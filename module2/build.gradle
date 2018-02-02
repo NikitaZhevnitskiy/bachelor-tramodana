@@ -1,7 +1,0 @@
-dependencies {
-	compile project(':module1')
-}
-
-apply plugin: 'application'
-
-mainClassName = "module1.Module1"
