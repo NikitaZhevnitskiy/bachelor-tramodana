@@ -1,0 +1,6 @@
+dependencies {
+	compile project(':module1')
+}
+
+
+mainClassName = "tramodana.Main"

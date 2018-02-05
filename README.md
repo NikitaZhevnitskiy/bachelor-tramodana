@@ -4,14 +4,15 @@ Trace, Model, Analyse - bachelor project developed in Ubuntu 16.04
 
 ## Requirements
 
-- Java 8 JDK: `sudo apt-get update && sudo install openjdk-8-jdk`
+- Java 8 JDK: `sudo apt-get update && sudo apt-get install openjdk-8-jdk`
 - Gradle: [install Gradle](https://gradle.org/install/)
 
-## Installation & running the application
+## running the application
 
-1. in the root directory (_bachelor-tramodana_), run `./gradlew build`
+1. in the root directory (_bachelor-tramodana_), run `./gradlew build`. If you want to skip tests, append `-x test`
 2. after Gradle has downloaded all dependencies, run `./gradlew run`
-3. [**TODO**: set up Gradle to run tests]
+3. run `./gradlew test` to test all modules, and `./gradlew clean` to remove all compilation files (the _build_ folders)
+4. to run a specific task for a specific project, follow the pattern `./gradlew  :<task>:<path-to-module>` - e.g: `./gradlew :module1:run` or `./gradlew :app:test`
 
 ## Cassandra data samples
 
