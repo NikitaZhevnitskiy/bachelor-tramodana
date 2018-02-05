@@ -4,7 +4,7 @@ Trace, Model, Analyse - bachelor project developed in Ubuntu 16.04
 
 ## Requirements
 
-- Java 8 JDK: `sudo apt-get update && sudo install openjdk-8-jdk`
+- Java 8 JDK: `sudo apt-get update && sudo apt-get install openjdk-8-jdk`
 - Gradle: [install Gradle](https://gradle.org/install/)
 
 ## running the application
