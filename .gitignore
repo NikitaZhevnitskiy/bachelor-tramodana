@@ -136,3 +136,6 @@ project/plugins/project/
 
 
 # End of https://www.gitignore.io/api/sbt,java,scala,intellij,visualstudiocode
+
+# ignore cassandra setup data - available from bachelor gDrive
+cassandra/*
