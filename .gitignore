@@ -139,3 +139,4 @@ project/plugins/project/
 
 # ignore cassandra setup data - available from bachelor gDrive
 cassandra/*
+
