@@ -138,3 +138,5 @@ project/plugins/project/
 # End of https://www.gitignore.io/api/sbt,java,scala,intellij,visualstudiocode
 
 /cassandra/data-sample
+/cassandra/cassandra
+/cassandra/cassandra-source-connector/
