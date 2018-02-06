@@ -1,0 +1,28 @@
+version: '3.3'
+
+services:
+#docker run --name cassandra-test-db -p9042:9042 -v "$(pwd)"/cassandra/cassandra:/var/lib/cassandra -d cassandra:3.9
+  cassandra:
+    image: cassandra:3.9
+    ports:
+      - "7000:7000"
+      - "7001:7001"
+      - "7199:7199"
+      - "9042:9042"
+      - "9160:9160"
+    volumes:
+#      - "/home/nikita/IdeaProjects/bachelor-tramodana/cassandra/cassandra:/var/lib/cassandra"
+      - "./cassandra:/var/lib/cassandra"
+
+  # this is our kafka cluster.
+  kafka-cluster:
+    image: landoop/fast-data-dev
+    environment:
+      ADV_HOST: 127.0.0.1         # Change to 192.168.99.100 if using Docker Toolbox
+      RUNTESTS: 0                 # Disable Running tests so the cluster starts faster
+    ports:
+      - "2181:2181"                 # Zookeeper
+      - "3030:3030"                 # Landoop UI
+      - "8081-8083:8081-8083"       # REST Proxy, Schema Registry, Kafka Connect ports
+      - "9581-9585:9581-9585"       # JMX Ports
+      - "9092:9092"                 # Kafka Broker
