@@ -10,6 +10,7 @@
 def scalaMajor = "2.12"
 def scalaMinor = "4"
 
+
 // In this section you declare where to find the dependencies of your project
 allprojects {
     apply plugin: 'scala'
@@ -23,8 +24,14 @@ allprojects {
 
     dependencies {
         compile(
+                // Scala
                 [group: 'org.scala-lang', name: 'scala-compiler', version: "$scalaMajor.$scalaMinor"],
-                [group: 'org.scala-lang', name: 'scala-library', version: "$scalaMajor.$scalaMinor"]
+                [group: 'org.scala-lang', name: 'scala-library', version: "$scalaMajor.$scalaMinor"],
+                // Kafka
+                ['group': 'com.lightbend', name: "kafka-streams-scala_$scalaMajor", version: '0.1.2'],
+                ['group': 'com.lightbend', name: "kafka-streams-query_$scalaMajor", version: '0.1.1'],
+                //Config
+                [group: 'com.typesafe', name: 'config', version: '1.3.2'],
         )
 
         testCompile(
