@@ -10,4 +10,4 @@
 rootProject.name = 'bachelor-tramodana'
 
 include 'app'
-include 'module1'
+include 'builder'
