@@ -5,7 +5,7 @@ From ./cassandra folder
 2. `docker-compose up -d` - w8t for 3-5 mins
 3. `docker-compose ps` - check that all containers are up
 4. `docker-compose exec kafka-cluster bash` - connect to kafka-cluster bash
-5. `kafka-topics --create --topic traces --partitions 3 --replication-factor 1 --zookeeper 127.0.0.1:2181` - create traces topic
+5. `kafka-topics --create --topic traces --partitions 1 --replication-factor 1 --zookeeper 127.0.0.1:2181` - create traces topic
 6. Go to [localhost:3030](http://localhost:3030/)
 7. Connectors -> New -> Sources -> Cassandra -> Replace with  -> Create
 ``` 
@@ -16,6 +16,7 @@ connect.cassandra.key.space=jaeger_v1_dc1
 connect.cassandra.kcql=INSERT INTO traces SELECT * FROM traces PK created
 connect.cassandra.contact.points=cassandra
 connect.cassandra.port=9042
+connect.cassandra.import.poll.interval=10000
 ```   
 
 Check `traces` topic on [localhost:3030](http://localhost:3030/kafka-topics-ui/#/)
