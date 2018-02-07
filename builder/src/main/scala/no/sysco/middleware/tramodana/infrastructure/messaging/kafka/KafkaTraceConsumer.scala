@@ -30,9 +30,9 @@ class KafkaTraceConsumer(kafkaBootstrapServers: String) {
         while (true) {
           val records : ConsumerRecords[String, String] = consumer.poll(1000)
 
-          for (record:ConsumerRecord[String,String] <- records) {
-            System.out.println("Received message: (" + record.key + ", " + record.value + ") at offset " + record.offset())
-          }
+//          for (record:ConsumerRecord[String,String] <- records) {
+//            println("Received message: (" + record.key + ", " + record.value + ") at offset " + record.offset())
+//          }
         }
       }
     })
