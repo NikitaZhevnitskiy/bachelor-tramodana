@@ -35,6 +35,7 @@ allprojects {
                 // alpakka Cassandra connector
                 [group: 'com.datastax.cassandra', name: 'cassandra-driver-core', version: '3.4.0'],
                 // extras for mapping cassandra entity to scala pojo
+                // https://docs.datastax.com/en/developer/java-driver/3.4/manual/custom_codecs/extras/
                 [group: 'com.datastax.cassandra', name: 'cassandra-driver-extras', version: '3.4.0'],
                 [group: 'com.lightbend.akka', name: 'akka-stream-alpakka-cassandra_2.12', version: '0.17'],
 
