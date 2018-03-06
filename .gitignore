@@ -140,3 +140,4 @@ project/plugins/project/
 /cassandra/data-sample
 /cassandra/cassandra
 /cassandra/cassandra-source-connector/
+.idea
