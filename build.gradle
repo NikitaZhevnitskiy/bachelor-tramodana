@@ -34,13 +34,23 @@ allprojects {
 
                 // alpakka Cassandra connector
                 [group: 'com.datastax.cassandra', name: 'cassandra-driver-core', version: '3.4.0'],
+
+                // remove later
                 // extras for mapping cassandra entity to scala pojo
                 // https://docs.datastax.com/en/developer/java-driver/3.4/manual/custom_codecs/extras/
                 [group: 'com.datastax.cassandra', name: 'cassandra-driver-extras', version: '3.4.0'],
+                [group: 'com.datastax.cassandra', name: 'cassandra-driver-mapping', version: '3.4.0'],
+
+
+                // alpakka
+                    // Kafka connector
+                [group: "com.typesafe.akka", name: "akka-stream-kafka_2.12", version: "0.19"],
+                    // Cassandra connector
                 [group: 'com.lightbend.akka', name: 'akka-stream-alpakka-cassandra_2.12', version: '0.17'],
 
-                // alpakka Kafka connector
-                [group: "com.typesafe.akka", name: "akka-stream-kafka_2.12", version: "0.19"],
+                // json parser Play framework [only for verification]
+                [group: 'com.typesafe.play', name: 'play-json_2.12', version: '2.6.9'],
+
                 //Config
                 [group: 'com.typesafe', name: 'config', version: '1.3.2'],
         )
