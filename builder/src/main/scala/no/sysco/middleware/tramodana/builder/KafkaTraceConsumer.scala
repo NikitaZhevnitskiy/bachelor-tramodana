@@ -1,4 +1,5 @@
-package no.sysco.middleware.tramodana.infrastructure.messaging.kafka
+package no.sysco.middleware.tramodana.builder
+
 import java.util.concurrent.Executors
 import java.util.{Collections, Properties}
 

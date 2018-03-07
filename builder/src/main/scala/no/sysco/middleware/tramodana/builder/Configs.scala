@@ -1,4 +1,4 @@
-package no.sysco.middleware.tramodana.infrastructure.messaging.kafka
+package no.sysco.middleware.tramodana.builder
 
 import com.typesafe.config.ConfigFactory
 

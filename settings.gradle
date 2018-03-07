@@ -8,6 +8,6 @@
  */
 
 rootProject.name = 'bachelor-tramodana'
-
-include 'app'
 include 'builder'
+include 'connector'
+

@@ -1,6 +1,6 @@
-package no.sysco.middleware.tramodana.infrastructure.messaging.kafka
+package no.sysco.middleware.tramodana.builder
 
-object Boot extends App {
+object BuilderApp extends App {
   val configs = Configs.buildServerConfig()
   val kafkaTraceConsumer = new KafkaTraceConsumer(configs.kafkaConfig.bootstrapServers)
   kafkaTraceConsumer.run()
