@@ -1,6 +1,7 @@
 package no.middleware.tramodana.connector
 
 import com.datastax.driver.core.{Row, TypeCodec}
+import no.middleware.tramodana.connector.CassandraSpanParser.Span
 import play.api.libs.json.Json
 
 import scala.collection.mutable.ListBuffer
@@ -41,7 +42,7 @@ object CassandraSpanParser {
     val parentId = row.get("parent_id", TypeCodec.bigint())
 
     // process
-    val process = getJsonLogs(row.getObject("process").toString)
+    val process = getJsonProcess(row.getObject("process").toString)
 
     // refs
     val refs = getJsonRefs(row.getObject("refs").toString)
@@ -53,6 +54,27 @@ object CassandraSpanParser {
     val tagsJson = getJsonLogs(row.getObject("tags").toString)
 
     Span(id, spanId, spanHash, duration, flags, logsJson, operationName, parentId, process, refs, startTime, tagsJson)
+  }
+
+  def getJson(span: Span):String = {
+    var json =
+      s"""
+        |{
+        | "trace_id":"${span.traceId}",
+        | "span_id":${span.spanId},
+        | "span_hash":${span.spanHash},
+        | "duration":${span.duration},
+        | "flags":${span.flags},
+        | "logs":${span.logsJson},
+        | "operation_name":"${span.operationName}",
+        | "parent_id":"${span.parentId}",
+        | "process":${span.processJson},
+        | "refs":${span.refsJson},
+        | "start_time":${span.startTime},
+        | "tags":${span.tagsJson}
+        |}
+      """.stripMargin
+    json
   }
 
   // id looks like 0:0:0:0:580e:4402:fc7a:c24a
@@ -199,4 +221,49 @@ object ForTestingPurpose extends App {
   var tagsRaw = "[{key:'processId',value_type:'string',value_string:'1',value_bool:false,value_long:0,value_double:0.0,value_binary:NULL}, {key:'sampler.type',value_type:'string',value_string:'const',value_bool:false,value_long:0,value_double:0.0,value_binary:NULL}, {key:'sampler.param',value_type:'bool',value_string:'',value_bool:true,value_long:0,value_double:0.0,value_binary:NULL}]"
   var tagsNew = CassandraSpanParser.getJsonLogs(tagsRaw)
   Json.parse(tagsNew)
+
+
+
+
+  // getJson
+
+//  traceId: String,
+//  spanId: Long,
+//  spanHash: Long,
+//  duration: Long,
+//  flags: Int,
+//  logsJson: String,
+//  operationName: String,
+//  parentId: Long,
+//  processJson: String,
+//  refsJson: String,
+//  startTime: Long,
+//  tagsJson: String
+// Span(0x0000000000000000580e4402fc7ac24a,-3934047479617254955,5466372416507478571,125197,1,[],buyingFoodSpan,0,{"service_name":"Sub Process","tags":[{"key":"hostname","value_type":"string","value_string":"nikita-lenovo-yoga-710-14ikb","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"jaeger.version","value_type":"string","value_string":"Java-0.21.0","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"ip","value_type":"string","value_string":"127.0.1.1","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]},[{"ref_type":"follows-from","trace_id":"0x0000000000000000580e4402fc7ac24a","span_id":6345083704628134474}],1520414091728000,[{"key":"processId","value_type":"string","value_string":"1","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}])
+
+  val span = Span(
+    "0x0000000000000000580e4402fc7ac24a",
+    1515896982295615193L,
+    -3155976967717968692L,
+    770919L,
+    1,
+    """
+      |[{"ts":1520414091706000,"fields":[{"key":"event","value_type":"string","value_string":"goHomeLog","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]}]
+    """.stripMargin,
+    "goHomeSpan",
+    6345083704628134474L,
+    """
+      |{"service_name":"Main Process","tags":[{"key":"hostname","value_type":"string","value_string":"nikita-lenovo-yoga-710-14ikb","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"jaeger.version","value_type":"string","value_string":"Java-0.21.0","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"ip","value_type":"string","value_string":"127.0.1.1","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]}
+    """.stripMargin,
+    """
+      |[{"ref_type":"follows-from","trace_id":"0x0000000000000000580e4402fc7ac24a","span_id":6345083704628134474}]
+    """.stripMargin,
+    1520414091728000L,
+    """
+      |[{"key":"processId","value_type":"string","value_string":"1","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]
+    """.stripMargin
+  )
+
+//  println(CassandraSpanParser.getJson(span))
+  Json.parse(CassandraSpanParser.getJson(span))
 }

@@ -5,6 +5,8 @@ import akka.stream.ActorMaterializer
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
 import akka.stream.scaladsl.Sink
 import com.datastax.driver.core._
+import no.middleware.tramodana.connector.ForTestingPurpose.span
+import play.api.libs.json.Json
 
 object ConnectorApp extends App {
 
@@ -35,8 +37,15 @@ object ConnectorApp extends App {
   val runnableGraph = result.foreach(rows => {
     rows.foreach(
       row => {
+
+        // 1 parse cassandra data
         val span = CassandraSpanParser.parse(row)
-        println(span)
+
+        // 2 get json
+        val json = Json.parse(CassandraSpanParser.getJson(span)).toString()
+
+        // 3 send to kafka [spand_id, json]
+
       })
   })
 
