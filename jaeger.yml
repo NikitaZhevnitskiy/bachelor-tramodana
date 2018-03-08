@@ -51,3 +51,4 @@ services:
     environment:
       - STORAGE=cassandra
       - CASSANDRA_CONTACT_POINTS=docker-vm
+

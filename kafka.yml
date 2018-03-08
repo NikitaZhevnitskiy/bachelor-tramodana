@@ -2,18 +2,17 @@ version: '3.3'
 
 services:
 #docker run --name cassandra-test-db -p9042:9042 -v "$(pwd)"/cassandra/cassandra:/var/lib/cassandra -d cassandra:3.9
-  cassandra:
-    image: cassandra:3.9
-    ports:
-      - "7000:7000"
-      - "7001:7001"
-      - "7199:7199"
-      - "9042:9042"
-      - "9160:9160"
-    volumes:
-#      - "/home/nikita/IdeaProjects/bachelor-tramodana/cassandra/cassandra:/var/lib/cassandra"
-      - "./cassandra:/var/lib/cassandra"
-
+#  cassandra:
+#    image: cassandra:3.9
+#    ports:
+#      - "7000:7000"
+#      - "7001:7001"
+#      - "7199:7199"
+#      - "9042:9042"
+#      - "9160:9160"
+#    volumes:
+##      - "/home/nikita/IdeaProjects/bachelor-tramodana/cassandra/cassandra:/var/lib/cassandra"
+#      - "./cassandra:/var/lib/cassandra"
   # this is our kafka cluster.
   kafka-cluster:
     image: landoop/fast-data-dev
