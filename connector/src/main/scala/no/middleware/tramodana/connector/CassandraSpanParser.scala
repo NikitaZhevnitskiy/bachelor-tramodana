@@ -56,8 +56,8 @@ object CassandraSpanParser {
     Span(id, spanId, spanHash, duration, flags, logsJson, operationName, parentId, process, refs, startTime, tagsJson)
   }
 
+  //todo: migrate to span POJO
   def getJson(span: Span):String = {
-    var json =
       s"""
         |{
         | "trace_id":"${span.traceId}",
@@ -74,7 +74,6 @@ object CassandraSpanParser {
         | "tags":${span.tagsJson}
         |}
       """.stripMargin
-    json
   }
 
   // id looks like 0:0:0:0:580e:4402:fc7a:c24a

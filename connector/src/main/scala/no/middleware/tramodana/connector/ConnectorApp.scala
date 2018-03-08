@@ -1,14 +1,21 @@
 package no.middleware.tramodana.connector
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
-import akka.stream.scaladsl.Sink
-import com.datastax.driver.core._
-import no.middleware.tramodana.connector.ForTestingPurpose.span
-import play.api.libs.json.Json
+import akka.NotUsed
+import akka.actor.{AbstractLoggingActor, ActorLogging, ActorSystem}
+import akka.stream.ActorMaterializer
+import akka.kafka.scaladsl.Producer
+import akka.stream.scaladsl.{Flow, Source}
+import akka.kafka.ProducerSettings
+import com.datastax.driver.core.{Cluster, SimpleStatement}
+import no.middleware.tramodana.connector.CassandraSpanParser.Span
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.serialization.{LongSerializer, StringSerializer}
 
 object ConnectorApp extends App {
+
+  final val SPANS_ORIGINAL_TOPIC:  String = "spans-original"
 
   //#init-mat
   implicit val system = ActorSystem()
@@ -28,27 +35,32 @@ object ConnectorApp extends App {
   //#init-session
   val keyspaceName = connectorConfig.cassandra.keyspace
   val stmt = new SimpleStatement(s"SELECT blobAsInet(trace_id), span_id, span_hash, duration, flags, logs, operation_name, parent_id, process, refs, start_time, tags FROM $keyspaceName.traces").setFetchSize(200)
-  val result = CassandraSource(stmt).runWith(Sink.seq)
 
 
-  //  val logsCodec = TypeCodec.list(TypeCodec.custom(DataType.custom(Log.getClass.getCanonicalName)))
-  //  CodecRegistry.DEFAULT_INSTANCE.register(logsCodec)
+  // Source
+  // 1 fetch cassandra data
+  val sourceCassandra: Source[Span, NotUsed] = CassandraSource(stmt)
+    .map(CassandraSpanParser.parse)
 
-  val runnableGraph = result.foreach(rows => {
-    rows.foreach(
-      row => {
+  // Flow
+  // 2 parse cassandra data
+  val flowParsing: Flow[Span, ProducerRecord[String, String], NotUsed] =
+    Flow
+      .fromFunction[Span, ProducerRecord[String, String]](
+        span => new ProducerRecord[String, String](SPANS_ORIGINAL_TOPIC, span.spanId.toString, CassandraSpanParser.getJson(span))
+    )
 
-        // 1 parse cassandra data
-        val span = CassandraSpanParser.parse(row)
+  //Sink
+  //3 send to kafka
+  val kafkaProducerSettings = ProducerSettings
+    .create(system, new StringSerializer(), new StringSerializer())
+    .withBootstrapServers(connectorConfig.kafka.bootstrapServers)
+  val sinkKafka = Producer.plainSink(kafkaProducerSettings)
 
-        // 2 get json
-        val json = Json.parse(CassandraSpanParser.getJson(span)).toString()
 
-        // 3 send to kafka [spand_id, json]
-
-      })
-  })
-
+  // Run streams
+  val runnableGraph = sourceCassandra.via(flowParsing).to(sinkKafka)
+  runnableGraph.run()
 }
 
 
