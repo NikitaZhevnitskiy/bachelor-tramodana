@@ -13,7 +13,12 @@ final case class Span(
                        flags: Int,
                        logs: Option[List[Log]],
                        operationName: String,
-                       parentId:String)
+                       parentId:String,
+                       process:Option[Process],
+                       refs: Option[List[Ref]],
+                       startTime: Long,
+                       tags: Option[List[Field]]
+                     )
 
 
 final case class Log(
@@ -29,15 +34,28 @@ final case class Field(
                         valueDouble: Double,
                         valueBinary: String)
 
+final case class Process(
+                          serviceName: String,
+                          tags: Option[List[Field]])
+
+final case class Ref(
+                      refType: String,
+                      traceId: String,
+                      spanId: Long)
+
+
 
 
 trait JsonSpanProtocol extends SprayJsonSupport with DefaultJsonProtocol {
 
 
-  implicit def spanFormat: RootJsonFormat[Span] = jsonFormat(Span, "trace_id", "span_id", "span_hash","duration", "flags", "logs", "operation_name","parent_id")
-  implicit def spanLogFormat: RootJsonFormat[Log] = jsonFormat(Log, "ts", "fields")
-  implicit def spanFieldFormat: RootJsonFormat[Field] = jsonFormat(Field, "key", "value_type", "value_string","value_bool","value_long","value_double","value_binary")
+  implicit def spanFormat: RootJsonFormat[Span] =
+    jsonFormat(Span, "trace_id", "span_id", "span_hash","duration", "flags", "logs", "operation_name","parent_id", "process", "refs", "start_time", "tags")
 
+  implicit def spanLogFormat: RootJsonFormat[Log] = jsonFormat(Log, "ts", "fields")
+  implicit def logFieldFormat: RootJsonFormat[Field] = jsonFormat(Field, "key", "value_type", "value_string","value_bool","value_long","value_double","value_binary")
+  implicit def spanProcessFormat: RootJsonFormat[Process] = jsonFormat(Process,"service_name", "tags")
+  implicit def spanRefFormat: RootJsonFormat[Ref] = jsonFormat(Ref,"ref_type", "trace_id","span_id")
 }
 
 object MakeFun extends App with JsonSpanProtocol {
@@ -54,39 +72,15 @@ object MakeFun extends App with JsonSpanProtocol {
       |    "operation_name":"getBookMethod",
       |    "parent_id":"791514443164284288",
       |    "process":{"service_name":"Shop","tags":[{"key":"hostname","value_type":"string","value_string":"nikita-lenovo-yoga-710-14ikb","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"jaeger.version","value_type":"string","value_string":"Java-0.20.0","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"ip","value_type":"string","value_string":"127.0.1.1","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]},
-      |    "refs":[],
+      |    "refs": [{
+      |        "ref_type": "follows-from",
+      |        "trace_id": "0x00000000000000007501dc93b11c4999",
+      |        "span_id": 8431262504304003481
+      |    }],
       |    "start_time":1520595273625000,
       |    "tags":[{"key":"http.status_code","value_type":"int64","value_string":"","value_bool":false,"value_long":200,"value_double":0.0,"value_binary":"NULL"}, {"key":"component","value_type":"string","value_string":"java-web-servlet","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"span.kind","value_type":"string","value_string":"server","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"http.url","value_type":"string","value_string":"http://localhost:10082/getbook","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"http.method","value_type":"string","value_string":"GET","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]
       |  }
     """.stripMargin
-
-//  val str =
-//    """
-//      |{
-//      |    "trace_id":"0x000000000000000087e760b2d75f518c",
-//      |    "span_id":8525301431701052675,
-//      |    "span_hash":-4287773619472038007,
-//      |    "duration":8749,
-//      |    "flags":1,
-//      |    "logs":[
-//      |       {
-//      |         "ts":1520595273626000,
-//      |         "fields":[
-//      |             {
-//      |               "key":"hostname",
-//      |               "value_type":"string",
-//      |               "value_string":"nikita-lenovo-yoga-710-14ikb",
-//      |               "value_bool":false,
-//      |               "value_long":0,
-//      |               "value_double":0.0,
-//      |               "value_binary":"NULL"
-//      |             }
-//      |         ]
-//      |       }
-//      |    ],
-//      |    "operation_name":"getBookMethod"
-//      |}
-//    """.stripMargin
 
   println(str)
   println(JsonParser(str).convertTo[Span])
