@@ -40,7 +40,11 @@ object ConnectorApp extends App {
   // Source
   // 1 fetch cassandra data
   val sourceCassandra: Source[Span, NotUsed] = CassandraSource(stmt)
-    .map(CassandraSpanParser.parse)
+    .map(row => {
+      println(row)
+      val span = CassandraSpanParser.parse(row)
+      span
+    })
 
   // Flow
   // 2 parse cassandra data

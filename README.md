@@ -9,10 +9,15 @@ Trace, Model, Analyse - bachelor project developed in Ubuntu 16.04
 
 ## running the application
 
-1. in the root directory (_bachelor-tramodana_), run `./gradlew build`. If you want to skip tests, append `-x test`
-2. after Gradle has downloaded all dependencies, run `./gradlew run`
-3. run `./gradlew test` to test all modules, and `./gradlew clean` to remove all compilation files (the _build_ folders)
-4. to run a specific task for a specific project, follow the pattern `./gradlew  :<task>:<path-to-module>` - e.g: `./gradlew :module1:run` or `./gradlew :app:test`
+
+1. `docker-compose -f jaeger.yml up -d`  
+2. Check containers status with `docker-compose -f jaeger.yml ps` that tracing-jaeger-query and tracing-jaeger-collector are UP. 
+If NOT, exec `docker-compose -f jaeger.yml up -d`  one more time
+3. Generate traces with examples/[TraceGenApp1](https://github.com/NikitaZhevnitskiy/TraceGenApp1) 
+or examples/[TraceGenApp2](https://github.com/NikitaZhevnitskiy/TraceGenApp2)
+4. Up Kafka with `docker-compose -f kafka.yml up -d`, takes around 2-3 mins
+5. Run ConnectorApp
+6. Check [localhost:3030](http://localhost:3030)
 
 ## Cassandra data samples
 
