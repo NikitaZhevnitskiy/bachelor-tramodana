@@ -1,5 +1,7 @@
 package no.middleware.tramodana.connector
 
+import java.text.ParseException
+
 import com.datastax.driver.core.{Row, TypeCodec}
 import no.middleware.tramodana.connector.CassandraSpanParser.Span
 import play.api.libs.json.Json
@@ -76,17 +78,27 @@ object CassandraSpanParser {
       """.stripMargin
   }
 
-  // id looks like 0:0:0:0:580e:4402:fc7a:c24a
+  // id looks like
+  // todo: test with :fc7:
+  //  0:0:0:0:580e:4402:fc7:c24a -> 0x000000000000000580e4402fc70c24a
   def getStringId(canonicalHostName: String): String = {
     val arr = canonicalHostName.split(":")
     val id = "0x" + arr.toStream.map(elem => {
       if ("0".equals(elem)) {
         "0000"
       } else {
-        elem
+        elem.length match {
+          case 1 => elem+"000"
+          case 2 => elem+"00"
+          case 3 => elem+"0"
+          case _ => elem
+        }
       }
     })
       .mkString
+
+    if(id.length != 36) throw new ParseException("Length must be equal 36. Current: ", id.length)
+
     id
   }
 
@@ -163,6 +175,10 @@ object CassandraSpanParser {
 // TODO: Rob
 object ForTestingPurpose extends App {
   val strIdRaw = "0:0:0:0:580e:4402:fc7a:c24a"
+  val fuckMyLife = CassandraSpanParser.getStringId(strIdRaw)
+  println(fuckMyLife+s" ${fuckMyLife.length}")
+
+
   var processRaw =
     """
       |{
