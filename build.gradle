@@ -59,7 +59,9 @@ allprojects {
 
         testCompile(
                 [group: "org.scalatest", name: "scalatest_$scalaMajor", version: "3.0.4"],
-                [group: "junit", name: "junit", version: "4.12"]
+                [group: "junit", name: "junit", version: "4.12"],
+                //json validator
+                [group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.7.0"]
         )
 
         // Need scala-xml at test runtime
