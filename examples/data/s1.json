@@ -1,0 +1,65 @@
+[
+  {
+    "trace_id":"0x000000000000000087e760b2d75f518c",
+    "span_id":-8653841837735325300,
+    "span_hash":-3070310647739834627,
+    "duration":32957,
+    "flags":1,
+    "logs":[{"ts":1520595273615000,"fields":[{"key":"handler.class_simple_name","value_type":"string","value_string":"GreetingController","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"handler","value_type":"string","value_string":"public java.lang.String ru.zhenik.spring.rest.hello.one.controller.GreetingController.guyBook()","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"event","value_type":"string","value_string":"preHandle","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"handler.method_name","value_type":"string","value_string":"guyBook","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]}, {"ts":1520595273646000,"fields":[{"key":"event","value_type":"string","value_string":"afterCompletion","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"handler","value_type":"string","value_string":"public java.lang.String ru.zhenik.spring.rest.hello.one.controller.GreetingController.guyBook()","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]}],
+    "operation_name":"guyBook",
+    "parent_id":"0",
+    "process":{"service_name":"Human","tags":[{"key":"hostname","value_type":"string","value_string":"nikita-lenovo-yoga-710-14ikb","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"jaeger.version","value_type":"string","value_string":"Java-0.20.0","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"ip","value_type":"string","value_string":"127.0.1.1","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]},
+    "refs":[],
+    "start_time":1520595273614000,
+    "tags":[{"key":"http.status_code","value_type":"int64","value_string":"","value_bool":false,"value_long":200,"value_double":0.0,"value_binary":"NULL"}, {"key":"component","value_type":"string","value_string":"java-web-servlet","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"span.kind","value_type":"string","value_string":"server","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"sampler.type","value_type":"string","value_string":"probabilistic","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"sampler.param","value_type":"float64","value_string":"","value_bool":false,"value_long":0,"value_double":1.0,"value_binary":"NULL"}, {"key":"http.url","value_type":"string","value_string":"http://localhost:10081/buybook","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"http.method","value_type":"string","value_string":"GET","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]
+  },
+
+
+  {
+    "trace_id":"0x000000000000000087e760b2d75f518c",
+    "span_id":791514443164284288,
+    "span_hash":6279610417666811475,
+    "duration":16290,
+    "flags":1,
+    "logs":[],
+    "operation_name":"GET",
+    "parent_id":"-8653841837735325300",
+    "process":{"service_name":"Human","tags":[{"key":"hostname","value_type":"string","value_string":"nikita-lenovo-yoga-710-14ikb","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"jaeger.version","value_type":"string","value_string":"Java-0.20.0","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"ip","value_type":"string","value_string":"127.0.1.1","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]},
+    "refs":[],
+    "start_time":1520595273618000,
+    "tags":[{"key":"http.status_code","value_type":"int64","value_string":"","value_bool":false,"value_long":200,"value_double":0.0,"value_binary":"NULL"}, {"key":"component","value_type":"string","value_string":"java-spring-rest-template","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"span.kind","value_type":"string","value_string":"client","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"http.url","value_type":"string","value_string":"http://localhost:10082/getbook","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"peer.port","value_type":"int64","value_string":"","value_bool":false,"value_long":10082,"value_double":0.0,"value_binary":"NULL"}, {"key":"http.method","value_type":"string","value_string":"GET","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]
+  },
+
+
+  {
+    "trace_id":"0x000000000000000087e760b2d75f518c",
+    "span_id":8525301431701052675,
+    "span_hash":-4287773619472038007,
+    "duration":8749,
+    "flags":1,
+    "logs":[{"ts":1520595273626000,"fields":[{"key":"handler.class_simple_name","value_type":"string","value_string":"GreetingController","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"handler","value_type":"string","value_string":"public java.lang.String ru.zhenik.spring.rest.hello.two.controller.GreetingController.getBookMethod()","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"event","value_type":"string","value_string":"preHandle","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"handler.method_name","value_type":"string","value_string":"getBookMethod","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]}, {"ts":1520595273633000,"fields":[{"key":"event","value_type":"string","value_string":"afterCompletion","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"handler","value_type":"string","value_string":"public java.lang.String ru.zhenik.spring.rest.hello.two.controller.GreetingController.getBookMethod()","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]}],
+    "operation_name":"getBookMethod",
+    "parent_id":"791514443164284288",
+    "process":{"service_name":"Shop","tags":[{"key":"hostname","value_type":"string","value_string":"nikita-lenovo-yoga-710-14ikb","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"jaeger.version","value_type":"string","value_string":"Java-0.20.0","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"ip","value_type":"string","value_string":"127.0.1.1","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]},
+    "refs":[],
+    "start_time":1520595273625000,
+    "tags":[{"key":"http.status_code","value_type":"int64","value_string":"","value_bool":false,"value_long":200,"value_double":0.0,"value_binary":"NULL"}, {"key":"component","value_type":"string","value_string":"java-web-servlet","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"span.kind","value_type":"string","value_string":"server","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"http.url","value_type":"string","value_string":"http://localhost:10082/getbook","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"http.method","value_type":"string","value_string":"GET","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]
+  },
+
+  // failed case
+  {
+    "trace_id":"0x0000000000000000a0411ec94fecca",
+    "span_id":-6899199305433871158,
+    "span_hash":4298214864001490567,
+    "duration":7512,
+    "flags":1,
+    "logs":[{"ts":1520595276451000,"fields":[{"key":"handler.class_simple_name","value_type":"string","value_string":"GreetingController","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"handler","value_type":"string","value_string":"public java.lang.String ru.zhenik.spring.rest.hello.one.controller.GreetingController.guyBook()","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"event","value_type":"string","value_string":"preHandle","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"handler.method_name","value_type":"string","value_string":"guyBook","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]}, {"ts":1520595276456000,"fields":[{"key":"event","value_type":"string","value_string":"afterCompletion","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"handler","value_type":"string","value_string":"public java.lang.String ru.zhenik.spring.rest.hello.one.controller.GreetingController.guyBook()","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]}],
+    "operation_name":"guyBook",
+    "parent_id":"0",
+    "process":{"service_name":"Human","tags":[{"key":"hostname","value_type":"string","value_string":"nikita-lenovo-yoga-710-14ikb","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"jaeger.version","value_type":"string","value_string":"Java-0.20.0","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"},{"key":"ip","value_type":"string","value_string":"127.0.1.1","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]},
+    "refs":[],
+    "start_time":1520595276449000,
+    "tags":[{"key":"http.status_code","value_type":"int64","value_string":"","value_bool":false,"value_long":200,"value_double":0.0,"value_binary":"NULL"}, {"key":"component","value_type":"string","value_string":"java-web-servlet","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"span.kind","value_type":"string","value_string":"server","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"sampler.type","value_type":"string","value_string":"probabilistic","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"sampler.param","value_type":"float64","value_string":"","value_bool":false,"value_long":0,"value_double":1.0,"value_binary":"NULL"}, {"key":"http.url","value_type":"string","value_string":"http://localhost:10081/buybook","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}, {"key":"http.method","value_type":"string","value_string":"GET","value_bool":false,"value_long":0,"value_double":0.0,"value_binary":"NULL"}]
+  }
+]
+
