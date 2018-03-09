@@ -1,0 +1,33 @@
+{
+  "models": [
+    {
+      "id": 1,
+      "nodes":[
+        {
+          "id":"A",
+          "from": null,
+          "to": "B"
+        },
+        {
+          "id":"B",
+          "from": "A",
+          "to": null
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "nodes":[
+        {
+          "id":"A",
+          "from": null,
+          "to": null
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    { "id": "A","description": "Search module"},
+    { "id": "B","description": "Delivery book module"}
+  ]
+}
