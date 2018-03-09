@@ -8,8 +8,6 @@ Trace, Model, Analyse - bachelor project developed in Ubuntu 16.04
 - Gradle: [install Gradle](https://gradle.org/install/)
 
 ## running the application
-
-
 1. `docker-compose -f jaeger.yml up -d`  
 2. Check containers status with `docker-compose -f jaeger.yml ps` that tracing-jaeger-query and tracing-jaeger-collector are UP. 
 If NOT, exec `docker-compose -f jaeger.yml up -d`  one more time
@@ -19,6 +17,10 @@ or examples/[TraceGenApp2](https://github.com/NikitaZhevnitskiy/TraceGenApp2)
 5. Run ConnectorApp
 6. Check [localhost:3030](http://localhost:3030)
 
+## Mock backend
+Install [json-server](https://github.com/typicode/json-server)
+1. Exec `json-server models.json --port 3004`
+2. Check [https://localhost:3004](https://localhost:3004)
 ## Cassandra data samples
 
 [Cassanra docker images docs](https://hub.docker.com/_/cassandra/).
