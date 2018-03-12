@@ -1,0 +1,182 @@
+[
+  {
+    "topic": "spans-original",
+    "key": 1444885104560382700,
+    "value": {
+      "trace_id": "0x0000000000000000140d4358e6932327",
+      "span_id": 1444885104560382700,
+      "span_hash": -6254043683320960000,
+      "duration": 40018,
+      "flags": 1,
+      "logs": [
+        {
+          "ts": 1520841827479000,
+          "fields": [
+            {
+              "key": "handler.class_simple_name",
+              "value_type": "string",
+              "value_string": "GreetingController",
+              "value_bool": false,
+              "value_long": 0,
+              "value_double": 0,
+              "value_binary": "NULL"
+            },
+            {
+              "key": "handler",
+              "value_type": "string",
+              "value_string": "public org.springframework.http.ResponseEntity ru.zhenik.spring.rest.hello.one.controller.GreetingController.buyBookMethod()",
+              "value_bool": false,
+              "value_long": 0,
+              "value_double": 0,
+              "value_binary": "NULL"
+            },
+            {
+              "key": "event",
+              "value_type": "string",
+              "value_string": "preHandle",
+              "value_bool": false,
+              "value_long": 0,
+              "value_double": 0,
+              "value_binary": "NULL"
+            },
+            {
+              "key": "handler.method_name",
+              "value_type": "string",
+              "value_string": "buyBookMethod",
+              "value_bool": false,
+              "value_long": 0,
+              "value_double": 0,
+              "value_binary": "NULL"
+            }
+          ]
+        },
+        {
+          "ts": 1520841827502000,
+          "fields": [
+            {
+              "key": "event",
+              "value_type": "string",
+              "value_string": "afterCompletion",
+              "value_bool": false,
+              "value_long": 0,
+              "value_double": 0,
+              "value_binary": "NULL"
+            },
+            {
+              "key": "handler",
+              "value_type": "string",
+              "value_string": "public org.springframework.http.ResponseEntity ru.zhenik.spring.rest.hello.one.controller.GreetingController.buyBookMethod()",
+              "value_bool": false,
+              "value_long": 0,
+              "value_double": 0,
+              "value_binary": "NULL"
+            }
+          ]
+        }
+      ],
+      "operation_name": "buyBookMethod",
+      "parent_id": "0",
+      "process": {
+        "service_name": "Human",
+        "tags": [
+          {
+            "key": "hostname",
+            "value_type": "string",
+            "value_string": "nikita-lenovo-yoga-710-14ikb",
+            "value_bool": false,
+            "value_long": 0,
+            "value_double": 0,
+            "value_binary": "NULL"
+          },
+          {
+            "key": "jaeger.version",
+            "value_type": "string",
+            "value_string": "Java-0.20.0",
+            "value_bool": false,
+            "value_long": 0,
+            "value_double": 0,
+            "value_binary": "NULL"
+          },
+          {
+            "key": "ip",
+            "value_type": "string",
+            "value_string": "127.0.1.1",
+            "value_bool": false,
+            "value_long": 0,
+            "value_double": 0,
+            "value_binary": "NULL"
+          }
+        ]
+      },
+      "refs": [],
+      "start_time": 1520841827464000,
+      "tags": [
+        {
+          "key": "http.status_code",
+          "value_type": "int64",
+          "value_string": "",
+          "value_bool": false,
+          "value_long": 400,
+          "value_double": 0,
+          "value_binary": "NULL"
+        },
+        {
+          "key": "component",
+          "value_type": "string",
+          "value_string": "java-web-servlet",
+          "value_bool": false,
+          "value_long": 0,
+          "value_double": 0,
+          "value_binary": "NULL"
+        },
+        {
+          "key": "span.kind",
+          "value_type": "string",
+          "value_string": "server",
+          "value_bool": false,
+          "value_long": 0,
+          "value_double": 0,
+          "value_binary": "NULL"
+        },
+        {
+          "key": "sampler.type",
+          "value_type": "string",
+          "value_string": "probabilistic",
+          "value_bool": false,
+          "value_long": 0,
+          "value_double": 0,
+          "value_binary": "NULL"
+        },
+        {
+          "key": "sampler.param",
+          "value_type": "float64",
+          "value_string": "",
+          "value_bool": false,
+          "value_long": 0,
+          "value_double": 1,
+          "value_binary": "NULL"
+        },
+        {
+          "key": "http.url",
+          "value_type": "string",
+          "value_string": "http://localhost:10081/buybook",
+          "value_bool": false,
+          "value_long": 0,
+          "value_double": 0,
+          "value_binary": "NULL"
+        },
+        {
+          "key": "http.method",
+          "value_type": "string",
+          "value_string": "GET",
+          "value_bool": false,
+          "value_long": 0,
+          "value_double": 0,
+          "value_binary": "NULL"
+        }
+      ]
+    },
+    "partition": 0,
+    "offset": 3
+  }
+]
