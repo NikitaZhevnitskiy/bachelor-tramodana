@@ -80,6 +80,7 @@ object CassandraSpanParser {
 
   // id looks like
   // todo: test with :fc7:
+  // /0:0:0:0:774b:3085:7c44:1a08
   //  0:0:0:0:580e:4402:fc7:c24a -> 0x000000000000000580e4402fc70c24a
   def getStringId(canonicalHostName: String): String = {
     val arr = canonicalHostName.split(":")
@@ -97,7 +98,7 @@ object CassandraSpanParser {
     })
       .mkString
 
-    if(id.length != 36) throw new ParseException("Length must be equal 36. Current: ", id.length)
+    if(id.length != 34) throw new ParseException("Length must be equal 34. Current: ", id.length)
 
     id
   }
@@ -172,7 +173,7 @@ object CassandraSpanParser {
 
 
 // For tests
-// TODO: Rob
+// TODO: remove when test is done
 object ForTestingPurpose extends App {
   val strIdRaw = "0:0:0:0:580e:4402:fc7a:c24a"
   val fuckMyLife = CassandraSpanParser.getStringId(strIdRaw)
@@ -281,4 +282,10 @@ object ForTestingPurpose extends App {
 
 //  println(CassandraSpanParser.getJson(span))
   Json.parse(CassandraSpanParser.getJson(span))
+
+  // todo: migrate to test
+  val epicId1 = "0:0:0:0:774b:3085:7c44:1a08"
+  val epicId2 = "0:0:0:0:580e:4402:fc7:c24a"
+  CassandraSpanParser.getStringId(epicId1)
+  CassandraSpanParser.getStringId(epicId2)
 }
