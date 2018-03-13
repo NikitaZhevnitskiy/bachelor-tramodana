@@ -26,6 +26,8 @@ allprojects {
 
     dependencies {
         compile(
+                // Schema
+//                [project(':builder')],
                 // Scala
                 [group: "org.scala-lang", name: "scala-compiler", version: "$scalaMajor.$scalaMinor"],
                 [group: "org.scala-lang", name: "scala-library", version: "$scalaMajor.$scalaMinor"],
