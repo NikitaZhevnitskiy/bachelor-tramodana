@@ -1,10 +1,10 @@
 [
   {
     "topic": "spans-original",
-    "key": -8295682498716909000,
+    "key": "-8295682498716909000",
     "value": {
       "trace_id": "0x00000000000000008cdfd0b8468dc387",
-      "span_id": -8295682498716909000,
+      "span_id": "-8295682498716909000",
       "span_hash": 7083069031972214000,
       "duration": 164851,
       "flags": 1,
@@ -181,16 +181,16 @@
   },
   {
     "topic": "spans-original",
-    "key": 3572368548636445000,
+    "key": "3572368548636445000",
     "value": {
       "trace_id": "0x00000000000000008cdfd0b8468dc387",
-      "span_id": 3572368548636445000,
+      "span_id": "3572368548636445000",
       "span_hash": 461343280406457700,
       "duration": 135504,
       "flags": 1,
       "logs": [],
       "operation_name": "GET",
-      "parent_id": "-8295682498716908665",
+      "parent_id": "-8295682498716909000",
       "process": {
         "service_name": "Human",
         "tags": [
@@ -287,10 +287,10 @@
   },
   {
     "topic": "spans-original",
-    "key": 4751561588173980000,
+    "key": "4751561588173980000",
     "value": {
       "trace_id": "0x00000000000000008cdfd0b8468dc387",
-      "span_id": 4751561588173980000,
+      "span_id": "4751561588173980000",
       "span_hash": 4016111364569515500,
       "duration": 26564,
       "flags": 1,
@@ -361,7 +361,7 @@
         }
       ],
       "operation_name": "getBookMethod",
-      "parent_id": "3572368548636445119",
+      "parent_id": "3572368548636445000",
       "process": {
         "service_name": "Shop",
         "tags": [
