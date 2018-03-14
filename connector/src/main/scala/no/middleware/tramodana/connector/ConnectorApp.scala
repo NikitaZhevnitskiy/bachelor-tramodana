@@ -3,17 +3,19 @@ package no.middleware.tramodana.connector
 
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
 import akka.NotUsed
-import akka.actor.{AbstractLoggingActor, ActorLogging, ActorSystem}
+import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.kafka.scaladsl.Producer
+import spray.json.JsonParser
 import akka.stream.scaladsl.{Flow, Source}
 import akka.kafka.ProducerSettings
 import com.datastax.driver.core.{Cluster, SimpleStatement}
-import no.middleware.tramodana.connector.CassandraSpanParser.Span
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.serialization.{LongSerializer, StringSerializer}
+import org.apache.kafka.common.serialization.StringSerializer
 
-object ConnectorApp extends App {
+
+
+object ConnectorApp extends App with JsonSpanProtocol {
 
   final val SPANS_ORIGINAL_TOPIC:  String = "spans-original"
 
@@ -34,28 +36,35 @@ object ConnectorApp extends App {
 
   //#init-session
   val keyspaceName = connectorConfig.cassandra.keyspace
-  val stmt = new SimpleStatement(s"SELECT blobAsInet(trace_id), span_id, span_hash, duration, flags, logs, operation_name, parent_id, process, refs, start_time, tags FROM $keyspaceName.traces").setFetchSize(200)
+//  val stmt = new SimpleStatement(s"SELECT blobAsInet(trace_id), span_id, span_hash, duration, flags, logs, operation_name, parent_id, process, refs, start_time, tags FROM $keyspaceName.traces").setFetchSize(200)
+  val stmt = new SimpleStatement(s"SELECT json * FROM $keyspaceName.traces")
 
 
   // Source
   // 1 fetch cassandra data
-  val sourceCassandra: Source[Span, NotUsed] = CassandraSource(stmt)
+  val sourceCassandra: Source[String, NotUsed] = CassandraSource(stmt)
     .map(row => {
       println(row)
-      val span = CassandraSpanParser.parse(row)
-      span
+      row.getString(0)
     })
+//  sourceCassandra.runWith(Sink.seq)
 
   // Flow
   // 2 parse cassandra data
-  val flowParsing: Flow[Span, ProducerRecord[String, String], NotUsed] =
+  val flowParsing: Flow[String, ProducerRecord[String, String], NotUsed] =
     Flow
-      .fromFunction[Span, ProducerRecord[String, String]](
-        span => new ProducerRecord[String, String](SPANS_ORIGINAL_TOPIC, span.spanId.toString, CassandraSpanParser.getJson(span))
+      .fromFunction[String, ProducerRecord[String, String]](
+        json => {
+          val span = JsonParser(json).convertTo[Span]
+          val record = new ProducerRecord[String, String](SPANS_ORIGINAL_TOPIC, span.spanId.toString, getJsonStringifyIds(span))
+          println(record)
+          record
+        }
     )
 
-  //Sink
-  //3 send to kafka
+
+//  //Sink
+//  //3 send to kafka
   val kafkaProducerSettings = ProducerSettings
     .create(system, new StringSerializer(), new StringSerializer())
     .withBootstrapServers(connectorConfig.kafka.bootstrapServers)

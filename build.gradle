@@ -26,6 +26,8 @@ allprojects {
 
     dependencies {
         compile(
+                // Schema
+//                [project(':builder')],
                 // Scala
                 [group: "org.scala-lang", name: "scala-compiler", version: "$scalaMajor.$scalaMinor"],
                 [group: "org.scala-lang", name: "scala-library", version: "$scalaMajor.$scalaMinor"],
@@ -55,6 +57,8 @@ allprojects {
 
                 //Config
                 [group: "com.typesafe", name: "config", version: "1.3.2"],
+                // Camunda
+                [group: 'org.camunda.bpm', name: 'camunda-engine', version: '7.8.0']
         )
 
         testCompile(
