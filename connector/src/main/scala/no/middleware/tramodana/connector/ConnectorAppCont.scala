@@ -15,7 +15,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 
 
 
-object ConnectorApp extends App with JsonSpanProtocol {
+object ConnectorAppCont extends App with JsonSpanProtocol {
 
   final val SPANS_ORIGINAL_TOPIC:  String = "spans-original"
 
@@ -37,7 +37,7 @@ object ConnectorApp extends App with JsonSpanProtocol {
   //#init-session
   val keyspaceName = connectorConfig.cassandra.keyspace
 //  val stmt = new SimpleStatement(s"SELECT blobAsInet(trace_id), span_id, span_hash, duration, flags, logs, operation_name, parent_id, process, refs, start_time, tags FROM $keyspaceName.traces").setFetchSize(200)
-  val stmt = new SimpleStatement(s"SELECT json * FROM $keyspaceName.traces")
+  val stmt = new SimpleStatement(s"SELECT json * FROM $keyspaceName.traces").setFetchSize(1000)
 
 
   // Source
@@ -56,7 +56,9 @@ object ConnectorApp extends App with JsonSpanProtocol {
       .fromFunction[String, ProducerRecord[String, String]](
         json => {
           val span = JsonParser(json).convertTo[Span]
-          val record = new ProducerRecord[String, String](SPANS_ORIGINAL_TOPIC, span.spanId.toString, getJsonStringifyIds(span))
+          val id = span.spanId
+          println(id)
+          val record = new ProducerRecord[java.lang.String, String](SPANS_ORIGINAL_TOPIC, id.toString, getJsonStringifyIds(span))
           println(record)
           record
         }

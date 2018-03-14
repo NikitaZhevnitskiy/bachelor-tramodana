@@ -32,7 +32,7 @@ class KafkaTraceConsumer(kafkaBootstrapServers: String) {
     Executors.newSingleThreadExecutor.execute(() => {
       while (true) {
         val records: ConsumerRecords[String, String] = consumer.poll(1000)
-        records.forEach(r => println(r.value))
+        records.forEach(r => println(r))
       }
     })
   }
