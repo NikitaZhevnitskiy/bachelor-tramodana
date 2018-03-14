@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<definitions id="definitions_7d914739-3f33-4091-acfc-0a92c028aaf3" targetNamespace="http://camunda.org/examples" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
+  <process id="process-with-one-task">
+    <startEvent id="start">
+      <outgoing>start-fork</outgoing>
+    </startEvent>
+    <parallelGateway id="fork">
+      <incoming>start-fork</incoming>
+      <outgoing>fork-task1</outgoing>
+      <outgoing>fork-task2</outgoing>
+    </parallelGateway>
+    <serviceTask id="task1" name="Service Task">
+      <incoming>fork-task1</incoming>
+      <outgoing>task1-join</outgoing>
+    </serviceTask>
+    <userTask id="task2" name="User Task">
+      <incoming>fork-task2</incoming>
+      <outgoing>task2-join</outgoing>
+    </userTask>
+    <parallelGateway id="join">
+      <incoming>task1-join</incoming>
+      <incoming>task2-join</incoming>
+      <outgoing>join-end</outgoing>
+    </parallelGateway>
+    <endEvent id="end">
+      <incoming>join-end</incoming>
+    </endEvent>
+    <sequenceFlow id="start-fork" sourceRef="start" targetRef="fork"/>
+    <sequenceFlow id="fork-task1" sourceRef="fork" targetRef="task1"/>
+    <sequenceFlow id="fork-task2" sourceRef="fork" targetRef="task2"/>
+    <sequenceFlow id="task1-join" sourceRef="task1" targetRef="join"/>
+    <sequenceFlow id="task2-join" sourceRef="task2" targetRef="join"/>
+    <sequenceFlow id="join-end" sourceRef="join" targetRef="end"/>
+  </process>
+</definitions>
