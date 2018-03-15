@@ -34,6 +34,7 @@ allprojects {
                 // Kafka
 //                ["group": "com.lightbend", name: "kafka-streams-scala_$scalaMajor", version: "0.1.2"],
 //                ["group": "com.lightbend", name: "kafka-streams-query_$scalaMajor", version: "0.1.1"],
+                [group: 'org.apache.kafka', name: 'kafka-streams', version: '1.0.1'],
 
                 // alpakka Cassandra connector
                 [group: "com.datastax.cassandra", name: "cassandra-driver-core", version: "3.4.0"],
