@@ -17,7 +17,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 object ConnectorAppSt extends App with JsonSpanProtocol {
-  final val SPANS_ORIGINAL_TOPIC: String = "spans-original"
+  final val SPANS_ORIGINAL_TOPIC: String = "spans-json-original"
 
   //#init-mat
   implicit val system = ActorSystem()
@@ -50,7 +50,7 @@ object ConnectorAppSt extends App with JsonSpanProtocol {
       .fromFunction[String, ProducerRecord[String, String]](
       json => {
         val span = JsonParser(json).convertTo[Span]
-        val id = span.spanId
+        val id = span.traceId
         val record = new ProducerRecord[java.lang.String, String](SPANS_ORIGINAL_TOPIC, id.toString, getJsonStringifyIds(span))
         println(record)
         record
