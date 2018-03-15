@@ -11,7 +11,9 @@ import org.apache.kafka.common.serialization.StringDeserializer
 class KafkaTraceConsumer(kafkaBootstrapServers: String) {
 
 //  final val TOPIC_TRACES = "traces"
-  final val SPANS_ORIGINAL_TOPIC:  String = "spans-original"
+//  final val SPANS_ORIGINAL_TOPIC:  String = "spans-original"
+  final val SPANS_TOPIC:  String = "spans"
+  final val TEST_TOPIC:  String = "test-topic"
   final val LOGS_BROKER:  String = "logs_broker"
 
   val kafkaConsumerConfigs: Properties = {
@@ -28,7 +30,7 @@ class KafkaTraceConsumer(kafkaBootstrapServers: String) {
   val consumer = new KafkaConsumer[String, String](kafkaConsumerConfigs)
 
   def run() = {
-    consumer.subscribe(Collections.singletonList(SPANS_ORIGINAL_TOPIC))
+    consumer.subscribe(Collections.singletonList(TEST_TOPIC))
     Executors.newSingleThreadExecutor.execute(() => {
       while (true) {
         val records: ConsumerRecords[String, String] = consumer.poll(1000)
