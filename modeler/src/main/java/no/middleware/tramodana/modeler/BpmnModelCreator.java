@@ -7,12 +7,17 @@ import org.camunda.bpm.model.bpmn.instance.Process;
 
 import java.io.File;
 
+/**
+ * This class will serialize Trace or Workflow object to BPMN format.
+ */
 public class BpmnModelCreator {
 
     private BpmnModelInstance modelInstance;
 
     public BpmnModelCreator() {
-
+        //##########
+        //########## 1. Imperative method of building a BPMN flowchart
+        //##########
 
         // To create a new BPMN model from scratch you have to create an empty BPMN model instance with the following method:
         modelInstance = Bpmn.createEmptyModel();
@@ -22,7 +27,7 @@ public class BpmnModelCreator {
         definitions.setTargetNamespace("http://camunda.org/examples");
         modelInstance.setDefinitions(definitions);
 
-// create elements
+        // create elements
         // create the process
         Process process = createElement(definitions, "process-with-one-task", Process.class);
         StartEvent startEvent = createElement(process, "start", StartEvent.class);
@@ -34,7 +39,7 @@ public class BpmnModelCreator {
         ParallelGateway join = createElement(process, "join", ParallelGateway.class);
         EndEvent endEvent = createElement(process, "end", EndEvent.class);
 
-// create flows
+        // create flows
         createSequenceFlow(process, startEvent, fork);
         createSequenceFlow(process, fork, task1);
         createSequenceFlow(process, fork, task2);
@@ -49,7 +54,6 @@ public class BpmnModelCreator {
 
         // write to output stream
         /*
-        OutputStream outputStream = new OutputStream(...);
         Bpmn.writeModelToStream(outputStream, modelInstance);
          */
 
@@ -57,18 +61,14 @@ public class BpmnModelCreator {
         File file = new File("backendtest.bpmn");
         Bpmn.writeModelToFile(file, modelInstance);
 
-        /*BpmnModelInstance testmodel = Bpmn.createExecutableProcess("my-process")
-                .startEvent("start")
-                .parallelGateway("fork")
-                    .serviceTask("task1")
-                    .name("Service task")
-                    .parallelGateway("join")
-                .moveToNode("fork")
-                    .userTask("task2")
-                    .name("User task")
-                    .connectTo("join")
-                .endEvent("end")
-                .done();*/
+        //##########
+        //########## 2. fluent method of building a BPMN workflow
+        //##########
+        /*
+        In this example we show the creation of a 2-branch workflow for a book selling service,
+        demonstrating how to tag each element with an id (for reuse and reference in code) and how
+        to name them (what will actually be shown in the visualisation);
+         */
         BpmnModelInstance testmodel = Bpmn.createExecutableProcess("buybook")
                 .startEvent(" buybookEvent")
                 .name("Buy book")
@@ -92,7 +92,14 @@ public class BpmnModelCreator {
 
     }
 
-    // To simplify this repeating procedure, you can use a helper method like this one.
+    /** To simplify the repeating procedure of creating elements, you can use a helper method like this one.
+     *
+     * @param parentElement
+     * @param id
+     * @param elementClass
+     * @param <T>
+     * @return
+     */
     private <T extends BpmnModelElementInstance> T createElement(BpmnModelElementInstance parentElement, String id, Class<T> elementClass) {
        /*
         Usually you want to add a process to your model. This follows the same 3 steps as the creation of the BPMN definitions element:
