@@ -10,6 +10,7 @@
 * refs (test it)
 
 ### Plan
+0. Create all topics before run main topology
 0. Aggregate by trace_id and write to kafka (raw-traces [trace_id, List[Spans]])
 1. Build tree - 
   a. find root of the Tree 

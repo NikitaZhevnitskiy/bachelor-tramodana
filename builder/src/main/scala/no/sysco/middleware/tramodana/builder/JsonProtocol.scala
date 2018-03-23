@@ -4,6 +4,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 
 import spray.json.{DefaultJsonProtocol, JsonParser, RootJsonFormat}
 
+final case class Trace(traceId:Option[String], spans: Option[List[Span]])
 
 final case class Span(
                        traceId: String,
