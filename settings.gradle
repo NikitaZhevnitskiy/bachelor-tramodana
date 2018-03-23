@@ -11,4 +11,3 @@ rootProject.name = 'bachelor-tramodana'
 include 'builder'
 include 'connector'
 include 'modeler'
-

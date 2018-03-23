@@ -58,7 +58,9 @@ allprojects {
                 //Config
                 [group: "com.typesafe", name: "config", version: "1.3.2"],
                 // Camunda
-                [group: 'org.camunda.bpm', name: 'camunda-engine', version: '7.8.0']
+                [group: 'org.camunda.bpm', name: 'camunda-engine', version: '7.8.0'],
+                [group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.7.0"]
+
         )
 
         testCompile(

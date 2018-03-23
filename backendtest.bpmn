@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<definitions id="definitions_7d914739-3f33-4091-acfc-0a92c028aaf3" targetNamespace="http://camunda.org/examples" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
+<definitions id="definitions_7364f951-ed90-4d20-884a-035ef3be67af" targetNamespace="http://camunda.org/examples" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
   <process id="process-with-one-task">
     <startEvent id="start">
       <outgoing>start-fork</outgoing>
