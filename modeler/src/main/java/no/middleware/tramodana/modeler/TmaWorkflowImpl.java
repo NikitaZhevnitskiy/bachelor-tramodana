@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public class TmaWorkflowImpl implements TmaWorkflowInterface {
-    String rootOperationName;
-    String[] operationSet;
-    int[][] traceModels;
+    public String rootOperationName;
+    public String[] operationSet;
+    public int[][] traceModels;
 
     public String getRoot() {
         return rootOperationName;
