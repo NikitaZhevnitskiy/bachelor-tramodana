@@ -17,7 +17,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 
 object ConnectorAppCont extends App with JsonSpanProtocol {
 
-  final val SPANS_ORIGINAL_TOPIC:  String = "spans-original"
+  final val SPANS_ORIGINAL_TOPIC:  String = "spans-json-original"
 
   //#init-mat
   implicit val system = ActorSystem()
@@ -51,7 +51,7 @@ object ConnectorAppCont extends App with JsonSpanProtocol {
 
   // Flow
   // 2 parse cassandra data
-  val flowParsing: Flow[String, ProducerRecord[String, String], NotUsed] =
+  val flowToSpanRecord: Flow[String, ProducerRecord[String, String], NotUsed] =
     Flow
       .fromFunction[String, ProducerRecord[String, String]](
         json => {
@@ -64,6 +64,19 @@ object ConnectorAppCont extends App with JsonSpanProtocol {
         }
     )
 
+  val flowToTraceRecord: Flow[String, ProducerRecord[String, String], NotUsed] =
+    Flow
+      .fromFunction[String, ProducerRecord[String, String]](
+      json => {
+        val span = JsonParser(json).convertTo[Span]
+        val id = span.spanId
+        println(id)
+        val record = new ProducerRecord[java.lang.String, String](SPANS_ORIGINAL_TOPIC, span.traceId, getJsonStringifyIds(span))
+        println(record)
+        record
+      }
+    )
+
 
 //  //Sink
 //  //3 send to kafka
@@ -74,7 +87,7 @@ object ConnectorAppCont extends App with JsonSpanProtocol {
 
 
   // Run streams
-  val runnableGraph = sourceCassandra.via(flowParsing).to(sinkKafka)
+  val runnableGraph = sourceCassandra.via(flowToTraceRecord).to(sinkKafka)
   runnableGraph.run()
 }
 

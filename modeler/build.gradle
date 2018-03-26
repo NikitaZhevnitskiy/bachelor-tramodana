@@ -3,3 +3,5 @@ apply plugin: 'application'
 
 group "no.sysco.middleware.tramodana"
 mainClassName = "no.sysco.middleware.tramodana.modeler.Main"
+
+

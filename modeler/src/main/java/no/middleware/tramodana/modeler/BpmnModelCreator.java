@@ -6,6 +6,7 @@ import org.camunda.bpm.model.bpmn.instance.*;
 import org.camunda.bpm.model.bpmn.instance.Process;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * This class will serialize Trace or Workflow object to BPMN format.
@@ -69,6 +70,7 @@ public class BpmnModelCreator {
         demonstrating how to tag each element with an id (for reuse and reference in code) and how
         to name them (what will actually be shown in the visualisation);
          */
+
         BpmnModelInstance testmodel = Bpmn.createExecutableProcess("buybook")
                 .startEvent(" buybookEvent")
                 .name("Buy book")
@@ -124,4 +126,15 @@ public class BpmnModelCreator {
         return sequenceFlow;
     }
 
+    public String parseToBpmn(TmaWorkflowInterface s) {
+
+        String roots = s.getRoot();
+
+
+        BpmnModelInstance bpmnModel = Bpmn.createExecutableProcess("empty")
+                .startEvent("nothing")
+                .done();
+        return Bpmn.convertToString(bpmnModel);
+
+    }
 }
