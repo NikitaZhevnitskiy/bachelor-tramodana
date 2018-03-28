@@ -1,5 +1,4 @@
-package no.middleware.tramodana.connector
-
+package no.sysco.middleware.tramodana.connector
 
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
 import akka.NotUsed

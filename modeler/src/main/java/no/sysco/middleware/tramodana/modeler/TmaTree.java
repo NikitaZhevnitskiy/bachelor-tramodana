@@ -1,4 +1,4 @@
-package no.middleware.tramodana.modeler;
+package no.sysco.middleware.tramodana.modeler;
 
 import java.util.*;
 import java.util.stream.Collectors;

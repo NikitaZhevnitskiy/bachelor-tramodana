@@ -1,4 +1,4 @@
-package no.middleware.tramodana.modeler;
+package no.sysco.middleware.tramodana.modeler;
 
 public abstract class SpanWithHierarchy {
   String parentId;

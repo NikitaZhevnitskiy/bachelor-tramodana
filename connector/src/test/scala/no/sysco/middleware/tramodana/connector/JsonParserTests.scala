@@ -1,8 +1,9 @@
-import no.middleware.tramodana.connector.CassandraSpanParser
-import no.middleware.tramodana.connector.CassandraSpanParser.Span
-import org.scalatest._
-import com.fasterxml.jackson.databind.ObjectMapper
+package no.sysco.middleware.tramodana.connector
+
 import java.io.IOException
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.scalatest._
 
 
 class JsonParserTests extends WordSpec with Matchers {

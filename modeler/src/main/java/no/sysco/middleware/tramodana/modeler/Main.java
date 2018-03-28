@@ -1,10 +1,9 @@
-package no.middleware.tramodana.modeler;
+package no.sysco.middleware.tramodana.modeler;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.io.StringReader;
 
 public class Main {
 

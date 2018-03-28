@@ -14,9 +14,7 @@ def akkaHttpV = "10.0.11"
 
 // In this section you declare where to find the dependencies of your project
 allprojects {
-    apply plugin: "scala"
-
-
+    apply plugin: 'scala'
     repositories {
         // Use jcenter for resolving your dependencies.
         // You can declare any Maven/Ivy/file repository here.
@@ -74,12 +72,6 @@ allprojects {
         // Need scala-xml at test runtime
         testRuntime "org.scala-lang.modules:scala-xml_$scalaMajor:1.0.6"
     }
-}
-
-subprojects {
-    apply plugin: "application"
-    // https://stackoverflow.com/a/42709164/6769651
-    apply plugin: "scala"
 }
 
 task wrapper(type: Wrapper){

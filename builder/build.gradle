@@ -1,1 +1,5 @@
-mainClassName = "no.sysco.middleware.tramodana.builder.BuilderApp"
+apply plugin: 'scala'
+apply plugin: 'application'
+
+group = 'no.sysco.middleware.tramodana'
+mainClassName = 'no.sysco.middleware.tramodana.builder.BuilderApp'

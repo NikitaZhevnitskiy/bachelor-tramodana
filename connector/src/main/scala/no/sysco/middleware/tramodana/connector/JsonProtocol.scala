@@ -1,4 +1,4 @@
-package no.middleware.tramodana.connector
+package no.sysco.middleware.tramodana.connector
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json.{DefaultJsonProtocol, DeserializationException, JsArray, JsNumber, JsValue, JsonParser, RootJsonFormat}
