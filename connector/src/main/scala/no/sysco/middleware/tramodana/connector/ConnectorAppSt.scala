@@ -4,9 +4,9 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.kafka.ProducerSettings
 import akka.kafka.scaladsl.Producer
-import akka.stream.{ActorMaterializer, ClosedShape}
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
 import akka.stream.scaladsl.{Flow, GraphDSL, RunnableGraph, Source}
+import akka.stream.{ActorMaterializer, ClosedShape}
 import com.datastax.driver.core.{Cluster, SimpleStatement}
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer

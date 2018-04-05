@@ -1,7 +1,7 @@
 package no.sysco.middleware.tramodana.connector
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import spray.json.{DefaultJsonProtocol, DeserializationException, JsArray, JsNumber, JsValue, JsonParser, RootJsonFormat}
+import spray.json.{DefaultJsonProtocol, JsonParser, RootJsonFormat}
 
 
 final case class Span(
