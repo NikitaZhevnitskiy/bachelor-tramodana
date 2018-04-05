@@ -1,18 +1,16 @@
-package no.middleware.tramodana.connector
+package no.sysco.middleware.tramodana.connector
 
-
-import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
 import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import akka.kafka.scaladsl.Producer
-import spray.json.JsonParser
-import akka.stream.scaladsl.{Flow, Source}
 import akka.kafka.ProducerSettings
+import akka.kafka.scaladsl.Producer
+import akka.stream.ActorMaterializer
+import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
+import akka.stream.scaladsl.{Flow, Source}
 import com.datastax.driver.core.{Cluster, SimpleStatement}
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
-
+import spray.json.JsonParser
 
 
 object ConnectorAppCont extends App with JsonSpanProtocol {

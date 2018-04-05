@@ -1,4 +1,4 @@
-package no.middleware.tramodana.connector
+package no.sysco.middleware.tramodana.connector
 
 import com.typesafe.config.ConfigFactory
 
