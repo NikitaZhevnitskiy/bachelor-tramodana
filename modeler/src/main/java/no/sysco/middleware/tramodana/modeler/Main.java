@@ -1,19 +1,48 @@
 package no.sysco.middleware.tramodana.modeler;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.File;
 import java.io.IOException;
 
 public class Main {
 
     public static void main(String[] args) {
+        //testFunc();
 
-        // 1. receive Json
-        // 2. parse Json to TmaWorkflowImpl
-        BpmnModelCreator creator = new BpmnModelCreator();
+        // get json string
 
-        String workflowJson =
+        // parse json string to JSON
+        JsonNode root = null;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            if (args.length != 0){
+                String filepath = args[0];
+                root = mapper.readTree(new File(filepath));
+            }
+            else {
+                System.out.println("no args");
+                root = mapper.readTree(testJsonFile());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // parse JSON to TmaWorkflow
+        ITmaWorkflow tmaWorkflow = TmaJsonParser.parseToWorkflow(root);
+
+        // parse TmaWorkflow to BpmnXML
+        TmaBpmnCreator creator = new TmaBpmnCreator();
+        String bpmnXml = creator.getBpmnXML(tmaWorkflow);
+
+        // send back xml
+
+    }
+
+    public static String testJsonFile() {
+        return
                 "{\n" +
                         "  \"rootOperationName\": \"search_book_event\",\n" +
                         "  \"operationSet\": [\n" +
@@ -36,6 +65,15 @@ public class Main {
                         "  ]\n" +
                         "}\n";
 
+    }
+
+    public static void testFunc() {
+
+        // 1. receive Json
+        // 2. parse Json to TmaWorkflowImpl
+        BpmnModelCreator creator = new BpmnModelCreator();
+
+        String workflowJson = testJsonFile();
         ObjectMapper mapper = new ObjectMapper();
         TmaWorkflowImpl tree = null;
         try {

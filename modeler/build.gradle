@@ -4,4 +4,23 @@ apply plugin: 'application'
 group = 'no.sysco.middleware.tramodana'
 mainClassName = 'no.sysco.middleware.tramodana.modeler.Main'
 
+repositories {
+    mavenCentral()
+}
 
+dependencies {
+    testCompileOnly(
+        'junit:junit:4.12'
+    )
+    testImplementation(
+            'org.junit.jupiter:junit-jupiter-api:5.1.0'
+    )
+    testRuntimeOnly(
+            'org.junit.jupiter:junit-jupiter-engine:5.1.0',
+            'org.junit.vintage:junit-vintage-engine:5.1.0' 
+    )
+}
+
+test {
+    useJUnitPlatform()
+}

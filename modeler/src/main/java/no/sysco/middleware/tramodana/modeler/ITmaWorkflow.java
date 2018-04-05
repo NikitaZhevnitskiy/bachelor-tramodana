@@ -1,6 +1,6 @@
 package no.sysco.middleware.tramodana.modeler;
 
-public interface TmaWorkflowInterface {
+public interface ITmaWorkflow {
     String getRoot();
     String[] getNodes();
     int[][] getPaths();

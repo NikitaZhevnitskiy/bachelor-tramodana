@@ -125,7 +125,7 @@ public class BpmnModelCreator {
         return sequenceFlow;
     }
 
-    public String parseToBpmn(TmaWorkflowInterface s) {
+    public String parseToBpmn(ITmaWorkflow s) {
 
         String roots = s.getRoot();
 
