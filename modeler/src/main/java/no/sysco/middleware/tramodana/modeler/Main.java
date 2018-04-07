@@ -87,7 +87,8 @@ public class Main {
             ex.printStackTrace();
 
         }
-
+        System.out.println("---- With fluent API ----");
+        System.out.println(creator.createTestBpmnDiagramWithFluentAPI("thrown banana"));
         String parsedWorkflow = creator.parseToBpmn(tree);
 
     }

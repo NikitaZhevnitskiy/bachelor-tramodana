@@ -14,7 +14,39 @@ public class BpmnModelCreator {
 
     private BpmnModelInstance modelInstance;
 
-    public BpmnModelCreator() {
+
+    /**
+     *  2. fluent method of building a BPMN workflow
+     *  In this example we show the creation of a 2-branch workflow for a book selling service,
+     *  demonstrating how to tag each element with an id (for reuse and reference in code) and how
+     *  to name them (what will actually be shown in the visualisation);
+     */
+    public String createTestBpmnDiagramWithFluentAPI(String eventName) {
+
+        BpmnModelInstance testmodel = Bpmn.createExecutableProcess(eventName.trim())
+                .startEvent(eventName.trim()+ "Event")
+                .name("Buy book")
+                .parallelGateway("fork")
+                .name("Enough money?")
+                    .serviceTask("registerBook")
+                    .name("Register book order")
+                    .endEvent("end-with-book")
+                    .name("Book ordered")
+                .moveToNode("fork")
+                    .userTask("user-cry")
+                    .name("*user cries*")
+                    .endEvent("end-without-book")
+                    .name("No book for you!")
+                .done();
+
+        Bpmn.validateModel(testmodel);
+        String testmodelXMLstring = Bpmn.convertToString(testmodel);
+        //File testfile = new File("fluenttest.bpmn");
+        //Bpmn.writeModelToFile(testfile, testmodel);
+        return testmodelXMLstring;
+    }
+
+    public String createTestBpmnProcessProcedurally(){
         //##########
         //########## 1. Imperative method of building a BPMN flowchart
         //##########
@@ -53,44 +85,13 @@ public class BpmnModelCreator {
         String xmlString = Bpmn.convertToString(modelInstance);
 
         // write to output stream
-        /*
-        Bpmn.writeModelToStream(outputStream, modelInstance);
-         */
+        //Bpmn.writeModelToStream(outputStream, modelInstance);
 
         // write to file
-        File file = new File("backendtest.bpmn");
-        Bpmn.writeModelToFile(file, modelInstance);
+        //File file = new File("backendtest.bpmn");
+        //Bpmn.writeModelToFile(file, modelInstance);
 
-        //##########
-        //########## 2. fluent method of building a BPMN workflow
-        //##########
-        /*
-        In this example we show the creation of a 2-branch workflow for a book selling service,
-        demonstrating how to tag each element with an id (for reuse and reference in code) and how
-        to name them (what will actually be shown in the visualisation);
-         */
-
-        BpmnModelInstance testmodel = Bpmn.createExecutableProcess("buybook")
-                .startEvent(" buybookEvent")
-                .name("Buy book")
-                .parallelGateway("fork")
-                .name("Enough money?")
-                    .serviceTask("registerBook")
-                    .name("Register book order")
-                    .endEvent("end-with-book")
-                    .name("Book ordered")
-                .moveToNode("fork")
-                    .userTask("user-cry")
-                    .name("*user cries*")
-                    .endEvent("end-without-book")
-                    .name("No book for you!")
-                .done();
-
-        Bpmn.validateModel(testmodel);
-        String testmodelXMLstring = Bpmn.convertToString(testmodel);
-        File testfile = new File("fluenttest.bpmn");
-        Bpmn.writeModelToFile(testfile, testmodel);
-
+        return xmlString;
     }
 
     /** To simplify the repeating procedure of creating elements, you can use a helper method like this one.
@@ -126,10 +127,7 @@ public class BpmnModelCreator {
     }
 
     public String parseToBpmn(ITmaWorkflow s) {
-
         String roots = s.getRoot();
-
-
         BpmnModelInstance bpmnModel = Bpmn.createExecutableProcess("empty")
                 .startEvent("nothing")
                 .done();
