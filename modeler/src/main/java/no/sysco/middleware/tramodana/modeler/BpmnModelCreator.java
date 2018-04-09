@@ -23,8 +23,9 @@ public class BpmnModelCreator {
      */
     public String createTestBpmnDiagramWithFluentAPI(String eventName) {
 
+        eventName = eventName.replace(' ','_');
         BpmnModelInstance testmodel = Bpmn.createExecutableProcess(eventName.trim())
-                .startEvent(eventName.trim()+ "Event")
+                .startEvent(eventName.trim()+ "_event")
                 .name("Buy book")
                 .parallelGateway("fork")
                 .name("Enough money?")

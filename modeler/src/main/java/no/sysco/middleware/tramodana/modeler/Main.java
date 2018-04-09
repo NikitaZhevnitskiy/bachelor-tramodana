@@ -3,14 +3,17 @@ package no.sysco.middleware.tramodana.modeler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.camunda.bpm.model.bpmn.Bpmn;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class Main {
 
     public static void main(String[] args) {
-        //testFunc();
+        testFunc();
 
         // get json string
 
@@ -34,7 +37,7 @@ public class Main {
         ITmaWorkflow tmaWorkflow = TmaJsonParser.parseToWorkflow(root);
 
         // parse TmaWorkflow to BpmnXML
-        TmaBpmnCreator creator = new TmaBpmnCreator();
+        TmaBpmnCreator creator = new TmaBpmnCreator(root);
         String bpmnXml = creator.getBpmnXML(tmaWorkflow);
 
         // send back xml
@@ -87,10 +90,20 @@ public class Main {
             ex.printStackTrace();
 
         }
-        System.out.println("---- With fluent API ----");
-        System.out.println(creator.createTestBpmnDiagramWithFluentAPI("thrown banana"));
-        String parsedWorkflow = creator.parseToBpmn(tree);
 
+        System.out.println("---- With fluent API ----");
+        String parsedWorkflow =creator.createTestBpmnDiagramWithFluentAPI("banana thrown");
+        System.out.println(parsedWorkflow);
+        //String parsedWorkflow = creator.parseToBpmn(tree);
+        File testfile = new File("fluenttest.bpmn");
+        BufferedWriter bw = null;
+        try {
+            bw = new BufferedWriter(new FileWriter(testfile));
+            bw.write(parsedWorkflow);
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
