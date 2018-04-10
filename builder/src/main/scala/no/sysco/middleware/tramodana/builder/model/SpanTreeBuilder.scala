@@ -11,7 +11,7 @@ import scala.collection.mutable.ListBuffer
 /**
 This Tree class implements an N-ary tree which is a rooted tree in which each node has no more than n children.
   */
-object SpanTree {
+object SpanTreeBuilder {
 
   def build(spanList: List[Span]):SpanTree = {
 

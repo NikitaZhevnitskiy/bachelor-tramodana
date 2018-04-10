@@ -27,21 +27,6 @@ object BuilderApp extends App with JsonSpanProtocol {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   def addShutdownHook(streams: KafkaStreams, latch: CountDownLatch): Unit ={
     // attach shutdown handler to catch control-c
     Runtime.getRuntime.addShutdownHook(new Thread("streams-experiments-shutdown-hook") {
@@ -74,7 +59,8 @@ object BuilderApp extends App with JsonSpanProtocol {
   def buildTopology(builder: StreamsBuilder):Topology = {
 
     //   1 - stream from kafka
-    val originalSource: KStream[java.lang.String, String] = builder.stream[String, String](SPANS_JSON_ORIGINAL)
+    val originalSource: KStream[java.lang.String, String] =
+      builder.stream[String, String](SPANS_JSON_ORIGINAL)
 
     // to TRACES topic [trace_id, List[Span]]
     originalSource
@@ -99,7 +85,8 @@ object BuilderApp extends App with JsonSpanProtocol {
 
 
     // TODO: to Processed-traces [trace_id, Tree[Span] ]
-    val tracesSource: KStream[String, String] = builder.stream[String,String](TRACES)
+    val tracesSource: KStream[String, String] =
+      builder.stream[String,String](TRACES)
     println("HERE: ")
     tracesSource.peek((k, v)=>{
       val list: List[Span] = JsonParser(v).convertTo[List[Span]]

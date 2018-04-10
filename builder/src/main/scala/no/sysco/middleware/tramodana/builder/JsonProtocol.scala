@@ -1,6 +1,7 @@
 package no.sysco.middleware.tramodana.builder
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import play.api.libs.json.Reads
 import spray.json.{DefaultJsonProtocol, JsonParser, RootJsonFormat}
 
 final case class Trace(traceId:Option[String], spans: Option[List[Span]])
@@ -47,7 +48,7 @@ final case class SpanTree(
                            operationName: String,
                            value: Span,
                            parent: Option[String] = None,
-                           children: List[SpanTree] = List.empty)
+                           children: Seq[SpanTree] = Seq.empty)
 
 
 
@@ -61,8 +62,8 @@ trait JsonSpanProtocol extends SprayJsonSupport with DefaultJsonProtocol {
   implicit def logFieldFormat: RootJsonFormat[Field] = jsonFormat(Field, "key", "value_type", "value_string","value_bool","value_long","value_double","value_binary")
   implicit def spanProcessFormat: RootJsonFormat[Process] = jsonFormat(Process,"service_name", "tags")
   implicit def spanRefFormat: RootJsonFormat[Ref] = jsonFormat(Ref,"ref_type", "trace_id","span_id")
-//  implicit def spanTree: RootJsonFormat[SpanTree] = jsonFormat4(SpanTree, "operation_name", "value", "parent","children")
-  implicit def spanTree: RootJsonFormat[SpanTree] = jsonFormat4(SpanTree)
+  implicit val spanTree: RootJsonFormat[SpanTree] = jsonFormat(SpanTree, "operation_name", "value", "parent","children")
+//  implicit val spanTree: RootJsonFormat[SpanTree] = jsonFormat(SpanTree)
 }
 
 object MakeFun extends App with JsonSpanProtocol {
