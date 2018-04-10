@@ -228,7 +228,7 @@ class SpanTreeSpec extends WordSpec with Matchers with JsonSpanProtocol{
       val tree = SpanTreeBuilder.build(list)
 
       // Assert
-      assertEquals("buyBookMethod",tree.operationName)
+      assertEquals("buyBookMethod", tree.operationName)
       assertEquals(1, tree.children.length)
       assertEquals("GET", tree.children.head.operationName)
       assertEquals(1, tree.children.head.children.length)
@@ -250,69 +250,57 @@ class SpanTreeSpec extends WordSpec with Matchers with JsonSpanProtocol{
       }
     }
 
-    "convert from json to pojo 0 child" in {
+    "convert json -> pojo 0 child" in {
 
       // Act
       var tree: SpanTree = JsonParser(jsonTree0Child).convertTo[SpanTree]
 
-
       // Assert
       assertEquals("buyBookMethod", tree.operationName)
-      assertEquals(tree.operationName,tree.value.operationName)
+      assertEquals(tree.operationName, tree.value.operationName)
       assertEquals(0, tree.children.size)
-
-
     }
 
-    "convert from pojo to json spanTree 0 child" in {
-      // Arrange
-//      val list: List[Span] = JsonParser(listJson).convertTo[List[Span]]
-      val listWithOneSpan: String = s"[$spanJson]"
-      val list: List[Span] = JsonParser(listWithOneSpan).convertTo[List[Span]]
-      val tree = SpanTreeBuilder.build(list)
-
-      // Act
-      println(tree.toString)
-      println(tree.toJson)
-    }
-
-//    "convert from pojo to json spanTree with children" in {
-//      // Arrange
-//      val list: List[Span] = JsonParser(listJson).convertTo[List[Span]]
-//      val tree = SpanTreeBuilder.build(list)
-//
-//      // Act
-//      println(tree.toString)
-//      println(tree.toJson)
-//    }
-
-    "no name" in {
+    "convert json -> pojo 1 child" in {
       // Arrange
       val span = JsonParser(spanJson).convertTo[Span]
+      val someId = "qweqweqweq"
       val sTreeChild = SpanTree(
         operationName = "2",
         value = span,
-        parent = Option("2"))
-
+        parent = Option(someId))
       val sTreeParent = SpanTree(
         operationName = "1",
         value = span,
         parent = None,
-        children = Seq(sTreeChild)
+        children = List(sTreeChild)
       )
 
-      //
-      println(sTreeChild.children)
-
       // Act
-      println(sTreeParent)
-      println(sTreeParent.toJson)
+      val parsedJson = sTreeParent.toJson.toString
+
+      // Assert
+      assertTrue(parsedJson.contains(someId))
     }
 
+    "convert pojo -> json 0 child" in {
+      // Arrange
+      val list: List[Span] = JsonParser(listJson).convertTo[List[Span]]
+      val tree = SpanTreeBuilder.build(list)
 
+      // Act
+      println(tree.toJson)
+    }
 
+    "convert from pojo -> json spanTree 1 child" in {
+      // Arrange
+      val list: List[Span] = JsonParser(listJson).convertTo[List[Span]]
+      val tree = SpanTreeBuilder.build(list)
+
+      // Act
+      println(tree.toJson.toString)
+    }
 
   }
-
 
 }
