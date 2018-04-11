@@ -1,121 +1,293 @@
 package no.sysco.middleware.tramodana.modeler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.*;
 import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.builder.*;
 import org.camunda.bpm.model.bpmn.builder.ProcessBuilder;
+import org.camunda.bpm.model.bpmn.instance.BpmnModelElementInstance;
+import org.camunda.bpm.model.bpmn.instance.EndEvent;
+import org.camunda.bpm.model.bpmn.instance.ServiceTask;
+import org.camunda.bpm.model.xml.ModelValidationException;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 public class TmaBpmnCreator {
 
-    private enum JsonRootKeys {
-        ROOT_NODE_KEY,
-        NODE_LIST, TRACE_MODELS, WORKFLOW_TREE
-    }
-
+    private final BpmnModelInstance bpmnTree;
+    private final String bpmnXML;
+    private final List<TmaNode> nodeList;
+    private final JsonNode rootNodeIndex;
     private Map<JsonRootKeys, String> jsonKeyMap;
 
-    TmaBpmnCreator(JsonNode j) {
+    TmaBpmnCreator(JsonNode json) {
         jsonKeyMap = loadJsonKeys();
 
-        JsonNode json = j;
-        JsonNode root = getRoot(json);
+        rootNodeIndex = getRoot(json);
+        nodeList = getNodeList(json);
 
 
-        JsonNode tree = getTree(json);
-        String bpmnXML = parseToBpmnXML(tree);
+        JsonNode workflowTree = getWorkflowTree(json);
+        bpmnTree = parseToBpmn(workflowTree);
+        bpmnXML = BpmnToXML(bpmnTree).orElse(getErrorBpmnXml());
+    }
+
+    public static void main(String[] args) {
+        testGenerateJsonWithArray();
+        testReadingAndParsingJsonFile();
+        AbstractFlowNodeBuilder processbuilder = makeExampleProcess();
+
+    }
+
+    private static void testReadingAndParsingJsonFile() {
+
+        ObjectMapper m = new ObjectMapper();
+        //String testworkflow_path = "modeler/src/main/java/no/sysco/middleware/tramodana/modeler/workflow_json_v02.json";
+        String testworkflow_path = "examples/input_for_modeler/workflow_v03.json";
+
+        try {
+
+            byte[] testJsonBytes = Files.readAllBytes(Paths.get(testworkflow_path));
+            JsonNode testWorkflowJson = m.readTree(testJsonBytes);
+            System.out.println(m.writerWithDefaultPrettyPrinter().writeValueAsString(testWorkflowJson));
+
+            String tree =new TmaBpmnCreator(testWorkflowJson).getBpmnXML();
+            System.out.println(tree);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void testGenerateJsonWithArray() {
+        ObjectMapper m = new ObjectMapper();
+        ObjectNode root = m.createObjectNode();
+        root.put("rootNode", 0);
+        ArrayNode traceModels = m.createArrayNode();
+        ArrayNode trace1 = m.createArrayNode();
+        for (int i = 0; i < 5; i++) trace1.add(i);
+        ArrayNode trace2 = m.createArrayNode();
+        for (int i = 0; i < 4; i++) trace2.add(i);
+        traceModels.add(trace1);
+        traceModels.add(trace2);
+        root.set("traceModels", traceModels);
+        try {
+            System.out.println(m.writerWithDefaultPrettyPrinter().writeValueAsString(root));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static AbstractFlowNodeBuilder makeExampleProcess() {
+        ProcessBuilder fluentProcess;
+        fluentProcess = Bpmn.createExecutableProcess("banana");
+        AbstractFlowNodeBuilder a;
+        a = fluentProcess.startEvent("bananaStart");
+
+        AbstractFlowNodeBuilder b;
+        b = ((StartEventBuilder) a).name("Banana start");
+
+        AbstractFlowNodeBuilder c;
+        c = b.parallelGateway("fork");
+
+        AbstractFlowNodeBuilder d;
+        d = ((ParallelGatewayBuilder) c).name("Got strawbs?");
+
+        AbstractFlowNodeBuilder e;
+        e = d.serviceTask();
+
+        AbstractFlowNodeBuilder f;
+        f = ((ServiceTaskBuilder) e).name("Eat banana and strawbs");
+
+        AbstractFlowNodeBuilder g;
+        g = f.endEvent();
+
+        AbstractFlowNodeBuilder h;
+        h = ((EndEventBuilder) g).name("no more banana, no more strawbs");
+
+        AbstractFlowNodeBuilder i;
+        i = h.moveToNode("fork");
+
+        AbstractFlowNodeBuilder j;
+        j = i.userTask().name("Eat only banana");
+        return j;
+    }
+
+    public String getBpmnXML() {
+        return bpmnXML;
+    }
+
+    public BpmnModelInstance getBpmnTree() {
+        return bpmnTree;
+    }
+
+    private Map<JsonRootKeys, String> loadJsonKeys() {
+        Map<JsonRootKeys, String> map = new HashMap<>();
+
+        map.put(JsonRootKeys.ROOT_NODE_KEY, "rootNode");
+        map.put(JsonRootKeys.WORKFLOW_TREE, "workflowTree");
+        map.put(JsonRootKeys.NODE_LIST, "nodeList");
+        map.put(JsonRootKeys.TRACE_MODELS, "traceModels");
+        map.put(JsonRootKeys.NODE_CHILDREN, "children");
+
+        return map;
+    }
+
+    private List<TmaNode> getNodeList(JsonNode json) {
+        JsonNode nodeArray = json.path(jsonKeyMap.get(JsonRootKeys.NODE_LIST));
+        TypeReference<List<TmaNode>> nodeListType = new TypeReference<List<TmaNode>>() {
+        };
+        ObjectReader reader = new ObjectMapper().readerFor(nodeListType);
+        List<TmaNode> nodeList = null;
+        try {
+            nodeList = reader.readValue(nodeArray);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return nodeList;
+    }
+
+    String getErrorBpmnXml() {
+
+        BpmnModelInstance errorBpmn =
+                Bpmn.createExecutableProcess("error")
+                        .startEvent().name("error")
+                        .endEvent()
+                        .done();
+        return Bpmn.convertToString(errorBpmn);
+    }
+
+    Optional<String> BpmnToXML(BpmnModelInstance bpmnTree) {
+
+        try {
+            Bpmn.validateModel(bpmnTree);
+        } catch (ModelValidationException e) {
+            System.err.println("The BPMN instance is not valid:\n" + e.getMessage());
+            return Optional.empty();
+        }
+
+        String processXml = Bpmn.convertToString(bpmnTree);
+        return Optional.of(processXml);
+
     }
 
     private JsonNode getRoot(JsonNode j) {
         String rootKey = jsonKeyMap.get(JsonRootKeys.ROOT_NODE_KEY);
         return j.path(rootKey);
     }
-    private JsonNode getTree(JsonNode j) {
+
+    private JsonNode getWorkflowTree(JsonNode j) {
         String treeKey = jsonKeyMap.get(JsonRootKeys.WORKFLOW_TREE);
         return j.path(treeKey);
     }
 
-    private String parseToBpmnXML(JsonNode json) {
-        ProcessBuilder fluentProcess;
-        fluentProcess = Bpmn.createExecutableProcess("banana");
-        StartEventBuilder a;
-        a = fluentProcess.startEvent("bananaStart");
-        StartEventBuilder b;
-        b = a.name("Banana start");
-        ParallelGatewayBuilder c;
-        c = b.parallelGateway("fork");
-        ParallelGatewayBuilder d;
-        d = c.name("Got strawbs?");
-        ServiceTaskBuilder e;
-        e = d.serviceTask();
-        ServiceTaskBuilder f;
-        f = e.name("Eat banana and strawbs");
-        EndEventBuilder g;
-        g = f.endEvent();
-        EndEventBuilder h;
-        h = g.name("no more banana, no more strawbs");
-        AbstractFlowNodeBuilder i;
-        i = h.moveToNode("fork");
+    public BpmnModelInstance parseToBpmn(JsonNode json) {
+        TmaNode workflowRoot = nodeList.get(rootNodeIndex.intValue());
+        ProcessBuilder fluentProcess =
+                Bpmn.createExecutableProcess(workflowRoot.name + "_" + workflowRoot.id);
+
+        AbstractFlowNodeBuilder startingEvent =
+                fluentProcess
+                        .startEvent(workflowRoot.id)
+                        .name(workflowRoot.name);
+
+        // Iterate through the tree, create one node at a time
+        AbstractFlowNodeBuilder completedTree = parseToBpmnIter(startingEvent, json);
 
 
-
-        return null;
+        // Finalise the build ( and builds the diagram elements)
+        BpmnModelInstance finalisedBuild = completedTree.done();
+        return finalisedBuild;
     }
 
-    String getBpmnXML(ITmaWorkflow tmaWorkflow) {
-        return "implement me - TmaBpmnCreator.getBpmnXML";
-    }
+    private AbstractFlowNodeBuilder parseToBpmnIter(AbstractFlowNodeBuilder processBuilder, JsonNode node) {
 
-
-    private Map<JsonRootKeys, String> loadJsonKeys() {
-        Map<JsonRootKeys,String> map = new HashMap<>();
-
-        map.put(JsonRootKeys.ROOT_NODE_KEY, "rootNode");
-        map.put(JsonRootKeys.WORKFLOW_TREE, "workflowTree");
-        map.put(JsonRootKeys.NODE_LIST, "nodeList");
-        map.put(JsonRootKeys.TRACE_MODELS, "traceModels");
-
-        return map;
-    }
-
-    public static void main(String[] args) {
-        ObjectMapper m = new ObjectMapper();
-        ObjectNode root = m.createObjectNode();
-        root.put("rootNode", 0);
-        ArrayNode traceModels = m.createArrayNode();
-        ArrayNode trace1= m.createArrayNode();
-        for(int i = 0; i < 5; i++) trace1.add(i);
-        ArrayNode trace2= m.createArrayNode();
-        for(int i = 0; i < 4; i++) trace2.add(i);
-        traceModels.add(trace1);
-        traceModels.add(trace2);
-        root.set("traceModels", traceModels);
-        try {
-            System.out.println( m.writerWithDefaultPrettyPrinter().writeValueAsString(root));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        TmaNode nodeDetails = getTmaNode(node);
+        Iterator<JsonNode> children_it = getChildren(node);
+        // nodes without children are leaves ( end events, or replying nodes)
+        if (!children_it.hasNext()) {
+            return processBuilder.endEvent(nodeDetails.id)
+                    .name(nodeDetails.name);
+            // processBuilder = addElement(processBuilder, node, EndEvent.class);
+            // return processBuilder;
         }
-        String testworkflow_path = "modeler/src/main/java/no/sysco/middleware/tramodana/modeler/parsed_workflow.json";
-        try{
 
-            byte[] testJsonBytes = Files.readAllBytes(Paths.get(testworkflow_path));
-            JsonNode n = m.readTree(testJsonBytes);
-            System.out.println(m.writerWithDefaultPrettyPrinter().writeValueAsString(n));
-        } catch (IOException e) {
-            e.printStackTrace();
+        // processBuilder = addElement(processBuilder, node, ServiceTask.class);
+        processBuilder = processBuilder.serviceTask(nodeDetails.id)
+                .name(nodeDetails.name);
+
+        // TODO: add annotation (possible?)
+        List<JsonNode> children = new ArrayList<>();
+        children_it.forEachRemaining(children::add);
+
+        String currentNodeId = getId(node);
+        // if the current node has more than one child,
+        // we create a gateway element and use it
+        // as a return point until all children are processed
+        if (children.size() > 1) {
+            currentNodeId = "fork_from_node_" + getId(node);
+            processBuilder = processBuilder.parallelGateway(currentNodeId);
         }
+
+        // start recursion for each child
+        for (JsonNode child : children) {
+            processBuilder =
+                    parseToBpmnIter(processBuilder, child)
+                            .moveToNode(currentNodeId);
+        }
+
+        return processBuilder;
     }
 
+    private Iterator<JsonNode> getChildren(JsonNode node) {
+        return node.path(jsonKeyMap.get(JsonRootKeys.NODE_CHILDREN)).elements();
+    }
+
+    private boolean hasChildren(JsonNode node) {
+        return getChildren(node).hasNext();
+    }
+
+    private <T extends BpmnModelElementInstance> AbstractFlowNodeBuilder addElement(
+            AbstractFlowNodeBuilder pb,
+            JsonNode node,
+            Class<T> elementClass) {
+
+        BpmnModelInstance bpmnInst = Bpmn.createEmptyModel();
+        T element = bpmnInst.newInstance(elementClass);
+        TmaNode tmaNode = getTmaNode(node);
+        element.setAttributeValue("id", tmaNode.id, true);
+        element.setAttributeValue("name", tmaNode.name);
+        pb.addExtensionElement(element);
+        return pb;
+    }
+
+    private String getId(JsonNode node) {
+        return getTmaNode(node).id;
+    }
+
+    private String getName(JsonNode node) {
+        return getTmaNode(node).name;
+    }
+
+    private TmaNode getTmaNode(JsonNode node) {
+        JsonNode nodeListIndex = node.path(jsonKeyMap.get(JsonRootKeys.NODE_INDEX));
+        int index = nodeListIndex.intValue();
+        return nodeList.get(index);
+    }
+
+    private enum JsonRootKeys {
+        ROOT_NODE_KEY,
+        NODE_LIST,
+        TRACE_MODELS,
+        NODE_CHILDREN, NODE_INDEX, WORKFLOW_TREE
+    }
 
 }
