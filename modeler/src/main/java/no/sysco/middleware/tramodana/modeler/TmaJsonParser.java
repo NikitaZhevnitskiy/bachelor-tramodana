@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class TmaJsonParser {
 
-    public static ITmaWorkflow parseToWorkflow(JsonNode root) {
+    public static TmaIWorkflow parseToWorkflow(JsonNode root) {
         return null;
     }
 

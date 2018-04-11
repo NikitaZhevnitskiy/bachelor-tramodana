@@ -3,7 +3,7 @@ package no.sysco.middleware.tramodana.modeler;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TmaTree<T extends SpanWithHierarchy> {
+public class TmaTree<T extends TmaSpanWithHierarchy> {
 
   private class Node {
     private T value;

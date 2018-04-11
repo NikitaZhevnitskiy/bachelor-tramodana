@@ -4,7 +4,7 @@ package no.sysco.middleware.tramodana.modeler;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class TmaWorkflowImpl implements ITmaWorkflow {
+public class TmaWorkflowImpl implements TmaIWorkflow {
     public String rootOperationName;
     public String[] operationSet;
     public int[][] traceModels;

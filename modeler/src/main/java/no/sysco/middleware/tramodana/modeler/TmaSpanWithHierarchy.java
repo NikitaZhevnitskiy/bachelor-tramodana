@@ -1,9 +1,9 @@
 package no.sysco.middleware.tramodana.modeler;
 
-public abstract class SpanWithHierarchy {
+public abstract class TmaSpanWithHierarchy {
   String parentId;
   String spanId;
-  public SpanWithHierarchy(String parentId, String spanId){
+  public TmaSpanWithHierarchy(String parentId, String spanId){
     this.parentId = parentId;
     this.spanId = spanId;
   }

@@ -3,7 +3,7 @@ package no.sysco.middleware.tramodana.modeler;
 import java.util.Arrays;
 import java.util.LinkedList;
 
-public class TmaSpanTest extends SpanWithHierarchy {
+public class TmaSpanTest extends TmaSpanWithHierarchy {
   String value;
 
   public TmaSpanTest(String parentId, String spanId, String value) {

@@ -2,7 +2,7 @@ package no.sysco.middleware.tramodana.modeler;
 
 import java.util.List;
 
-public class TmaSpan extends SpanWithHierarchy {
+public class TmaSpan extends TmaSpanWithHierarchy {
     public String traceId;
     public String spanId;
     public long spanHash;
