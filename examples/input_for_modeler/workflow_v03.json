@@ -1,0 +1,80 @@
+{
+  "nodeList": [
+    {
+      "name": "search_book_event",
+      "id": "819228"
+    },
+    {
+      "name": "GET",
+      "id": "819229"
+    },
+    {
+      "name": "executeQuery(String query)",
+      "id": "819230"
+    },
+    {
+      "name": "process_book_list",
+      "id": "819231"
+    },
+    {
+      "name": "no_books_found",
+      "id": "819232"
+    },
+    {
+      "name": "getBookByName()",
+      "id": "819233"
+    },
+    {
+      "name": "book_name_found",
+      "id": "819234"
+    },
+    {
+      "name": "book_name_not_found",
+      "id": "819235"
+    }
+  ],
+  "rootNode": 0,
+  "traceModels": [
+    [ 0, 1, 2, 3 ],
+    [ 0, 1, 2, 4 ],
+    [ 0, 1 ],
+    [ 0, 1, 5, 6 ],
+    [ 0, 1, 5, 7 ]
+  ],
+  "workflowTree": {
+    "node": 0,
+    "children": [
+      {
+        "node": 1,
+        "children": [
+          {
+            "node": 2,
+            "children": [
+              {
+                "node": 3,
+                "children": []
+              },
+              {
+                "node": 4,
+                "children": []
+              }
+            ]
+          },
+          {
+            "node": 5,
+            "children": [
+              {
+                "node": 6,
+                "children": []
+              },
+              {
+                "node": 7,
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
