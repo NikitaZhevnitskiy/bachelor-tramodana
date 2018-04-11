@@ -3,12 +3,13 @@ package no.sysco.middleware.tramodana.modeler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.camunda.bpm.model.bpmn.Bpmn;
+import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Optional;
 
 public class Main {
 
@@ -34,14 +35,23 @@ public class Main {
         }
 
         // parse JSON to TmaWorkflow
-        ITmaWorkflow tmaWorkflow = TmaJsonParser.parseToWorkflow(root);
+        // TmaIWorkflow tmaWorkflow = TmaJsonParser.parseToWorkflow(root);
 
-        // parse TmaWorkflow to BpmnXML
-        TmaBpmnCreator creator = new TmaBpmnCreator(root);
-        String bpmnXml = creator.getBpmnXML(tmaWorkflow);
+        // parse JsonNode to BpmnXML
+        Optional<String> bpmnXml = parseJsonNodeToXML(root);
+
 
         // send back xml
+        String res = bpmnXml.orElse("BpmnXml is null");
+        System.out.println(res);
 
+    }
+
+    private static Optional<String> parseJsonNodeToXML(JsonNode root) {
+
+        TmaBpmnCreator creator = new TmaBpmnCreator(root);
+        BpmnModelInstance bpmnTree = creator.parseToBpmn(root);
+        return creator.BpmnToXML(bpmnTree);
     }
 
     public static String testJsonFile() {
