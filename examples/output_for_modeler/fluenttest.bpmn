@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<definitions xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="definitions_d7744a2b-e597-4b2f-9f14-82865eeff603" targetNamespace="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
+  <process id="banana_thrown" isExecutable="true">
+    <startEvent id="banana_thrown_event" name="Buy book">
+      <outgoing>sequenceFlow_0a76535b-47da-473e-8ba6-727f834940ee</outgoing>
+    </startEvent>
+    <parallelGateway id="fork" name="Enough money?">
+      <incoming>sequenceFlow_0a76535b-47da-473e-8ba6-727f834940ee</incoming>
+      <outgoing>sequenceFlow_91aa44ae-209f-460d-bbad-7dc5205b3f6f</outgoing>
+      <outgoing>sequenceFlow_72a94a76-9be7-45ef-b8b1-3fcf15d005e6</outgoing>
+    </parallelGateway>
+    <sequenceFlow id="sequenceFlow_0a76535b-47da-473e-8ba6-727f834940ee" sourceRef="banana_thrown_event" targetRef="fork"/>
+    <serviceTask id="registerBook" name="Register book order">
+      <incoming>sequenceFlow_91aa44ae-209f-460d-bbad-7dc5205b3f6f</incoming>
+      <outgoing>sequenceFlow_4d97b375-12b9-4380-9cf6-da5df5ed4570</outgoing>
+    </serviceTask>
+    <sequenceFlow id="sequenceFlow_91aa44ae-209f-460d-bbad-7dc5205b3f6f" sourceRef="fork" targetRef="registerBook"/>
+    <endEvent id="end-with-book" name="Book ordered">
+      <incoming>sequenceFlow_4d97b375-12b9-4380-9cf6-da5df5ed4570</incoming>
+    </endEvent>
+    <sequenceFlow id="sequenceFlow_4d97b375-12b9-4380-9cf6-da5df5ed4570" sourceRef="registerBook" targetRef="end-with-book"/>
+    <userTask id="user-cry" name="*user cries*">
+      <incoming>sequenceFlow_72a94a76-9be7-45ef-b8b1-3fcf15d005e6</incoming>
+      <outgoing>sequenceFlow_a07a46dc-9495-409b-b77b-fa948a627f9a</outgoing>
+    </userTask>
+    <sequenceFlow id="sequenceFlow_72a94a76-9be7-45ef-b8b1-3fcf15d005e6" sourceRef="fork" targetRef="user-cry"/>
+    <endEvent id="end-without-book" name="No book for you!">
+      <incoming>sequenceFlow_a07a46dc-9495-409b-b77b-fa948a627f9a</incoming>
+    </endEvent>
+    <sequenceFlow id="sequenceFlow_a07a46dc-9495-409b-b77b-fa948a627f9a" sourceRef="user-cry" targetRef="end-without-book"/>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_a356abb9-dcc0-4752-8106-85e3fb0ecc2a">
+    <bpmndi:BPMNPlane bpmnElement="banana_thrown" id="BPMNPlane_e53a53cd-c664-4f69-bdff-74a2be46c31c">
+      <bpmndi:BPMNShape bpmnElement="banana_thrown_event" id="BPMNShape_377505d6-551d-4b47-9ec5-ada1981a5e2c">
+        <dc:Bounds height="36.0" width="36.0" x="100.0" y="100.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="fork" id="BPMNShape_531a393f-d18f-445a-b7e3-3f6f8984f02c">
+        <dc:Bounds height="50.0" width="50.0" x="186.0" y="93.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow_0a76535b-47da-473e-8ba6-727f834940ee" id="BPMNEdge_a29801ad-c37f-4e45-a7be-fb2e5b637765">
+        <di:waypoint x="136.0" y="118.0"/>
+        <di:waypoint x="186.0" y="118.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape bpmnElement="registerBook" id="BPMNShape_52c4fd8a-10fe-49bf-a547-4074ed6de0d0">
+        <dc:Bounds height="80.0" width="100.0" x="286.0" y="78.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow_91aa44ae-209f-460d-bbad-7dc5205b3f6f" id="BPMNEdge_b04f34cf-c3dc-4ed6-b1a3-0faa04b66e36">
+        <di:waypoint x="236.0" y="118.0"/>
+        <di:waypoint x="286.0" y="118.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape bpmnElement="end-with-book" id="BPMNShape_e394ce31-900c-4a7c-a196-949e1d8de473">
+        <dc:Bounds height="36.0" width="36.0" x="436.0" y="100.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow_4d97b375-12b9-4380-9cf6-da5df5ed4570" id="BPMNEdge_b12d8dc3-3be4-4931-8836-8f3971697da3">
+        <di:waypoint x="386.0" y="118.0"/>
+        <di:waypoint x="436.0" y="118.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape bpmnElement="user-cry" id="BPMNShape_36ec7da0-0f16-4730-a627-b0bceab6f478">
+        <dc:Bounds height="80.0" width="100.0" x="286.0" y="208.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow_72a94a76-9be7-45ef-b8b1-3fcf15d005e6" id="BPMNEdge_52db5f8b-fd57-48e1-b274-47f425fe2765">
+        <di:waypoint x="211.0" y="143.0"/>
+        <di:waypoint x="211.0" y="248.0"/>
+        <di:waypoint x="286.0" y="248.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape bpmnElement="end-without-book" id="BPMNShape_724ff0e4-6820-429b-b58f-e0a2cc06a25e">
+        <dc:Bounds height="36.0" width="36.0" x="436.0" y="230.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow_a07a46dc-9495-409b-b77b-fa948a627f9a" id="BPMNEdge_acff68bf-a918-43ec-9c7c-b458aada76f9">
+        <di:waypoint x="386.0" y="248.0"/>
+        <di:waypoint x="436.0" y="248.0"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

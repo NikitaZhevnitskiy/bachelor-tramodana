@@ -3,6 +3,7 @@ package no.sysco.middleware.tramodana.modeler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 
 import java.io.BufferedWriter;
@@ -22,11 +23,10 @@ public class Main {
         JsonNode root = null;
         try {
             ObjectMapper mapper = new ObjectMapper();
-            if (args.length != 0){
+            if (args.length != 0) {
                 String filepath = args[0];
                 root = mapper.readTree(new File(filepath));
-            }
-            else {
+            } else {
                 System.out.println("no args");
                 root = mapper.readTree(testJsonFile());
             }
@@ -102,15 +102,35 @@ public class Main {
         }
 
         System.out.println("---- With fluent API ----");
-        String parsedWorkflow =creator.createTestBpmnDiagramWithFluentAPI("banana thrown");
+        BpmnModelInstance testmodel = creator.createTestBpmnDiagramWithFluentAPI("banana thrown");
+        System.out.println("---- BEFORE EXTENSION ----");
+        String parsedWorkflow = Bpmn.convertToString(testmodel);
         System.out.println(parsedWorkflow);
+        System.out.println("---- AFTER EXTENSION ----");
+        BpmnModelInstance extendedTestModel = creator.testExtendModel(testmodel, "end-without-book");
+        String extendedWorkflow = Bpmn.convertToString(extendedTestModel);
+        System.out.println(extendedWorkflow);
+        System.out.println("---- EXTENSION OF PROCEDURALLY GENERATED BPMN ----");
+        BpmnModelInstance procTestModel = creator.createTestBpmnProcessProcedurally();
+        BpmnModelInstance procExtModel = creator.testExtendModel(procTestModel,"end");
+        String procExtString = Bpmn.convertToString(procExtModel);
+        System.out.println("---- DONE ----");
+
+
         //String parsedWorkflow = creator.parseToBpmn(tree);
-        File testfile = new File("fluenttest.bpmn");
-        BufferedWriter bw = null;
+        File beforeBpmnExtension = new File( "examples/output_for_modeler/fluenttest.bpmn");
+        File afterBpmnExtension = new File( "examples/output_for_modeler/fluenttest_after.bpmn");
+        File procBpmnExtension = new File( "examples/output_for_modeler/proctest_ext.bpmn");
         try {
-            bw = new BufferedWriter(new FileWriter(testfile));
+            BufferedWriter bw = new BufferedWriter(new FileWriter( beforeBpmnExtension));
             bw.write(parsedWorkflow);
             bw.close();
+            BufferedWriter bw2 = new BufferedWriter(new FileWriter( afterBpmnExtension));
+            bw2.write(extendedWorkflow);
+            bw2.close();
+            BufferedWriter bw3 = new BufferedWriter(new FileWriter( procBpmnExtension));
+            bw3.write(procExtString);
+            bw3.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
