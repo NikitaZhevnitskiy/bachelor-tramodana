@@ -2,15 +2,16 @@ package no.sysco.middleware.tramodana.modeler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.node.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.builder.*;
 import org.camunda.bpm.model.bpmn.builder.ProcessBuilder;
 import org.camunda.bpm.model.bpmn.instance.BpmnModelElementInstance;
-import org.camunda.bpm.model.bpmn.instance.EndEvent;
-import org.camunda.bpm.model.bpmn.instance.ServiceTask;
 import org.camunda.bpm.model.xml.ModelValidationException;
 
 import java.io.IOException;
@@ -58,7 +59,7 @@ public class TmaBpmnCreator {
             JsonNode testWorkflowJson = m.readTree(testJsonBytes);
             System.out.println(m.writerWithDefaultPrettyPrinter().writeValueAsString(testWorkflowJson));
 
-            String tree =new TmaBpmnCreator(testWorkflowJson).getBpmnXML();
+            String tree = new TmaBpmnCreator(testWorkflowJson).getBpmnXML();
             System.out.println(tree);
         } catch (IOException e) {
             e.printStackTrace();
@@ -136,6 +137,7 @@ public class TmaBpmnCreator {
         map.put(JsonRootKeys.NODE_LIST, "nodeList");
         map.put(JsonRootKeys.TRACE_MODELS, "traceModels");
         map.put(JsonRootKeys.NODE_CHILDREN, "children");
+        map.put(JsonRootKeys.NODE_INDEX, "node");
 
         return map;
     }
@@ -191,16 +193,14 @@ public class TmaBpmnCreator {
 
     public BpmnModelInstance parseToBpmn(JsonNode json) {
         TmaNode workflowRoot = nodeList.get(rootNodeIndex.intValue());
-        ProcessBuilder fluentProcess =
-                Bpmn.createExecutableProcess(workflowRoot.name + "_" + workflowRoot.id);
-
-        AbstractFlowNodeBuilder startingEvent =
-                fluentProcess
+        String processId = workflowRoot.name + "_" + workflowRoot.id;
+        StartEventBuilder startingEventBuilder =
+                Bpmn.createExecutableProcess(processId)
                         .startEvent(workflowRoot.id)
                         .name(workflowRoot.name);
 
         // Iterate through the tree, create one node at a time
-        AbstractFlowNodeBuilder completedTree = parseToBpmnIter(startingEvent, json);
+        AbstractFlowNodeBuilder completedTree = parseToBpmnIter(startingEventBuilder, json);
 
 
         // Finalise the build ( and builds the diagram elements)
@@ -208,7 +208,7 @@ public class TmaBpmnCreator {
         return finalisedBuild;
     }
 
-    private AbstractFlowNodeBuilder parseToBpmnIter(AbstractFlowNodeBuilder processBuilder, JsonNode node) {
+    private <T extends AbstractFlowNodeBuilder> EndEventBuilder parseToBpmnIter(T processBuilder, JsonNode node) {
 
         TmaNode nodeDetails = getTmaNode(node);
         Iterator<JsonNode> children_it = getChildren(node);
@@ -221,12 +221,15 @@ public class TmaBpmnCreator {
         }
 
         // processBuilder = addElement(processBuilder, node, ServiceTask.class);
-        processBuilder = processBuilder.serviceTask(nodeDetails.id)
-                .name(nodeDetails.name);
-
-        // TODO: add annotation (possible?)
         List<JsonNode> children = new ArrayList<>();
         children_it.forEachRemaining(children::add);
+        if(children.size() == 1) {
+            ServiceTaskBuilder sbt = processBuilder.serviceTask(nodeDetails.id)
+                            .name(nodeDetails.name);
+                return parseToBpmnIter(sbt,children.get(0));
+        }
+
+        // TODO: add annotation (possible?)
 
         String currentNodeId = getId(node);
         // if the current node has more than one child,
@@ -234,17 +237,15 @@ public class TmaBpmnCreator {
         // as a return point until all children are processed
         if (children.size() > 1) {
             currentNodeId = "fork_from_node_" + getId(node);
-            processBuilder = processBuilder.parallelGateway(currentNodeId);
-        }
+            ParallelGatewayBuilder pgwb = processBuilder.parallelGateway(currentNodeId);
 
-        // start recursion for each child
-        for (JsonNode child : children) {
-            processBuilder =
-                    parseToBpmnIter(processBuilder, child)
-                            .moveToNode(currentNodeId);
+            // start recursion for each child
+            for (JsonNode child : children) {
+                 parseToBpmnIter(pgwb, child)
+                                .moveToNode(currentNodeId);
+            }
         }
-
-        return processBuilder;
+        return (EndEventBuilder) processBuilder;
     }
 
     private Iterator<JsonNode> getChildren(JsonNode node) {
@@ -287,7 +288,9 @@ public class TmaBpmnCreator {
         ROOT_NODE_KEY,
         NODE_LIST,
         TRACE_MODELS,
-        NODE_CHILDREN, NODE_INDEX, WORKFLOW_TREE
+        NODE_CHILDREN,
+        NODE_INDEX,
+        WORKFLOW_TREE
     }
 
 }
