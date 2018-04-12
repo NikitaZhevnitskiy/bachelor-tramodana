@@ -5,6 +5,9 @@ import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.*;
 import org.camunda.bpm.model.bpmn.instance.Process;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
 /**
  * This class will serialize Trace or Workflow object to BPMN format.
  */
@@ -19,7 +22,7 @@ public class BpmnModelCreator {
      *  demonstrating how to tag each element with an id (for reuse and reference in code) and how
      *  to name them (what will actually be shown in the visualisation);
      */
-    public String createTestBpmnDiagramWithFluentAPI(String eventName) {
+    public BpmnModelInstance createTestBpmnDiagramWithFluentAPI(String eventName) {
 
         eventName = eventName.replace(' ','_');
         BpmnModelInstance testmodel = Bpmn.createExecutableProcess(eventName.trim())
@@ -39,13 +42,12 @@ public class BpmnModelCreator {
                 .done();
 
         Bpmn.validateModel(testmodel);
-        String testmodelXMLstring = Bpmn.convertToString(testmodel);
         //File testfile = new File("fluenttest.bpmn");
         //Bpmn.writeModelToFile(testfile, testmodel);
-        return testmodelXMLstring;
+        return testmodel;
     }
 
-    public String createTestBpmnProcessProcedurally(){
+    public BpmnModelInstance createTestBpmnProcessProcedurally(){
         //##########
         //########## 1. Imperative method of building a BPMN flowchart
         //##########
@@ -81,7 +83,7 @@ public class BpmnModelCreator {
         // validate the model
         Bpmn.validateModel(modelInstance);
         // convert to string
-        String xmlString = Bpmn.convertToString(modelInstance);
+        //String xmlString = Bpmn.convertToString(modelInstance);
 
         // write to output stream
         //Bpmn.writeModelToStream(outputStream, modelInstance);
@@ -90,7 +92,7 @@ public class BpmnModelCreator {
         //File file = new File("backendtest.bpmn");
         //Bpmn.writeModelToFile(file, modelInstance);
 
-        return xmlString;
+        return modelInstance;
     }
 
     /** To simplify the repeating procedure of creating elements, you can use a helper method like this one.
@@ -132,5 +134,20 @@ public class BpmnModelCreator {
                 .done();
         return Bpmn.convertToString(bpmnModel);
 
+    }
+
+    public BpmnModelInstance testExtendModel(BpmnModelInstance testmodel, String attachNodeId) {
+        String xml =  Bpmn.convertToString(testmodel);
+        InputStream is = new ByteArrayInputStream(xml.getBytes());
+        BpmnModelInstance extModel = Bpmn.readModelFromStream(is);
+        EndEvent endEvent = (EndEvent) extModel.getModelElementById(attachNodeId);
+
+        BpmnModelInstance
+                mod = endEvent.builder()
+                .endEvent("end-with-book-anyway")
+                .name("Ok fine, have a book.")
+                .done();
+
+        return mod;
     }
 }
