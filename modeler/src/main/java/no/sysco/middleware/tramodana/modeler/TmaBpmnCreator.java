@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.builder.*;
-import org.camunda.bpm.model.bpmn.builder.ProcessBuilder;
 import org.camunda.bpm.model.bpmn.instance.BpmnModelElementInstance;
 import org.camunda.bpm.model.xml.ModelValidationException;
 
@@ -50,7 +49,6 @@ public class TmaBpmnCreator {
     private static void testReadingAndParsingJsonFile() {
 
         ObjectMapper m = new ObjectMapper();
-        //String testworkflow_path = "modeler/src/main/java/no/sysco/middleware/tramodana/modeler/workflow_json_v02.json";
         String testworkflow_path = "examples/input_for_modeler/workflow_v03.json";
 
         try {
@@ -87,38 +85,18 @@ public class TmaBpmnCreator {
     }
 
     private static AbstractFlowNodeBuilder makeExampleProcess() {
-        ProcessBuilder fluentProcess;
-        fluentProcess = Bpmn.createExecutableProcess("banana");
-        AbstractFlowNodeBuilder a;
-        a = fluentProcess.startEvent("bananaStart");
-
-        AbstractFlowNodeBuilder b;
-        b = ((StartEventBuilder) a).name("Banana start");
-
-        AbstractFlowNodeBuilder c;
-        c = b.parallelGateway("fork");
-
-        AbstractFlowNodeBuilder d;
-        d = ((ParallelGatewayBuilder) c).name("Got strawbs?");
-
-        AbstractFlowNodeBuilder e;
-        e = d.serviceTask();
-
-        AbstractFlowNodeBuilder f;
-        f = ((ServiceTaskBuilder) e).name("Eat banana and strawbs");
-
-        AbstractFlowNodeBuilder g;
-        g = f.endEvent();
-
-        AbstractFlowNodeBuilder h;
-        h = ((EndEventBuilder) g).name("no more banana, no more strawbs");
-
-        AbstractFlowNodeBuilder i;
-        i = h.moveToNode("fork");
-
-        AbstractFlowNodeBuilder j;
-        j = i.userTask().name("Eat only banana");
-        return j;
+        return Bpmn.createExecutableProcess("banana")
+                .startEvent("bananaStart")
+                .name("Banana start")
+                .parallelGateway("fork")
+                .name("Got strawbs?")
+                .serviceTask()
+                .name("Eat banana and strawbs")
+                .endEvent()
+                .name("no more banana, no more strawbs")
+                .moveToNode("fork")
+                .userTask()
+                .name("Eat only banana");
     }
 
     public String getBpmnXML() {
