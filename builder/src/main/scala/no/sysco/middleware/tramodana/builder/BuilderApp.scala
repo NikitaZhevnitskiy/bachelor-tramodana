@@ -110,7 +110,7 @@ object BuilderApp extends App with JsonSpanProtocol {
     processedTracesSource
       .mapValues(jsonTree => {
         val tree = JsonParser(jsonTree).convertTo[SpanTree]
-        tree.operationName
+        tree.value.operationName
       })
         .to(TRACE_ID_ROOT_OPERATION)
 
