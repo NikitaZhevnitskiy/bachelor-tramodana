@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 public class Main {
+    private static final String TEST_FILE_DIR_PATH = "examples/output_for_modeler/";
 
     public static void main(String[] args) {
         testFunc();
@@ -28,7 +29,6 @@ public class Main {
                 root = mapper.readTree(new File(filepath));
             } else {
                 System.out.println("no args");
-                root = mapper.readTree(testJsonFile());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -54,52 +54,12 @@ public class Main {
         return creator.BpmnToXML(bpmnTree);
     }
 
-    public static String testJsonFile() {
-        return
-                "{\n" +
-                        "  \"rootOperationName\": \"search_book_event\",\n" +
-                        "  \"operationSet\": [\n" +
-                        "    \"search_book_event\",\n" +
-                        "    \"GET\",\n" +
-                        "    \"executeQuery(String query)\",\n" +
-                        "    \"process_book_list\",\n" +
-                        "    \"no_books_found\",\n" +
-                        "    \"getBookByName()\",\n" +
-                        "    \"book_name_found\",\n" +
-                        "    \"book_name_not_found\"\n" +
-                        "  ],\n" +
-                        "\n" +
-                        "  \"traceModels\": [\n" +
-                        "    [0,1,2,3],\n" +
-                        "    [0,1,2,4],\n" +
-                        "    [0,1],\n" +
-                        "    [0,1,5,6],\n" +
-                        "    [0,1,5,7]\n" +
-                        "  ]\n" +
-                        "}\n";
-
-    }
-
     public static void testFunc() {
 
         // 1. receive Json
         // 2. parse Json to TmaWorkflowImpl
         BpmnModelCreator creator = new BpmnModelCreator();
-
-        String workflowJson = testJsonFile();
         ObjectMapper mapper = new ObjectMapper();
-        TmaWorkflowImpl tree = null;
-        try {
-
-            tree = mapper.readValue(workflowJson, TmaWorkflowImpl.class);
-            System.out.println("parsed workflow: ");
-            System.out.println(tree);
-
-        } catch (IOException ex) {
-
-            ex.printStackTrace();
-
-        }
 
         System.out.println("---- With fluent API ----");
         BpmnModelInstance testmodel = creator.createTestBpmnDiagramWithFluentAPI("banana thrown");
@@ -118,9 +78,9 @@ public class Main {
 
 
         //String parsedWorkflow = creator.parseToBpmn(tree);
-        File beforeBpmnExtension = new File( "examples/output_for_modeler/fluenttest.bpmn");
-        File afterBpmnExtension = new File( "examples/output_for_modeler/fluenttest_after.bpmn");
-        File procBpmnExtension = new File( "examples/output_for_modeler/proctest_ext.bpmn");
+        File beforeBpmnExtension = new File( TEST_FILE_DIR_PATH+ "fluenttest.bpmn");
+        File afterBpmnExtension = new File( TEST_FILE_DIR_PATH+ "fluenttest_after.bpmn");
+        File procBpmnExtension = new File( TEST_FILE_DIR_PATH+ "proctest_ext.bpmn");
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter( beforeBpmnExtension));
             bw.write(parsedWorkflow);

@@ -194,11 +194,8 @@ public class TmaBpmnCreator {
         if (!children_it.hasNext()) {
             return processBuilder.endEvent(nodeDetails.id)
                     .name(nodeDetails.name);
-            // processBuilder = addElement(processBuilder, node, EndEvent.class);
-            // return processBuilder;
         }
 
-        // processBuilder = addElement(processBuilder, node, ServiceTask.class);
         List<JsonNode> children = new ArrayList<>();
         children_it.forEachRemaining(children::add);
         if(children.size() == 1) {
