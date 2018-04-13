@@ -96,14 +96,33 @@ object SpanTreeDraft extends JsonSpanProtocol {
     //    spanList.foreach(s => println(s"${s.startTime}: ${s.operationName} : ${s.spanId} : ${s.parentId}"))
     spanList
   }
+
+  //                        1A
+  //                     /   |
+  //                   2B    5E
+  //                  /
+  //                3C
+  def getSpanListWith4Nodes(): List[Span] = {
+    val span = SpanTreeDraft.spanFromFile("builder/src/test/resources/spanExample.json")
+
+    val span01 = span.copy(startTime = 1, operationName = "A", spanId = "1", parentId = "0")
+    val span11 = span.copy(startTime = 2, operationName = "B", spanId = "2", parentId = "1")
+    val span12 = span.copy(startTime = 5, operationName = "E", spanId = "5", parentId = "1")
+    val span21 = span.copy(startTime = 3, operationName = "C", spanId = "3", parentId = "2")
+
+    val spanList = List(span21, span12, span11, span01)
+    println(s"startTime : operationName : spanId : parentId")
+    //    spanList.foreach(s => println(s"${s.startTime}: ${s.operationName} : ${s.spanId} : ${s.parentId}"))
+    spanList
+  }
 }
 
 object M extends App with JsonSpanProtocol{
   import spray.json._
 
-  val spans = SpanTreeDraft.getSpanListWith7Nodes()
-//  println(spans.toJson)
-  val tree = SpanTreeDraft.build(spans)
-  println(tree.toJson)
+  val spans = SpanTreeDraft.getSpanListWith4Nodes()
+  println(spans.toJson)
+//  val tree = SpanTreeDraft.build(spans)
+//  println(tree.toJson)
 
 }
