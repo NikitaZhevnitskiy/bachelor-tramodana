@@ -49,7 +49,7 @@ case class SpanTree(
                            value: Span,
                            parent: Option[String] = None,
                            children: List[SpanTree] = List.empty)
-
+ case class Node( value: Span, children: List[Node])
 
 
 
@@ -65,4 +65,6 @@ trait JsonSpanProtocol extends SprayJsonSupport with DefaultJsonProtocol {
   // recursive
   implicit def spanTree: JsonFormat[SpanTree] =
     lazyFormat(jsonFormat(SpanTree, "operation_name", "value", "parent","children"))
+  implicit def node: JsonFormat[Node] =
+    lazyFormat(jsonFormat2(Node))
 }

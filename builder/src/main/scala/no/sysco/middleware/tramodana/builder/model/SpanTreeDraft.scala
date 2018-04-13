@@ -1,13 +1,43 @@
 package no.sysco.middleware.tramodana.builder.model
 
 
-import no.sysco.middleware.tramodana.builder.{JsonSpanProtocol, Span, SpanTree}
+import no.sysco.middleware.tramodana.builder.{JsonSpanProtocol, Span, SpanTree, Node}
 
 import scala.io.Source
 
 
 object SpanTreeDraft extends JsonSpanProtocol {
+
   import spray.json._
+
+
+
+
+  def newbuild(spans: List[Span], parentId:String="0"): Node = {
+    val rootSpan = spans.find(_.parentId.equalsIgnoreCase(parentId)).get
+    val remainingNodes = spans.filterNot(_.spanId.equalsIgnoreCase(rootSpan.spanId))
+
+    val nodeTree = buildIter(rootSpan, remainingNodes)
+
+     nodeTree
+
+  }
+  def buildIter(current: Span, spans: List[Span]) : Node = {
+    spans.size match  {
+      case 0 => Node(current, Nil)
+      case _ =>
+        val childrenSpans = getChildrenSpans(current, spans).sortBy(_.startTime)
+        val remaining = spans.diff(childrenSpans)
+        Node(current, childrenSpans.map( s => buildIter(s, remaining)) )
+    }
+  }
+
+  def getChildrenSpans(span: Span, spans: List[Span]) : List[Span] = {
+    spans.filter(child => isChildOf(child,span))
+
+  }
+
+  def isChildOf(child: Span, parent: Span): Boolean = child.parentId.equalsIgnoreCase(parent.spanId)
 
   def build(spans: List[Span], parentId:String="0"): Option[SpanTree] = {
     val rootSpan = spans.find(_.parentId.equalsIgnoreCase(parentId))
@@ -120,9 +150,11 @@ object SpanTreeDraft extends JsonSpanProtocol {
 object M extends App with JsonSpanProtocol{
   import spray.json._
 
-  val spans = SpanTreeDraft.getSpanListWith4Nodes()
+  //val spans = SpanTreeDraft.getSpanListWith4Nodes()
+  val spans = SpanTreeDraft.getSpanListWith7Nodes()
   println(spans.toJson)
 //  val tree = SpanTreeDraft.build(spans)
-//  println(tree.toJson)
+   val tree = SpanTreeDraft.newbuild(spans)
+   println(tree.toJson)
 
 }
