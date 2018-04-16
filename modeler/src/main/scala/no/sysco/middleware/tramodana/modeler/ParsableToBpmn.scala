@@ -14,8 +14,8 @@ object JsonKey extends Enumeration{
 }
 
 trait ParsableToBpmn{
-  def getTree: Option[SpanTree ]
-  def getNodeList: List[Span]
+  def getBaseSpanTree: Option[SpanTree ]
+  def getNodeSet: Set[Span]
   def getRoot: Option[Span ]
 
 }
