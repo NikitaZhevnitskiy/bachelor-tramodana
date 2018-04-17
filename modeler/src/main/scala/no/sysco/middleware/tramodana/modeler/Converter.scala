@@ -1,10 +1,20 @@
 package no.sysco.middleware.tramodana.modeler
 
 import spray.json._
+
 class Converter() {
-  def jsonToParsable(jsonWorkflow: String): Option[ParsableToBpmn] =Option.empty
+  def jsonToParsable(jsonWorkflow: String): Option[Parsable] =Option.empty
 
 }
+
+case class Jsonable(rootNode: Int, traceModels: List[List[Int]])
+
+object JsonableJsonProtocol extends DefaultJsonProtocol
+{
+  implicit val whatever = jsonFormat2(Jsonable)
+}
+
+import JsonableJsonProtocol._
 
 object Converter{
 
@@ -14,9 +24,9 @@ object Converter{
     val trace2 = trace(4)
 
     val traces = List(trace1, trace2)
-    val root = new { val rootNode = 0; val traceModels: List[List[Int]] = traces; }
+    val root = Jsonable( 0 ,  traces ).toJson
 
-    println(root.toJson.prettyPrint)
+    println(root.prettyPrint)
   }
 
 }
