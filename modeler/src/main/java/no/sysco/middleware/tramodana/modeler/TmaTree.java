@@ -1,6 +1,7 @@
 package no.sysco.middleware.tramodana.modeler;
 
 import java.util.*;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class TmaTree<T extends TmaSpanWithHierarchy> {
