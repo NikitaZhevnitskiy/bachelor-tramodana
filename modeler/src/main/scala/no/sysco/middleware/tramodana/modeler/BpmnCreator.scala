@@ -15,9 +15,17 @@ object BpmnCreator {
     Converter.testGenerateJsonWithArray()
     val exampleProcess: String = makeExampleProcess
 
-    val file = new File("examples/output_for_modeler/example_process.bpmn")
+    writeToExampleDir(exampleProcess, "example_process")
+
+    val loopBasedTreeBuilding = example
+    println(s"while-loop depth-first (stack based) tree traversal:\n$loopBasedTreeBuilding")
+    writeToExampleDir(loopBasedTreeBuilding, "loop-based" )
+  }
+
+  def writeToExampleDir(content: String, fileNameWithoutExt: String):Unit ={
+    val file = new File(s"examples/output_for_modeler/$fileNameWithoutExt.bpmn")
     val bufferedWriter = new BufferedWriter(new FileWriter(file))
-    bufferedWriter.write(exampleProcess)
+    bufferedWriter.write(content)
     bufferedWriter.close()
   }
 
@@ -210,11 +218,11 @@ object BpmnCreator {
           return Option.empty
       }
 
-      val processId = root.operationName + "_process"
+      val processId = root.value.operationName + "_process"
       var builder: StartEventBuilder =
         Bpmn.createExecutableProcess(processId)
           .startEvent(root.value.process.get.serviceName)
-          .name(root.operationName)
+          .name(root.value.operationName)
       val children: List[SpanTree] = parsableTree.getChildren(root)
       val nodeStack: Stack[SpanTree] = new Stack(children)
 
