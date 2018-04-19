@@ -1,7 +1,10 @@
 package no.sysco.middleware.tramodana.modeler
 
+import org.junit.runner.RunWith
 import org.scalatest._
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class StackTest extends WordSpec with BeforeAndAfter {
 
   var fullStack : Stack[Int] = new Stack
