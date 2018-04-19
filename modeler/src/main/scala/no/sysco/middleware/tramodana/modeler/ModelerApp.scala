@@ -1,5 +1,7 @@
 package no.sysco.middleware.tramodana.modeler
 
+import no.sysco.middleware.tramodana.modeler.BpmnCreator.BpmnCreator
+
 import scala.io.Source
 
 object ModelerApp extends App {

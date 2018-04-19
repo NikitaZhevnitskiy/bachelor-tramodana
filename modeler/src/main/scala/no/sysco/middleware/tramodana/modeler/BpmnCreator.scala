@@ -1,12 +1,11 @@
 package no.sysco.middleware.tramodana.modeler
 
-
 import java.io.{BufferedWriter, File, FileWriter}
 
 import no.sysco.middleware.tramodana.builder.SpanTree
-import org.camunda.bpm.model.bpmn.{Bpmn, BpmnModelInstance}
 import org.camunda.bpm.model.bpmn.builder._
 import org.camunda.bpm.model.bpmn.instance._
+import org.camunda.bpm.model.bpmn.{Bpmn, BpmnModelInstance}
 import org.camunda.bpm.model.xml.ModelValidationException
 
 
@@ -284,6 +283,7 @@ object BpmnCreator {
     //    element.setAttributeValue("name", tmaNode.name)
     //    pb.addExtensionElement(element)
     //    pb
-    //  }
-    //
+    // }
   }
+
+}

@@ -27,5 +27,9 @@ class Stack[T](var list: List[T]) {
 
   def nonEmpty: Boolean = list.nonEmpty
 
+  def clear(): Unit = list = Nil
+
+  def size: Int = list.size
+
 }
 
