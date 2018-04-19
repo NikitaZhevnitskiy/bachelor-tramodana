@@ -44,12 +44,8 @@ final case class Ref(
                       traceId: String,
                       spanId: String)
 
-case class SpanTree(
-                           operationName: String,
-                           value: Span,
-                           parent: Option[String] = None,
-                           children: List[SpanTree] = List.empty)
- case class Node( value: Span, children: List[Node])
+
+ case class SpanTree(value: Span, children: List[SpanTree])
 
 
 
@@ -63,8 +59,6 @@ trait JsonSpanProtocol extends SprayJsonSupport with DefaultJsonProtocol {
   implicit def spanProcessFormat: RootJsonFormat[Process] = jsonFormat(Process,"service_name", "tags")
   implicit def spanRefFormat: RootJsonFormat[Ref] = jsonFormat(Ref,"ref_type", "trace_id","span_id")
   // recursive
-  implicit def spanTree: JsonFormat[SpanTree] =
-    lazyFormat(jsonFormat(SpanTree, "operation_name", "value", "parent","children"))
-  implicit def node: JsonFormat[Node] =
-    lazyFormat(jsonFormat2(Node))
+  // https://github.com/spray/spray-json#jsonformats-for-recursive-types
+  implicit def node: JsonFormat[SpanTree] = lazyFormat(jsonFormat2(SpanTree))
 }

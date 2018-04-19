@@ -235,21 +235,25 @@ object Utils extends JsonSpanProtocol{
     val span22 = span.copy(startTime = 4, operationName = "D", spanId = "4", parentId = "2")
     val span23 = span.copy(startTime = 6, operationName = "F", spanId = "6", parentId = "5")
 
-    val spanList = List(span23, span22, span21, span13, span12, span11, span01)
-    println(s"startTime : operationName : spanId : parentId")
-    spanList.foreach(s => println(s"${s.startTime}: ${s.operationName} : ${s.spanId} : ${s.parentId}"))
-    spanList
+    List(span23, span22, span21, span13, span12, span11, span01)
   }
 
+  //                        1A
+  //                     /   |
+  //                   2B    5E
+  //                  /
+  //                3C
+  def getSpanListWith4Nodes(): List[Span] = {
+    val span = Utils.spanFromFile("builder/src/test/resources/spanExample.json")
 
-}
+    val span01 = span.copy(startTime = 1, operationName = "A", spanId = "1", parentId = "0")
+    val span11 = span.copy(startTime = 2, operationName = "B", spanId = "2", parentId = "1")
+    val span12 = span.copy(startTime = 5, operationName = "E", spanId = "5", parentId = "1")
+    val span21 = span.copy(startTime = 3, operationName = "C", spanId = "3", parentId = "2")
 
-object App extends App with JsonSpanProtocol {
-  import spray.json._
+    List(span21, span12, span11, span01)
 
-  val listOfSpans = Utils.getSpanListWith7Nodes()
-  val tree = SpanTreeBuilder.build(listOfSpans)
-  println(listOfSpans.toJson)
-  println(tree.toJson)
+  }
+
 
 }

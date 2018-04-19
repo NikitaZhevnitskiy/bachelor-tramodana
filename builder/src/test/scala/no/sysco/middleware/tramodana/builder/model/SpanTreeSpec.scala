@@ -11,13 +11,13 @@ class SpanTreeSpec extends WordSpec with Matchers with JsonSpanProtocol{
 
   "SpanTreeBuilder " should {
 
-    "build correctly" in {
+    "build correctly 3 nodes" in {
       //Create an n-ary tree for testing that looks like this:
-      //               a
+      //               A
       //              /
-      //             b
+      //             B
       //            /
-      //           d
+      //           D
 
       // Arrange
       val list: List[Span] = JsonParser(Utils.listJson).convertTo[List[Span]]
@@ -26,13 +26,58 @@ class SpanTreeSpec extends WordSpec with Matchers with JsonSpanProtocol{
       val tree = SpanTreeBuilder.build(list)
 
       // Assert
-      assertEquals("buyBookMethod", tree.operationName)
+      assertEquals("buyBookMethod", tree.value.operationName)
       assertEquals(1, tree.children.length)
-      assertEquals("GET", tree.children.head.operationName)
+      assertEquals("GET", tree.children.head.value.operationName)
       assertEquals(1, tree.children.head.children.length)
-      assertEquals("getBookMethod", tree.children.head.children.head.operationName)
+      assertEquals("getBookMethod", tree.children.head.children.head.value.operationName)
+    }
 
-      SpanTreeBuilder.printTree(Option(tree))
+    "build correctly 4 nodes" in {
+      //                        1A
+      //                     /   |
+      //                   2B    5E
+      //                  /
+      //                3C
+
+      // Arrange
+      val list: List[Span] = Utils.getSpanListWith4Nodes()
+
+      // Act
+      val tree = SpanTreeBuilder.build(list)
+
+      // Assert
+      assertEquals("A", tree.value.operationName)
+      assertEquals(2, tree.children.length)
+      assertEquals("B", tree.children.head.value.operationName)
+      assertEquals(1, tree.children.head.children.length)
+      assertEquals("E", tree.children.tail.head.value.operationName)
+      assertEquals("C", tree.children.head.children.head.value.operationName)
+      assertEquals(0, tree.children.tail.head.children.length)
+    }
+
+    "build correctly 7 nodes" in {
+      //                        1A
+      //                     /   |   \
+      //                   2B    5E   7G
+      //                  / \     \
+      //                3C   4D    6F
+
+      // Arrange
+      val list: List[Span] = Utils.getSpanListWith7Nodes()
+
+      // Act
+      val tree = SpanTreeBuilder.build(list)
+
+      // Assert
+      assertEquals("A", tree.value.operationName)
+      assertEquals(3, tree.children.length)
+      assertEquals("B", tree.children.head.value.operationName)
+      assertEquals(2, tree.children.head.children.length)
+      assertEquals("E", tree.children.tail.head.value.operationName)
+      assertEquals("C", tree.children.head.children.head.value.operationName)
+      assertEquals(1, tree.children.tail.head.children.length)
+
     }
 
     "parsed incorrectly" in {
@@ -54,23 +99,21 @@ class SpanTreeSpec extends WordSpec with Matchers with JsonSpanProtocol{
       var tree: SpanTree = JsonParser(Utils.jsonTree0Child).convertTo[SpanTree]
 
       // Assert
-      assertEquals("buyBookMethod", tree.operationName)
-      assertEquals(tree.operationName, tree.value.operationName)
+      assertEquals("buyBookMethod", tree.value.operationName)
       assertEquals(0, tree.children.size)
     }
 
     "convert json -> pojo 1 child" in {
       // Arrange
       val span = JsonParser(Utils.spanJson).convertTo[Span]
-      val someId = "qweqweqweq"
+      val someId = "dasdasdasdasdasfsdgdsfg"
+
       val sTreeChild = SpanTree(
-        operationName = "2",
-        value = span,
-        parent = Option(someId))
+        value = span.copy(operationName = "B", parentId = "1", spanId = someId),
+        List.empty
+      )
       val sTreeParent = SpanTree(
-        operationName = "1",
-        value = span,
-        parent = None,
+        value = span.copy(operationName = "A", parentId = "0", spanId="1"),
         children = List(sTreeChild)
       )
 
@@ -102,7 +145,17 @@ class SpanTreeSpec extends WordSpec with Matchers with JsonSpanProtocol{
 
   "SpanTreeBuilder SEQ " should {
     "make SEQ correctly" in {
+      // Arrange
+      val spans: List[Span] = Utils.getSpanListWith7Nodes()
+      val tree = SpanTreeBuilder.build(spans)
 
+      val expectedList = List("A","B","C","D","E","F","G")
+
+      // Act
+      val actualList = SpanTreeBuilder.getSequence(tree).flatMap(span => span.operationName)
+
+      // Assert
+      assertEquals(actualList.toString, expectedList.toString)
     }
   }
 }
