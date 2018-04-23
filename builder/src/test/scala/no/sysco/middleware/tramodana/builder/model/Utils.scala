@@ -255,5 +255,9 @@ object Utils extends JsonSpanProtocol{
 
   }
 
+  def getSpan(): Span = {
+    Utils.spanFromFile("builder/src/test/resources/spanExample.json")
+  }
+
 
 }
