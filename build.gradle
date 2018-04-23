@@ -10,6 +10,7 @@
 def scalaMajor = "2.12"
 def scalaMinor = "4"
 def akkaHttpV = "10.0.11"
+def kafkaV = "1.1.0"
 
 
 // In this section you declare where to find the dependencies of your project
@@ -28,7 +29,7 @@ allprojects {
                 [group: "org.scala-lang", name: "scala-compiler", version: "$scalaMajor.$scalaMinor"],
                 [group: "org.scala-lang", name: "scala-library", version: "$scalaMajor.$scalaMinor"],
                 // Kafka
-                [group: 'org.apache.kafka', name: 'kafka-streams', version: '1.0.1'],
+                [group: 'org.apache.kafka', name: 'kafka-streams', version: "$kafkaV"],
 
                 // alpakka Cassandra connector
                 [group: "com.datastax.cassandra", name: "cassandra-driver-core", version: "3.4.0"],
@@ -42,9 +43,9 @@ allprojects {
 
                 // alpakka
                     // Kafka [sink, source]
-                [group: "com.typesafe.akka", name: "akka-stream-kafka_$scalaMajor", version: "0.19"],
+                [group: "com.typesafe.akka", name: "akka-stream-kafka_$scalaMajor", version: "0.20"],
                     // Cassandra [sink, source]
-                [group: "com.lightbend.akka", name: "akka-stream-alpakka-cassandra_$scalaMajor", version: "0.17"],
+                [group: "com.lightbend.akka", name: "akka-stream-alpakka-cassandra_$scalaMajor", version: "0.18"],
 
                 // json parser
                 [group: 'com.typesafe.akka', name: "akka-http-spray-json_$scalaMajor", version: "$akkaHttpV"],
