@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<definitions xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="definitions_d6a8e4b4-8e7d-47e9-ac00-c8a8fa8ad07e" targetNamespace="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
+  <process id="log_in" isExecutable="true">
+    <startEvent id="start_1" name="Log in">
+      <outgoing>sequenceFlow_8b5eac1d-2e60-4d4c-bde7-5b21e42e8e7d</outgoing>
+    </startEvent>
+    <parallelGateway id="fork_1" name="Has membership?">
+      <incoming>sequenceFlow_8b5eac1d-2e60-4d4c-bde7-5b21e42e8e7d</incoming>
+      <outgoing>sequenceFlow_e4a9304b-9e46-4383-b1d2-b669bb12e345</outgoing>
+      <outgoing>sequenceFlow_dc1fa7ab-9763-4fcb-b68c-8fefe6d3256d</outgoing>
+    </parallelGateway>
+    <sequenceFlow id="sequenceFlow_8b5eac1d-2e60-4d4c-bde7-5b21e42e8e7d" sourceRef="start_1" targetRef="fork_1"/>
+    <serviceTask id="service_1" name="Create membership">
+      <incoming>sequenceFlow_e4a9304b-9e46-4383-b1d2-b669bb12e345</incoming>
+    </serviceTask>
+    <sequenceFlow id="sequenceFlow_e4a9304b-9e46-4383-b1d2-b669bb12e345" sourceRef="fork_1" targetRef="service_1"/>
+    <serviceTask id="service_2" name="Search for membership">
+      <incoming>sequenceFlow_dc1fa7ab-9763-4fcb-b68c-8fefe6d3256d</incoming>
+    </serviceTask>
+    <sequenceFlow id="sequenceFlow_dc1fa7ab-9763-4fcb-b68c-8fefe6d3256d" sourceRef="fork_1" targetRef="service_2"/>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_703ea4b3-7e4b-4e59-921f-6b4184d688af">
+    <bpmndi:BPMNPlane bpmnElement="log_in" id="BPMNPlane_c102be45-5793-44ca-9cda-bb9543cb088a">
+      <bpmndi:BPMNShape bpmnElement="start_1" id="BPMNShape_5dd6343a-b68e-4277-92f7-296183a22d75">
+        <dc:Bounds height="36.0" width="36.0" x="100.0" y="100.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="fork_1" id="BPMNShape_ee1a66f0-7735-482a-a17f-ff71020d501a">
+        <dc:Bounds height="50.0" width="50.0" x="186.0" y="93.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow_8b5eac1d-2e60-4d4c-bde7-5b21e42e8e7d" id="BPMNEdge_8c506ca2-4938-428d-81db-92ea17db3bf8">
+        <di:waypoint x="136.0" y="118.0"/>
+        <di:waypoint x="186.0" y="118.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape bpmnElement="service_1" id="BPMNShape_ff11b841-5b81-43d0-be48-e6f91f1b1fcc">
+        <dc:Bounds height="80.0" width="100.0" x="286.0" y="78.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow_e4a9304b-9e46-4383-b1d2-b669bb12e345" id="BPMNEdge_7ac6fa99-537b-47fe-9924-b810d0cefa24">
+        <di:waypoint x="236.0" y="118.0"/>
+        <di:waypoint x="286.0" y="118.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape bpmnElement="service_2" id="BPMNShape_238a8f13-6729-4d32-b83d-8989276f39ae">
+        <dc:Bounds height="80.0" width="100.0" x="286.0" y="208.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow_dc1fa7ab-9763-4fcb-b68c-8fefe6d3256d" id="BPMNEdge_47bf1934-e770-4a93-81f8-ae84f5656a0a">
+        <di:waypoint x="211.0" y="143.0"/>
+        <di:waypoint x="211.0" y="248.0"/>
+        <di:waypoint x="286.0" y="248.0"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
