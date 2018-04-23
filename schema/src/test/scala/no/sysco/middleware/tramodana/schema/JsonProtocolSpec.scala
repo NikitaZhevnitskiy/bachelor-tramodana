@@ -1,4 +1,5 @@
-package no.sysco.middleware.tramodana.builder
+package no.sysco.middleware.tramodana.schema
+
 
 import org.scalatest.{Matchers, WordSpec}
 
@@ -47,3 +48,4 @@ class JsonProtocolSpec extends WordSpec with Matchers with JsonSpanProtocol {
 
 
 }
+

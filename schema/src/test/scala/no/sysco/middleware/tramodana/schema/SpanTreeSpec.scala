@@ -1,8 +1,7 @@
-package no.sysco.middleware.tramodana.builder.model
+package no.sysco.middleware.tramodana.schema
 
-import no.sysco.middleware.tramodana.builder.{JsonSpanProtocol, Span, SpanTree}
-import org.scalatest.{Matchers, WordSpec}
 import org.junit.Assert._
+import org.scalatest.{Matchers, WordSpec}
 
 class SpanTreeSpec extends WordSpec with Matchers with JsonSpanProtocol{
   import spray.json._

@@ -1,6 +1,4 @@
-package no.sysco.middleware.tramodana.builder.model
-
-import no.sysco.middleware.tramodana.builder._
+package no.sysco.middleware.tramodana.schema
 
 
 /**
