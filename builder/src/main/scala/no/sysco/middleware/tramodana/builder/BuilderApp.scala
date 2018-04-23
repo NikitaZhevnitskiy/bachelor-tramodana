@@ -3,7 +3,7 @@ package no.sysco.middleware.tramodana.builder
 import java.util.Properties
 import java.util.concurrent.CountDownLatch
 
-import no.sysco.middleware.tramodana.builder.model.SpanTreeBuilder
+import no.sysco.middleware.tramodana.schema._
 import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig, NewTopic}
 import org.apache.kafka.common.errors.TopicExistsException
 import org.apache.kafka.common.serialization.Serdes
@@ -26,7 +26,7 @@ object BuilderApp extends App with JsonSpanProtocol {
   val ROOT_SPAN_SEQ_SPAN = "root-span-seq-span"
   val ROOT_OPERATION_LIST_SEQ_SPAN = "root-operation-list-seq-span"
   // utils
-  val EMPTY_KEY = ""
+  val EMPTY_KEY: String = ""
 
 
   start()
@@ -125,6 +125,22 @@ object BuilderApp extends App with JsonSpanProtocol {
       tree.toJson.toString()
     })
       .to(PROCESSED_TRACES)
+
+//    builder.stream[String, String](TRACES)
+//      .map[String, String]((key, value) => {
+//      try {
+//        val spans = JsonParser(value).convertTo[List[Span]]
+//        val tree = SpanTreeBuilder.build(spans)
+//        val jsonTree : String = tree.toJson.toString()
+//        KeyValue.pair(key,jsonTree)
+//      }catch {
+//        case _: Exception => KeyValue.pair(EMPTY_KEY,EMPTY_KEY)
+//      }
+//    })
+//      .peek((k,v)=>println(s"HERE: $k \n $v"))
+//      .filterNot((k,v) => EMPTY_KEY.equalsIgnoreCase(k.trim))
+//      .peek((k,v)=>println(s"HERE: $k \n $v"))
+//      .to(PROCESSED_TRACES)
 
 
     /**
