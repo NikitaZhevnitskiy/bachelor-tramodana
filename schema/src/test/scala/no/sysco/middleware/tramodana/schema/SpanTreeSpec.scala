@@ -176,6 +176,28 @@ class SpanTreeSpec extends WordSpec with Matchers with JsonSpanProtocol{
       // Act
       println(tree.toJson.toString)
     }
+
+    "convert List[Seq[Span]] to Set[Seq[Span]]" in {
+
+      // Arrange
+      val spans1: Seq[Span] = SpanTreeBuilder
+        .getSequence(SpanTreeBuilder.build(Utils.getSpanListWith4Nodes()))
+      val spans2: Seq[Span] = SpanTreeBuilder
+        .getSequence(SpanTreeBuilder.build(Utils.getSpanListWith7Nodes()))
+      val spansDuplication = spans1
+
+      val listOfSeq: List[Seq[Span]] = List(spans1, spans2, spansDuplication)
+
+      // Act
+      val setOfSeq: Set[Seq[Span]] = SpanTreeBuilder.getSetOfSeq(listOfSeq)
+
+      // Assert
+      assertEquals(3,listOfSeq.size)
+      assertEquals(2,setOfSeq.size)
+
+
+
+    }
   }
 
   "SpanTreeBuilder SEQ " should {

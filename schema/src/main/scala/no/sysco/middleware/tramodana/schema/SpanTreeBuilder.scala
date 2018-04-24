@@ -47,12 +47,28 @@ object SpanTreeBuilder extends JsonSpanProtocol {
   // Based on DFS
   def getSequence(tree: SpanTree, list: List[Span] = List.empty[Span]): List[Span] = {
     var newList = list :+ tree.value
-    println(newList + s"was added ${tree.value.operationName}")
+//    println(newList + s"was added ${tree.value.operationName}")
     tree
       .children
       .sortWith(_.value.startTime < _.value.startTime)
       .foreach(t => newList = newList ++ getSequence(t, list))
     newList
   }
+
+  def getSetOfSeq(listOfSpanSeq: List[Seq[Span]]): Set[Seq[Span]] = {
+    var set: Set[Seq[Span]] = Set.empty
+    var setOfOpName: Set[String] = Set.empty
+
+    listOfSpanSeq.foreach(spanSeq => {
+      val opNames = spanSeq.flatMap(span => span.operationName).mkString
+      if( ! setOfOpName.contains(opNames)){
+        setOfOpName+=opNames
+        set+=spanSeq
+      }
+    })
+
+    set
+  }
+
 
 }
