@@ -11,6 +11,8 @@ services:
       "--cassandra.servers=tracing-jaeger-cassandra"]
     depends_on:
       - tracing-jaeger-cassandra
+      - tracing-jaeger-cassandra-schema
+
   tracing-jaeger-query:
     image: jaegertracing/jaeger-query:1.1.0
     command: [
@@ -24,6 +26,8 @@ services:
       - 16687
     depends_on:
       - tracing-jaeger-cassandra
+      - tracing-jaeger-cassandra-schema
+
   tracing-jaeger-agent:
     image: jaegertracing/jaeger-agent:1.1.0
     command: [
@@ -46,9 +50,8 @@ services:
     depends_on:
       - tracing-jaeger-cassandra
 
-  tracing-jaeger-dependencies:
-    image: jaegertracing/spark-dependencies:latest
-    environment:
-      - STORAGE=cassandra
-      - CASSANDRA_CONTACT_POINTS=docker-vm
-
+#  tracing-jaeger-dependencies:
+#    image: jaegertracing/spark-dependencies:latest
+#    environment:
+#      - STORAGE=cassandra
+#      - CASSANDRA_CONTACT_POINTS=docker-vm
