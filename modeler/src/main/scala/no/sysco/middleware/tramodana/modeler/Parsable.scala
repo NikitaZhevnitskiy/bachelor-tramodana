@@ -13,10 +13,9 @@ object JsonKey extends Enumeration{
   WORKFLOW_TREE = Value
 }
 
-trait Parsable{
-  def getBaseSpanTree: Option[SpanTree ]
-  def getNodeSet: Set[Span]
-  def getRoot: Option[SpanTree]
-  def getChildren(node: SpanTree) : List[SpanTree]
-
+trait Parsable[T,S]{
+  def getBaseSpanTree: Option[T ]
+  def getNodeList: List[S]
+  def getRoot: Option[T]
+  def getChildren(node: T) : List[T]
 }
