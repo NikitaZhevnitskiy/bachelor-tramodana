@@ -2,7 +2,7 @@ package no.sysco.middleware.tramodana.modeler
 
 import java.io.{BufferedWriter, File, FileWriter}
 
-import no.sysco.middleware.tramodana.builder.SpanTree
+import no.sysco.middleware.tramodana.builder.{Span, SpanTree}
 import org.camunda.bpm.model.bpmn.builder._
 import org.camunda.bpm.model.bpmn.instance._
 import org.camunda.bpm.model.bpmn.{Bpmn, BpmnModelInstance}
@@ -16,8 +16,21 @@ object BpmnCreator {
     val exampleProcess: String = makeExampleProcess
 
     //writeToExampleDir(exampleProcess, "example_process")
+val rootNode = new Node("Log in", "start_1",
+      List(
+        new Node("Create Membership", "service_1",
+          List(new Node("Show main page", "end_1", Nil, "service_1")),
+          "start_1"
+        ),
+        new Node("Find Membership", "service_2",
+          List(new Node("Show main page with suggestions", "end_2", Nil, "service_2")),
+          "start_1"
+        )
+      ),
+      "0"
+    )
 
-    val loopBasedTreeBuilding = example
+    val loopBasedTreeBuilding = example(rootNode)
     println(s"while-loop depth-first (stack based) tree traversal:\n$loopBasedTreeBuilding")
     writeToExampleDir(loopBasedTreeBuilding, "loop-based" )
   }
@@ -32,28 +45,15 @@ object BpmnCreator {
 
   case class Node(operationName: String, processId: String, children: List[Node], parentId: String)
 
-  def example: String = {
+  def example[T <: Span](rootNode: Parsable): String = {
 
-    val rootNode = new Node("Log in", "start_1",
-      List(
-        new Node("Create Membership", "service_1",
-          List(new Node("Show main page", "end_1", Nil, "service_1")),
-          "start_1"
-        ),
-        new Node("Find Membership", "service_2",
-          List(new Node("Show main page with suggestions", "end_2", Nil, "service_2")),
-          "start_1"
-        )
-      ),
-      "0"
-    )
 
     val modelInstance: BpmnModelInstance = Bpmn.createExecutableProcess("example")
       .startEvent(rootNode.processId)
       .name(rootNode.operationName)
       .done()
 
-    val nodeStack: Stack[Node] = new Stack(rootNode.children)
+    val nodeStack: Stack[Parsable] = new Stack(rootNode.children)
     val branchStack: Stack[String] = new Stack(rootNode.processId)
     var parentId: String = rootNode.processId
     var branchCount = 1
@@ -61,7 +61,7 @@ object BpmnCreator {
 
     while (nodeStack.nonEmpty) {
       val currentNode = nodeStack.pop.get
-      val children = currentNode.children
+      val children = currentNode.getChildren()
 
       children match {
         // no children -> node is a leaf, i.e. an end event
