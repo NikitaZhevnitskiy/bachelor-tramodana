@@ -1,6 +1,6 @@
 package no.sysco.middleware.tramodana.modeler
 
-import no.sysco.middleware.tramodana.builder._
+import no.sysco.middleware.tramodana.schema._
 import spray.json
 
 object JsonKey extends Enumeration{

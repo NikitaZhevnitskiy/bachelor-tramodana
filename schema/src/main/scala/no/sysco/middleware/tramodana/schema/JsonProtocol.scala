@@ -1,4 +1,4 @@
-package no.sysco.middleware.tramodana.builder
+package no.sysco.middleware.tramodana.schema
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json.JsonFormat

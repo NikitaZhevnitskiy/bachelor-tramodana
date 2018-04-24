@@ -1,8 +1,7 @@
-package no.sysco.middleware.tramodana.builder.model
+package no.sysco.middleware.tramodana.schema
 
-import no.sysco.middleware.tramodana.builder.{JsonSpanProtocol, Span, SpanTree}
-import org.scalatest.{Matchers, WordSpec}
 import org.junit.Assert._
+import org.scalatest.{Matchers, WordSpec}
 
 class SpanTreeSpec extends WordSpec with Matchers with JsonSpanProtocol{
   import spray.json._
@@ -77,6 +76,42 @@ class SpanTreeSpec extends WordSpec with Matchers with JsonSpanProtocol{
       assertEquals("E", tree.children.tail.head.value.operationName)
       assertEquals("C", tree.children.head.children.head.value.operationName)
       assertEquals(1, tree.children.tail.head.children.length)
+
+    }
+
+    "build correctly 7 nodes + 1 inncorrect" in {
+      //        8M           1A
+      //                  /   |   \
+      //                2B    5E   7G
+      //               / \     \
+      //             3C   4D    6F
+
+      // Arrange
+      val incorrectSpan: Span = Utils.getSpan().copy(traceId = "8", parentId = "15", startTime = 8, operationName = "M")
+      val list: List[Span] = Utils.getSpanListWith7Nodes().+:(incorrectSpan)
+
+      // Act
+      val tree = SpanTreeBuilder.build(list)
+
+      // Assert
+      assertEquals(3, tree.children.size)
+
+    }
+    "build correctly 1 nodes + 1 inncorrect" in {
+      //        8M           1A
+      //
+
+      // Arrange
+      val incorrectSpan: Span = Utils.getSpan().copy(traceId = "8", parentId = "15", startTime = 8, operationName = "M")
+      val correctSpan: Span = Utils.getSpan().copy(traceId = "1", parentId = "0", startTime = 8, operationName = "A")
+      val list: List[Span] = List(incorrectSpan, correctSpan)
+
+      // Act
+      val tree = SpanTreeBuilder.build(list)
+
+      // Assert
+        // incorrect node will be ignored
+      assertEquals(0, tree.children.size)
 
     }
 

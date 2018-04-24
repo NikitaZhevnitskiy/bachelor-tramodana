@@ -7,7 +7,7 @@ import org.apache.kafka.clients.consumer._
 import org.apache.kafka.common.serialization.StringDeserializer
 
 
-
+// TODO: remove it
 class KafkaTraceConsumer(kafkaBootstrapServers: String) {
 
 //  final val TOPIC_TRACES = "traces"

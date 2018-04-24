@@ -2,7 +2,7 @@ package no.sysco.middleware.tramodana.modeler
 
 import java.io.{BufferedWriter, File, FileWriter}
 
-import no.sysco.middleware.tramodana.builder.{Span, SpanTree}
+import no.sysco.middleware.tramodana.schema.{Span, SpanTree}
 import org.camunda.bpm.model.bpmn.builder._
 import org.camunda.bpm.model.bpmn.instance._
 import org.camunda.bpm.model.bpmn.{Bpmn, BpmnModelInstance}
