@@ -1,6 +1,6 @@
 package no.sysco.middleware.tramodana.modeler
 
-import no.sysco.middleware.tramodana.builder._
+import no.sysco.middleware.tramodana.schema._
 import spray.json
 
 object JsonKey extends Enumeration{
@@ -13,10 +13,9 @@ object JsonKey extends Enumeration{
   WORKFLOW_TREE = Value
 }
 
-trait Parsable{
-  def getBaseSpanTree: Option[SpanTree ]
-  def getNodeSet: Set[Span]
-  def getRoot: Option[SpanTree]
-  def getChildren(node: SpanTree) : List[SpanTree]
-
+trait Parsable[T,S]{
+  def getBaseSpanTree: Option[T ]
+  def getNodeList: List[S]
+  def getRoot: Option[T]
+  def getChildren(node: T) : List[T]
 }
