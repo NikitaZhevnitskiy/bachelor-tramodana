@@ -2,7 +2,7 @@ package no.sysco.middleware.tramodana.modeler
 
 import java.io.{BufferedWriter, File, FileWriter}
 
-import no.sysco.middleware.tramodana.schema.{Span, SpanTree}
+import no.sysco.middleware.tramodana.schema.SpanTree
 import org.camunda.bpm.model.bpmn.builder._
 import org.camunda.bpm.model.bpmn.instance._
 import org.camunda.bpm.model.bpmn.{Bpmn, BpmnModelInstance}
@@ -11,37 +11,16 @@ import org.camunda.bpm.model.xml.ModelValidationException
 
 object BpmnCreator {
 
+
   def main(args: Array[String]): Unit = {
     Converter.testGenerateJsonWithArray()
     val exampleProcess: String = makeExampleProcess
 
-    //writeToExampleDir(exampleProcess, "example_process")
-    val rootNode = new Node(
-      "Log in",
-      "start_1",
-      List(
-        new Node(
-          "Create Membership",
-          "service_1",
-          List(
-            new Node("Show main page", "end_1", Nil, "service_1")
-          ),
-          "start_1"),
-        new Node(
-          "Find Membership",
-          "service_2",
-          List(
-            new Node("Show main page with suggestions", "end_2", Nil, "service_2"),
-            new Node("FAILURE - 404", "id.404", Nil, "service_2")),
-          "start_1")
-      ),
-      "0"
-    )
 
-    val loopBasedBpmn = parseToBpmn(rootNode,"example")
-    val loopBasedBpmnStr = Bpmn.convertToString(loopBasedBpmn)
 
-    writeToExampleDir(loopBasedBpmnStr, "loop-based")
+    //val loopBasedBpmn = parseToBpmn(rootNode, "example")
+    //val loopBasedBpmnStr = Bpmn.convertToString(loopBasedBpmn)
+    //writeToExampleDir(loopBasedBpmnStr, "loop-based")
   }
 
   def writeToExampleDir(content: String, fileNameWithoutExt: String): Unit = {
@@ -51,26 +30,11 @@ object BpmnCreator {
     bufferedWriter.close()
   }
 
-
-  case class Node(operationName: String,
-                  processId: String,
-                  children: List[Node],
-                  parentId: String) extends BpmnParsable {
-    override def getChildren: List[BpmnParsable] = children
-
-    override def getParentId: String = parentId
-
-    override def setParentId(id: String): BpmnParsable = copy(parentId = id)
-
-    override def getOperationName: String = operationName
-
-    override def getProcessId: String = processId
-
-    //override def getChildren(node: BpmnParsable): List[BpmnParsable] = ???
-  }
-
-
-  def parseToBpmn(rootNode: BpmnParsable, processId: String): BpmnModelInstance= {
+  def parseToBpmn(rootNode: BpmnParsable, pId: String = "#"): BpmnModelInstance = {
+    val processId = pId match {
+      case x if x.equals("#")=> rootNode.getProcessId ++ "_" ++ rootNode.getOperationName
+      case _ => pId
+    }
 
     val modelInstance: BpmnModelInstance = Bpmn.createExecutableProcess(processId)
       .startEvent(rootNode.getProcessId)
@@ -119,6 +83,32 @@ object BpmnCreator {
     modelInstance
   }
 
+  def appendServiceTask[T <: FlowNode](mi: BpmnModelInstance,
+                                       parent_id: String,
+                                       nodeId: String,
+                                       nodeName: String) = {
+    val parentelem: T = mi.getModelElementById(parent_id)
+    parentelem.builder
+      .serviceTask(nodeId)
+      .name(nodeName).done()
+  }
+
+  def appendEndEvent[T <: FlowNode](mi: BpmnModelInstance,
+                                    parent_id: String,
+                                    nodeId: String,
+                                    nodeName: String) = {
+    val parentelem: T = mi.getModelElementById(parent_id)
+    parentelem.builder
+      .endEvent(nodeId)
+      .name(nodeName).done()
+  }
+
+  def appendGateway[T <: FlowNode](mi: BpmnModelInstance,
+                                   parent_id: String,
+                                   nodeId: String) = {
+    val parentelem: T = mi.getModelElementById(parent_id)
+    parentelem.builder.parallelGateway(nodeId).done()
+  }
 
   def makeExampleProcess: String = {
 
@@ -162,34 +152,6 @@ object BpmnCreator {
     parentelem.builder.addExtensionElement(newElem)
   }
 
-  def appendServiceTask[T <: FlowNode](mi: BpmnModelInstance,
-                                       parent_id: String,
-                                       nodeId: String,
-                                       nodeName: String) = {
-    val parentelem: T = mi.getModelElementById(parent_id)
-    parentelem.builder
-      .serviceTask(nodeId)
-      .name(nodeName).done()
-  }
-
-  def appendEndEvent[T <: FlowNode](mi: BpmnModelInstance,
-                                    parent_id: String,
-                                    nodeId: String,
-                                    nodeName: String) = {
-    val parentelem: T = mi.getModelElementById(parent_id)
-    parentelem.builder
-      .endEvent(nodeId)
-      .name(nodeName).done()
-  }
-
-  def appendGateway[T <: FlowNode](mi: BpmnModelInstance,
-                                   parent_id: String,
-                                   nodeId: String) = {
-    val parentelem: T = mi.getModelElementById(parent_id)
-    parentelem.builder.parallelGateway(nodeId).done()
-  }
-
-
   class BpmnCreator(val parsableData: BpmnParsable) {
 
     var bpmnXML: String = ""
@@ -198,27 +160,7 @@ object BpmnCreator {
     def getBpmnXML: String = bpmnXML
 
     def getBpmnTree: BpmnModelInstance = bpmnTree
-
-    private def getErrorBpmnXml = {
-      val errorBpmn = Bpmn.createExecutableProcess("error")
-        .startEvent
-        .name("error")
-        .endEvent
-        .done
-      Bpmn.convertToString(errorBpmn)
-    }
-
-    private def BpmnToXML(bpmnTree: BpmnModelInstance): Option[String] = {
-      try Bpmn.validateModel(bpmnTree)
-      catch {
-        case e: ModelValidationException =>
-          println("The BPMN instance is not valid:\n" + e.getMessage)
-          Option.empty
-      }
-      val xml: String = Bpmn.convertToString(bpmnTree)
-      Option(xml)
-    }
-
+/*
     def parseToBpmn(parsableTree: SpanTree): Option[BpmnModelInstance] = {
       val root = parsableTree
 
@@ -248,6 +190,26 @@ object BpmnCreator {
       //val finalisedBuild = completedTree.done
       //Option(finalisedBuild)
       Option(builder.done())
+    }
+*/
+    private def getErrorBpmnXml = {
+      val errorBpmn = Bpmn.createExecutableProcess("error")
+        .startEvent
+        .name("error")
+        .endEvent
+        .done
+      Bpmn.convertToString(errorBpmn)
+    }
+
+    private def BpmnToXML(bpmnTree: BpmnModelInstance): Option[String] = {
+      try Bpmn.validateModel(bpmnTree)
+      catch {
+        case e: ModelValidationException =>
+          println("The BPMN instance is not valid:\n" + e.getMessage)
+          Option.empty
+      }
+      val xml: String = Bpmn.convertToString(bpmnTree)
+      Option(xml)
     }
 
 
