@@ -17,7 +17,7 @@ object ModelerApp extends App {
       .fromFile(s"${INPUT_FILES_DIRECTORY }/workflow_v03.json")
       .getLines
       .mkString
-    val dto: Option[Parsable] = converter.jsonToParsable(jsonWorkflow)
+    val dto: Option[BpmnParsable] = converter.jsonToParsable(jsonWorkflow)
 
     val bpmnCreator = dto match {
       case Some(parsable) => new BpmnCreator(parsable)

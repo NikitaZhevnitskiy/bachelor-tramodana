@@ -16,14 +16,29 @@ object BpmnCreator {
     val exampleProcess: String = makeExampleProcess
 
     //writeToExampleDir(exampleProcess, "example_process")
-val rootNode = new Node("Log in", "start_1",
+    val rootNode = new Node(
+      "Log in",
+      "start_1",
       List(
-        new Node("Create Membership", "service_1",
-          List(new Node("Show main page", "end_1", Nil, "service_1")),
+        new Node(
+          "Create Membership",
+          "service_1",
+          List(
+            new Node(
+              "Show main page",
+              "end_1",
+              Nil,
+              "service_1")
+          ),
           "start_1"
         ),
-        new Node("Find Membership", "service_2",
-          List(new Node("Show main page with suggestions", "end_2", Nil, "service_2")),
+        new Node(
+          "Find Membership",
+          "service_2",
+          List(
+            new Node( "Show main page with suggestions", "end_2", Nil, "service_2"),
+            new Node( "FAILURE - 404", "404", Nil, "service_2")
+          ),
           "start_1"
         )
       ),
@@ -32,10 +47,10 @@ val rootNode = new Node("Log in", "start_1",
 
     val loopBasedTreeBuilding = example(rootNode)
     println(s"while-loop depth-first (stack based) tree traversal:\n$loopBasedTreeBuilding")
-    writeToExampleDir(loopBasedTreeBuilding, "loop-based" )
+    writeToExampleDir(loopBasedTreeBuilding, "loop-based")
   }
 
-  def writeToExampleDir(content: String, fileNameWithoutExt: String):Unit ={
+  def writeToExampleDir(content: String, fileNameWithoutExt: String): Unit = {
     val file = new File(s"examples/output_for_modeler/$fileNameWithoutExt.bpmn")
     val bufferedWriter = new BufferedWriter(new FileWriter(file))
     bufferedWriter.write(content)
@@ -43,49 +58,78 @@ val rootNode = new Node("Log in", "start_1",
   }
 
 
-  case class Node(operationName: String, processId: String, children: List[Node], parentId: String)
+  case class Node(operationName: String,
+                  processId: String,
+                  children: List[Node],
+                  parentId: String) extends BpmnParsable {
+    override def getChildren: List[BpmnParsable] = children
 
-  def example[T <: Span](rootNode: Parsable): String = {
+    override def getParentId: String = parentId
 
+    override def setParentId(id: String): BpmnParsable = copy(parentId = id)
+
+    override def getOperationName: String = operationName
+
+    override def getProcessId: String = processId
+
+    //override def getChildren(node: BpmnParsable): List[BpmnParsable] = ???
+  }
+
+
+  def example(rootNode: BpmnParsable): String = {
 
     val modelInstance: BpmnModelInstance = Bpmn.createExecutableProcess("example")
-      .startEvent(rootNode.processId)
-      .name(rootNode.operationName)
+      .startEvent(rootNode.getProcessId)
+      .name(rootNode.getOperationName)
       .done()
-
-    val nodeStack: Stack[Parsable] = new Stack(rootNode.children)
-    val branchStack: Stack[String] = new Stack(rootNode.processId)
-    var parentId: String = rootNode.processId
     var branchCount = 1
 
+    def getForkedChildren(n: BpmnParsable)= {
+      val branchId = n.getProcessId + "_fork_" + branchCount
+      branchCount += 1
+      appendGateway(modelInstance, n.getProcessId, branchId)
+      val forkedChildren = n.getChildren.mapConserve(child => child.setParentId(branchId))
+      forkedChildren
+    }
+
+    val nodeStack: Stack[BpmnParsable] = new Stack()
+    var rootChildren = rootNode.getChildren match {
+      case Nil => return Bpmn.convertToString(modelInstance)
+      case _ :: Nil =>  rootNode.getChildren
+      case _ :: _ => getForkedChildren(rootNode)
+    }
+
+    nodeStack.pushAll(rootChildren)
+    //var parentId: String = rootNode.getProcessId
+    //val branchStack: Stack[String] = new Stack(parentId)
 
     while (nodeStack.nonEmpty) {
-      val currentNode = nodeStack.pop.get
-      val children = currentNode.getChildren()
+      val currentNode  = nodeStack.pop.get
+      val children = currentNode.getChildren
 
       children match {
         // no children -> node is a leaf, i.e. an end event
-        case Nil => appendEndEvent(modelInstance, currentNode.parentId, currentNode.processId, currentNode.operationName)
-          parentId = branchStack.peek match {
-            case Some(branchId) => branchId
-            case None => parentId
+        case Nil => appendEndEvent(modelInstance, currentNode.getParentId, currentNode.getProcessId, currentNode.getOperationName)
+          //parentId = branchStack.peek match { case Some(branchId) => branchId case None => parentId }
+        case x =>
+          appendServiceTask(modelInstance, currentNode.getParentId, currentNode.getProcessId, currentNode.getOperationName)
+          x match {
+            case head :: Nil =>
+              // one child -> node is a task leading to next node
+              nodeStack.push(head)
+            case _ :: _ =>
+              // anything else (multiple children) -> the node is a task leading to a fork containing all children
+              val forkedChildren = getForkedChildren(currentNode)
+              nodeStack.pushAll(forkedChildren)
           }
-        // one child -> node is a task leading to next node
-        case x :: Nil => appendServiceTask(modelInstance, currentNode.parentId, currentNode.processId, currentNode.operationName)
-          nodeStack.push(x)
-          parentId = currentNode.processId
-
-        // anything else (multiple children) -> the node is a task leading to a fork containing all children
-        case _ :: _ =>
-          val branchId = currentNode.processId + "_fork_" + branchCount
-          branchCount += 1
-          appendGateway(modelInstance, currentNode.parentId, branchId)
-          nodeStack.pushAll(children.mapConserve(child => child.copy(parentId = branchId)))
       }
     }
 
+
     return Bpmn.convertToString(modelInstance)
   }
+
+
 
 
   def makeExampleProcess: String = {
@@ -158,7 +202,7 @@ val rootNode = new Node("Log in", "start_1",
   }
 
 
-  class BpmnCreator(val parsableData: Parsable) {
+  class BpmnCreator(val parsableData: BpmnParsable) {
 
     var bpmnXML: String = ""
     var bpmnTree: BpmnModelInstance = Bpmn.createEmptyModel()
@@ -187,20 +231,15 @@ val rootNode = new Node("Log in", "start_1",
       Option(xml)
     }
 
-    def parseToBpmn(parsableTree: Parsable): Option[BpmnModelInstance] = {
-      val root = parsableTree.getRoot match {
-        case Some(r) => r
-        case None =>
-          println("The tree is empty")
-          return Option.empty
-      }
+    def parseToBpmn(parsableTree: SpanTree): Option[BpmnModelInstance] = {
+      val root = parsableTree
 
       val processId = root.value.operationName + "_process"
       var builder: StartEventBuilder =
         Bpmn.createExecutableProcess(processId)
           .startEvent(root.value.process.get.serviceName)
           .name(root.value.operationName)
-      val children: List[SpanTree] = parsableTree.getChildren(root)
+      val children: List[SpanTree] = parsableTree.children
       val nodeStack: Stack[SpanTree] = new Stack(children)
 
 
