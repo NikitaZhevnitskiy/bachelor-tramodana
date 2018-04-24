@@ -206,7 +206,7 @@ class SpanTreeSpec extends WordSpec with Matchers with JsonSpanProtocol{
       val spans: List[Span] = Utils.getSpanListWith7Nodes()
       val tree = SpanTreeBuilder.build(spans)
 
-      val expectedList = List("A","B","C","D","E","F","G")
+      val expectedList = Seq("A","B","C","D","E","F","G")
 
       // Act
       val actualList = SpanTreeBuilder.getSequence(tree).flatMap(span => span.operationName)
