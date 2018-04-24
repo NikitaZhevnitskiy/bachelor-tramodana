@@ -7,8 +7,10 @@ import no.sysco.middleware.tramodana.schema._
 import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig, NewTopic}
 import org.apache.kafka.common.errors.TopicExistsException
 import org.apache.kafka.common.serialization.Serdes
+import org.apache.kafka.common.utils.Bytes
 import org.apache.kafka.streams._
-import org.apache.kafka.streams.kstream.KStream
+import org.apache.kafka.streams.kstream.{KStream, KTable, Materialized}
+import org.apache.kafka.streams.state.KeyValueStore
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionException
@@ -25,6 +27,8 @@ object BuilderApp extends App with JsonSpanProtocol {
   val TRACE_ID_SEQ_SPAN = "trace-id-seq-span"
   val ROOT_SPAN_SEQ_SPAN = "root-span-seq-span"
   val ROOT_OPERATION_LIST_SEQ_SPAN = "root-operation-list-seq-span"
+  val ROOT_OPERATION_SET_SEQ_SPAN = "root-operation-set-seq-span"
+  val ROOT_OPERATION_SET_SEQ_SPAN_TABLE = "root-operation-set-seq-span-table"
   // utils
   val EMPTY_KEY: String = ""
 
@@ -204,7 +208,25 @@ object BuilderApp extends App with JsonSpanProtocol {
       .to(ROOT_OPERATION_LIST_SEQ_SPAN)
 
     // Todo: make Set instead of list
-    // 9
+    /**
+      * 9 all possible sequences SET
+      * input: ROOT_OPERATION_LIST_SEQ_SPAN [root-Span, Seq[Span] ]
+      * output: ROOT_OPERATION_LIST_SEQ_SPAN [root-operation-name, List[ Seq[Span] ] ]
+      **/
+    builder.stream[String, String](ROOT_OPERATION_LIST_SEQ_SPAN)
+        .map[String, String]((operationName, listOfSpanSeq)=>{
+      val listOfSeq = JsonParser(listOfSpanSeq).convertTo[ List[ Seq[Span] ] ]
+      val setOfSeq = SpanTreeBuilder.getSetOfSeq(listOfSeq)
+      KeyValue.pair[String, String](operationName,setOfSeq.toJson.toString)
+    })
+      .to(ROOT_OPERATION_SET_SEQ_SPAN)
+
+
+
+    val table : KTable[String, String] = builder
+      .table(
+        ROOT_OPERATION_SET_SEQ_SPAN,
+        Materialized.as[String, String, KeyValueStore[Bytes, Array[Byte] ]](ROOT_OPERATION_SET_SEQ_SPAN_TABLE))
 
     // TODO: 10 alternatively build [root-operation-name, SpanTree] -> [root-operation-name, Set[SpanTree]]
 
@@ -248,7 +270,8 @@ object BuilderApp extends App with JsonSpanProtocol {
         new NewTopic(TRACE_ID_ROOT_OPERATION, 1, 1),
         new NewTopic(TRACE_ID_SEQ_SPAN, 1, 1),
         new NewTopic(ROOT_SPAN_SEQ_SPAN, 1, 1),
-        new NewTopic(ROOT_OPERATION_LIST_SEQ_SPAN, 1, 1)
+        new NewTopic(ROOT_OPERATION_LIST_SEQ_SPAN, 1, 1),
+        new NewTopic(ROOT_OPERATION_SET_SEQ_SPAN, 1, 1)
       )
     try {
       val result = adminClient.createTopics(newTopics.asJava)
