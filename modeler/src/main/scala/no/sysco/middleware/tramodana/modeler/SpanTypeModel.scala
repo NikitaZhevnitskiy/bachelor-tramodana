@@ -18,14 +18,35 @@ final case class Span(
                        startTime: Long,          // changes
                        tags: Option[List[Field]] // changes
                      )
+/*
+A SpanNode's id should be unique in a workflow, as it will be used as the base
+for creating node-to-node relationships.
+Therefore we need to make sure and avoid hash collision between two nodes
+in the same workflow.
+What makes a node unique is a composition of
+- its name,
+- the service it is a part of,
+- the kind of span (server or client),
+- and its parent node.
+
+First suggestion is to build it as composition of its values joined by '#'.
+E.g:
+  nodeHash = s"$spanKind#$serviceName#$operationName#$parentHash"
+A good test would be to check on spans with very common operation names,
+like REST request operations ('GET', 'POST', etc...)
+ */
 final case class SpanNode(
-                         nodeHash: String,       // should be decided out of rest of values
-                         //nodeId: String,         // same as hash?
-                         operationName: String,  // like in Span
-                         handlerClass: Option[String],   // under logs > fields > handler.class_simple_name
-
-
-
+                         nodeId: String,              // should be decided out of rest of values
+                         nodeHash: String,
+                         parentId: String,
+                         
+                         operationName: String,         // like in Span
+                         serviceName: String,           // under process > service_name
+                         spanKind: String,               // under tags > [key: span.kind] > value_string
+                         handlerClass: Option[String],  // under logs >
+                                                        //      fields >
+                                                        //      handler.class_simple_name >
+                                                        //      value_string
                          )
 /*
 "trace_id": "0x00000000000000008cdfd0b8468dc387",
