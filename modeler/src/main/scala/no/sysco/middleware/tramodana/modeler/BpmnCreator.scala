@@ -1,40 +1,76 @@
 package no.sysco.middleware.tramodana.modeler
 
-import java.io.{BufferedWriter, File, FileWriter}
-
-import no.sysco.middleware.tramodana.schema.SpanTree
-import org.camunda.bpm.model.bpmn.builder._
 import org.camunda.bpm.model.bpmn.instance._
 import org.camunda.bpm.model.bpmn.{Bpmn, BpmnModelInstance}
 import org.camunda.bpm.model.xml.ModelValidationException
+import org.camunda.bpm.model.xml.instance.ModelElementInstance
 
 
 object BpmnCreator {
 
 
   def main(args: Array[String]): Unit = {
-    Converter.testGenerateJsonWithArray()
-    val exampleProcess: String = makeExampleProcess
-
-
-
-    //val loopBasedBpmn = parseToBpmn(rootNode, "example")
-    //val loopBasedBpmnStr = Bpmn.convertToString(loopBasedBpmn)
-    //writeToExampleDir(loopBasedBpmnStr, "loop-based")
+    //var rootNode = Utils.createNode("0")
+    val rootNode: Node =
+      Utils.createNode("0", "Log in", "start_1",
+        List(
+          Utils.createNode("start_1", "Create Membership", "service_1",
+            List(
+              Utils.createNode("service_1", "Show Main Page", "end_1")
+            )
+          ),
+          Utils.createNode("start_1", "Find Membership", "service_2",
+            List(
+             Utils.createNode("service_2", "Get user updates", "service_3",
+              List( Utils.createNode("service_3", "Show main page with updates", "end_2_3"))
+            ),
+              Utils.createNode("service_2", "Error 404", "id404"),
+                Utils.createNode("service_2", "Error 405|", "id405")
+            )
+          )
+        )
+      )
+    val testBpmn = parseToBpmn(rootNode, "example")
+    testBpmn match {
+      case None => println("Bpmn workflow building failed")
+      case Some(bpmn) =>
+        val loopBasedBpmnStr = bpmnToString(bpmn).get
+        println(loopBasedBpmnStr)
+        rootNode.printPretty
+        Utils.writeToExampleDir(loopBasedBpmnStr, "loop-based")
+    }
   }
 
-  def writeToExampleDir(content: String, fileNameWithoutExt: String): Unit = {
-    val file = new File(s"examples/output_for_modeler/$fileNameWithoutExt.bpmn")
-    val bufferedWriter = new BufferedWriter(new FileWriter(file))
-    bufferedWriter.write(content)
-    bufferedWriter.close()
+
+  def bpmnToString(modelInstance: BpmnModelInstance): Option[String] = {
+    var bpmnString: String = ""
+    try {
+      bpmnString = Bpmn.convertToString(modelInstance)
+    } catch {
+      case e: ModelValidationException => return None
+    }
+
+    Some(bpmnString)
+
   }
 
-  def parseToBpmn(rootNode: BpmnParsable, pId: String = "#"): BpmnModelInstance = {
+  def parseToBpmn(rootNode: BpmnParsable, pId: String = "#"): Option[BpmnModelInstance] = {
     val processId = pId match {
-      case x if x.equals("#")=> rootNode.getProcessId ++ "_" ++ rootNode.getOperationName
+      case x if x.equals("#") => rootNode.getProcessId ++ "_proc"
       case _ => pId
     }
+
+    val resultBpmn = parse(rootNode, processId)
+    try {
+      Bpmn.validateModel(resultBpmn)
+    } catch {
+      case e: ModelValidationException => return None
+    }
+
+    Some(resultBpmn)
+  }
+
+  def parse(rootNode: BpmnParsable, processId: String): BpmnModelInstance = {
 
     val modelInstance: BpmnModelInstance = Bpmn.createExecutableProcess(processId)
       .startEvent(rootNode.getProcessId)
@@ -42,7 +78,7 @@ object BpmnCreator {
       .done()
     var branchCount = 1
 
-    def getForkedChildren(n: BpmnParsable) = {
+    def getForkedChildren(n: BpmnParsable): List[BpmnParsable] = {
       val branchId = n.getProcessId + "_fork_" + branchCount
       branchCount += 1
       appendGateway(modelInstance, n.getProcessId, branchId)
@@ -67,6 +103,7 @@ object BpmnCreator {
         // no children -> node is a leaf, i.e. an end event
         case Nil =>
           appendEndEvent(modelInstance, currentNode.getParentId, currentNode.getProcessId, currentNode.getOperationName)
+          //appendElement(modelInstance, currentNode)
         case x =>
           appendServiceTask(modelInstance, currentNode.getParentId, currentNode.getProcessId, currentNode.getOperationName)
           x match {
@@ -77,6 +114,8 @@ object BpmnCreator {
               // anything else (multiple children) -> the node is a task leading to a fork containing all children
               val forkedChildren = getForkedChildren(currentNode)
               nodeStack.pushAll(forkedChildren)
+              // Handled on the upper level, adding this empty case for the warnings to stop...
+            case Nil =>()
           }
       }
     }
@@ -86,7 +125,7 @@ object BpmnCreator {
   def appendServiceTask[T <: FlowNode](mi: BpmnModelInstance,
                                        parent_id: String,
                                        nodeId: String,
-                                       nodeName: String) = {
+                                       nodeName: String): BpmnModelInstance = {
     val parentelem: T = mi.getModelElementById(parent_id)
     parentelem.builder
       .serviceTask(nodeId)
@@ -96,7 +135,7 @@ object BpmnCreator {
   def appendEndEvent[T <: FlowNode](mi: BpmnModelInstance,
                                     parent_id: String,
                                     nodeId: String,
-                                    nodeName: String) = {
+                                    nodeName: String): BpmnModelInstance = {
     val parentelem: T = mi.getModelElementById(parent_id)
     parentelem.builder
       .endEvent(nodeId)
@@ -105,51 +144,32 @@ object BpmnCreator {
 
   def appendGateway[T <: FlowNode](mi: BpmnModelInstance,
                                    parent_id: String,
-                                   nodeId: String) = {
+                                   nodeId: String): BpmnModelInstance = {
     val parentelem: T = mi.getModelElementById(parent_id)
-    parentelem.builder.parallelGateway(nodeId).done()
+    parentelem.builder.parallelGateway().id(nodeId).done()
   }
 
-  def makeExampleProcess: String = {
-
-    val rootNode = new {
-      val id = "log_in"
-      val operationName = "Log in"
-      val processId = "start_1"
-    }
-
-    val modelInstance: BpmnModelInstance = Bpmn.createExecutableProcess(rootNode.id)
-      .startEvent(rootNode.processId)
-      .name(rootNode.operationName)
-      .done()
-
-    val start: StartEvent = modelInstance.getModelElementById(rootNode.processId)
-    start.builder
-      .parallelGateway("fork_1")
-      .name("Has membership?")
-      .done()
-
-    appendServiceTask(modelInstance, "fork_1", "service_1", "Create membership")
-    appendServiceTask(modelInstance, "fork_1", "service_2", "Search for membership")
-
-    val after_second_ext: String = Bpmn.convertToString(modelInstance)
-
-
-    println(s"second extended instance\n$after_second_ext")
-
-    after_second_ext
+  def appendElement(mi: BpmnModelInstance, node: BpmnParsable): Unit = {
+    appendElement(mi, node.getParentId, node.getProcessId, node.getOperationName
+      //,classOf[EndEvent]
+    )
   }
 
-  def appendElement[T <: FlowNode, F <: FlowNode](mi: BpmnModelInstance,
-                                                  parent_id: String,
-                                                  nodeId: String,
-                                                  nodeName: String,
-                                                  elemType: Class[F]) = {
-    val parentelem: T = mi.getModelElementById(parent_id)
-    val newElem: F = mi.newInstance(elemType)
-    newElem.setId(nodeId)
-    newElem.setName(nodeName)
-    parentelem.builder.addExtensionElement(newElem)
+  def appendElement[T <: BpmnModelElementInstance](mi: BpmnModelInstance,
+                                                   parent_id: String,
+                                                   nodeId: String,
+                                                    nodeName: String = "",
+                                                  ): Unit = {
+    val elementType = classOf[EndEvent]
+    val parentelem: ModelElementInstance = mi.getModelElementById(parent_id)
+    val newElem: ModelElementInstance = parentelem.getModelInstance.newInstance(elementType)
+
+    newElem.setAttributeValue("id", nodeId)
+    if (!"".equals(nodeName))
+      newElem.setAttributeValue("name", nodeName)
+
+    parentelem.addChildElement(newElem)
+
   }
 
   class BpmnCreator(val parsableData: BpmnParsable) {
@@ -160,38 +180,7 @@ object BpmnCreator {
     def getBpmnXML: String = bpmnXML
 
     def getBpmnTree: BpmnModelInstance = bpmnTree
-/*
-    def parseToBpmn(parsableTree: SpanTree): Option[BpmnModelInstance] = {
-      val root = parsableTree
 
-      val processId = root.value.operationName + "_process"
-      var builder: StartEventBuilder =
-        Bpmn.createExecutableProcess(processId)
-          .startEvent(root.value.process.get.serviceName)
-          .name(root.value.operationName)
-      val children: List[SpanTree] = parsableTree.children
-      val nodeStack: Stack[SpanTree] = new Stack(children)
-
-
-      while (nodeStack.nonEmpty) {
-        val currentNode = nodeStack.pop.get
-        currentNode.children match {
-          //case Nil => builder = builder.endEvent(currentNode.) // make end event
-          case _ =>
-        }
-
-
-      }
-
-      // Iterate through the tree, create one node at a time
-      //val completedTree : EndEventBuilder = parseToBpmnIter(startingEventBuilder, parsableTree.getBaseSpanTree.get)
-
-      // Finalise the build ( and builds the diagram elements)
-      //val finalisedBuild = completedTree.done
-      //Option(finalisedBuild)
-      Option(builder.done())
-    }
-*/
     private def getErrorBpmnXml = {
       val errorBpmn = Bpmn.createExecutableProcess("error")
         .startEvent
@@ -212,52 +201,6 @@ object BpmnCreator {
       Option(xml)
     }
 
-
-    /*  private def parseToBpmnIter[T : AbstractFlowElementBuilder](processBuilder: T,
-                                                                node: SpanTree): EndEventBuilder = {
-        val nodeDetails = node.value
-        val children_it = node.children
-
-        // nodes without children are leaves ( end events, or replying nodes)
-        children_it match {
-          case Nil => return processBuilder.endEvent(nodeDetails.process.get)
-            .name(nodeDetails.operationName)
-        }
-        if (!children_it.hasNext) return processBuilder.endEvent(nodeDetails.id).name(nodeDetails.name)
-        val children = new util.ArrayList[JsonNode]
-        children_it.forEachRemaining(children.add)
-        if (children.size == 1) {
-          val sbt = processBuilder.serviceTask(nodeDetails.id).name(nodeDetails.name)
-          return parseToBpmnIter(sbt, children.get(0))
-        }
-        // TODO: add annotation (possible?)
-        var currentNodeId = getId(node)
-        // if the current node has more than one child,
-        // we create a gateway element and use it
-        // as a return point until all children are processed
-        if (children.size > 1) {
-          currentNodeId = "fork_from_node_" + getId(node)
-          val pgwb = processBuilder.parallelGateway(currentNodeId)
-          // start recursion for each child
-          for (child <- children) {
-            parseToBpmnIter(pgwb, child).moveToNode(currentNodeId)
-          }
-        }
-        processBuilder.asInstanceOf[EndEventBuilder]
-      }*/
-
-    //  private def addElement[T <: BpmnModelElementInstance](
-    //                                                         pb: AbstractFlowNodeBuilder[_, _ <: FlowNode],
-    //                                                         node: JsonNode, elementClass: Class[T]
-    //                                                       ) = {
-    //    val bpmnInst = Bpmn.createEmptyModel
-    //    val element = bpmnInst.newInstance(elementClass)
-    //    val tmaNode = getTmaNode(node)
-    //    element.setAttributeValue("id", tmaNode.id, true)
-    //    element.setAttributeValue("name", tmaNode.name)
-    //    pb.addExtensionElement(element)
-    //    pb
-    // }
   }
 
 }
