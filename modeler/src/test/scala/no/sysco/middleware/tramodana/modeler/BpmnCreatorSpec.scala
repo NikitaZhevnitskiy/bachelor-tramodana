@@ -1,7 +1,5 @@
 package no.sysco.middleware.tramodana.modeler
 
-import java.io.{BufferedWriter, File, FileWriter}
-
 import org.junit.runner.RunWith
 import org.scalatest._
 import org.scalatest.junit.JUnitRunner
@@ -24,9 +22,11 @@ class BpmnCreatorSpec extends WordSpec with BeforeAndAfter {
             service_1    service_2
                /           /   \
               /           /     \
-           end_1       end_2     404
-   */
-
+           end_1    service_3   404
+                        /
+                       /
+                    end_3
+         */
   val inlineTree: Node =
     Utils.createNode("0", "Log in", "start_1",
       List(
@@ -38,7 +38,7 @@ class BpmnCreatorSpec extends WordSpec with BeforeAndAfter {
         Utils.createNode("start_1", "Find Membership", "service_2",
           List(
             Utils.createNode("service_2", "Get user updates", "service_3",
-              List( Utils.createNode("service_3", "Show main page with updates", "end_2"))
+              List(Utils.createNode("service_3", "Show main page with updates", "end_3"))
             ),
             Utils.createNode("service_2", "Error 404", "end_error")
           )
@@ -61,7 +61,7 @@ class BpmnCreatorSpec extends WordSpec with BeforeAndAfter {
 
   // edge cases
   val uniqueNodeSpanTree: Node = Utils.createNode()
-  val wrongId_allInt: Node = Utils.createNode(procId =  "1234")
+  val wrongId_allInt: Node = Utils.createNode(procId = "1234")
   val wrongId_startsWithHash: Node = Utils.createNode(procId = "#one")
   val wrongId_startsWithPeriod: Node = Utils.createNode(procId = ".one")
   val wrongId_containsSpace: Node = Utils.createNode(procId = "id one")
@@ -69,25 +69,43 @@ class BpmnCreatorSpec extends WordSpec with BeforeAndAfter {
   "A BpmnParsable element" when {
     "composed of only one node" should {
       "parse to BPMN without error" in {
-        val res = BpmnCreator.parseToBpmn(uniqueNodeSpanTree)
+        val res = new BpmnCreator(uniqueNodeSpanTree).getBpmnTree
         assert(res.nonEmpty)
       }
     }
-    "containing a processId of the wrong format" should{
-      "parse to None: all int id - e.g: \"1234\""       in{assert(BpmnCreator.parseToBpmn(wrongId_allInt).isEmpty) }
-      "parse to None: starts with '#' - e.g: \"#id\""   in{assert(BpmnCreator.parseToBpmn(wrongId_startsWithHash).isEmpty)  }
-      "parse to None: starts with '.' - e.g: \".id\""   in{assert(BpmnCreator.parseToBpmn(wrongId_startsWithPeriod).isEmpty)  }
-      "parse to None: contains space - e.g: \"id one\"" in{assert(BpmnCreator.parseToBpmn(wrongId_containsSpace).isEmpty)  }
+    "containing a processId of the wrong format" should {
+      "parse to None: all int id - e.g: \"1234\"" in {
+        assert(new BpmnCreator(wrongId_allInt).getBpmnTree.nonEmpty)
+      }
+      "parse to None: starts with '#' - e.g: \"#id\"" in {
+        assert(new BpmnCreator(wrongId_startsWithHash).getBpmnTree.nonEmpty)
+      }
+      "parse to None: starts with '.' - e.g: \".id\"" in {
+        assert(new BpmnCreator(wrongId_startsWithPeriod).getBpmnTree.nonEmpty)
+      }
+      "parse to None: contains space - e.g: \"id one\"" in {
+        assert(new BpmnCreator(wrongId_containsSpace).getBpmnTree.nonEmpty)
+      }
 
     }
     "its nodes have parent-child links" should {
       "parse to BPMN (built in-line)" in {
-        val res = BpmnCreator.parseToBpmn(inlineTree)
+        val res = new BpmnCreator(inlineTree).getBpmnTree
         assert(res.nonEmpty)
       }
       "parse to BPMN (built procedurally)" in {
-        val res = BpmnCreator.parseToBpmn(proceduralTree)
+        val res = new BpmnCreator(proceduralTree).getBpmnTree
         assert(res.nonEmpty)
+      }
+    }
+
+    "containing a broken child-parent link (parentId != the parent's processId)" should {
+      "parse to BPMN" in {
+        val root = Utils.createNode("0", "Log in", "start_1")
+        val orphanNode = Utils.createNode("wrong_parent_id", "lone child", "end_1")
+        val parentNode = root.addChild(orphanNode)
+        parentNode.printPretty
+        assert(new BpmnCreator(parentNode).getBpmnTree.nonEmpty)
       }
     }
   }
