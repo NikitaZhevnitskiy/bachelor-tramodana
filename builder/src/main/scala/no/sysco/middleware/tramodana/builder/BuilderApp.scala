@@ -27,8 +27,10 @@ object BuilderApp extends App with JsonSpanProtocol {
   val TRACE_ID_SEQ_SPAN = "trace-id-seq-span"
   val ROOT_SPAN_SEQ_SPAN = "root-span-seq-span"
   val ROOT_OPERATION_LIST_SEQ_SPAN = "root-operation-list-seq-span"
-  val ROOT_OPERATION_SET_SEQ_SPAN = "root-operation-set-seq-span"
-  val ROOT_OPERATION_SET_SEQ_SPAN_TABLE = "root-operation-set-seq-span-table"
+  val ROOT_OPERATION_SET_SEQ_SPANS = "root-operation-set-seq-spans"
+  val ROOT_OPERATION_SET_SEQ_SPANS_TABLE = "root-operation-set-seq-spans-table"
+  val ROOT_OPERATION_SET_SPAN_TREES = "root-operation-set-spantree"
+  val ROOT_OPERATION_SET_SPAN_TREES_TABLE = "root-operation-set-spantree-table"
   // utils
   val EMPTY_KEY: String = ""
 
@@ -219,16 +221,28 @@ object BuilderApp extends App with JsonSpanProtocol {
       val setOfSeq = SpanTreeBuilder.getSetOfSeq(listOfSeq)
       KeyValue.pair[String, String](operationName,setOfSeq.toJson.toString)
     })
-      .to(ROOT_OPERATION_SET_SEQ_SPAN)
+      .to(ROOT_OPERATION_SET_SEQ_SPANS)
+
+//    val tableSetSeqSpans : KTable[String, String] = builder
+//      .table(
+//        ROOT_OPERATION_SET_SEQ_SPANS,
+//        Materialized.as[String, String, KeyValueStore[Bytes, Array[Byte] ]](ROOT_OPERATION_SET_SEQ_SPANS_TABLE))
 
 
 
-    val table : KTable[String, String] = builder
-      .table(
-        ROOT_OPERATION_SET_SEQ_SPAN,
-        Materialized.as[String, String, KeyValueStore[Bytes, Array[Byte] ]](ROOT_OPERATION_SET_SEQ_SPAN_TABLE))
+    // 10 alternatively build [root-operation-name, SpanTree] -> [root-operation-name, Set[SpanTree]]
+    builder.stream[String, String](ROOT_OPERATION_SET_SEQ_SPANS)
+      .map[String, String]((k,v)=> {
+        val setSeqSpans = JsonParser(v).convertTo[Set[Seq[Span]]]
+        val setOfTrees: Set[SpanTree] = setSeqSpans.map((seq)=>SpanTreeBuilder.build(seq.toList))
+        KeyValue.pair[String, String](k,setOfTrees.toJson.toString)
+      })
+      .to(ROOT_OPERATION_SET_SPAN_TREES)
 
-    // TODO: 10 alternatively build [root-operation-name, SpanTree] -> [root-operation-name, Set[SpanTree]]
+//    val tableSetSpanTrees : KTable[String, String] = builder
+//      .table(ROOT_OPERATION_SET_SPAN_TREES,
+//        Materialized.as[String, String, KeyValueStore[Bytes, Array[Byte] ]](ROOT_OPERATION_SET_SPAN_TREES_TABLE))
+
 
     builder.build
 
@@ -271,7 +285,8 @@ object BuilderApp extends App with JsonSpanProtocol {
         new NewTopic(TRACE_ID_SEQ_SPAN, 1, 1),
         new NewTopic(ROOT_SPAN_SEQ_SPAN, 1, 1),
         new NewTopic(ROOT_OPERATION_LIST_SEQ_SPAN, 1, 1),
-        new NewTopic(ROOT_OPERATION_SET_SEQ_SPAN, 1, 1)
+        new NewTopic(ROOT_OPERATION_SET_SEQ_SPANS, 1, 1),
+        new NewTopic(ROOT_OPERATION_SET_SPAN_TREES, 1, 1)
       )
     try {
       val result = adminClient.createTopics(newTopics.asJava)
