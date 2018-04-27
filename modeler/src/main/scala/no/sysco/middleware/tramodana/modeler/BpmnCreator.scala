@@ -41,7 +41,7 @@ object BpmnCreator {
         //val loopBasedBpmnStr = bpmnToString(bpmn).get
         val loopBasedBpmnStr = creator.getBpmnXmlStr.get
         println(loopBasedBpmnStr)
-        rootNode.printPretty
+        rootNode.printPretty()
         Utils.writeToExampleDir(loopBasedBpmnStr, "loop-based")
     }
   }
@@ -50,7 +50,11 @@ object BpmnCreator {
 class BpmnCreator(val parsableData: BpmnParsable) {
 
   var branchCount = 1
-  var bpmnTree: Option[BpmnModelInstance] = parseToBpmn(parsableData)
+
+  private def preprocess(parsableData: BpmnParsable): BpmnParsable = parsableData
+
+  private var preprocessedTree = preprocess(parsableData)
+  var bpmnTree: Option[BpmnModelInstance] = parseToBpmn(preprocessedTree)
   def getBpmnXmlStr: Option[String] = bpmnToString(bpmnTree.get)
 
   def getBpmnTree: Option[BpmnModelInstance] = bpmnTree
@@ -95,11 +99,16 @@ class BpmnCreator(val parsableData: BpmnParsable) {
     forkedChildren
   }
 
-  private def parseToBpmn(rootNode: BpmnParsable, pId: String = "#"): Option[BpmnModelInstance] = {
-    val processId = pId match {
-      case x if x.equals("#") => rootNode.getProcessId ++ "_proc"
+  private def cleanProcessId(pId: String): String = {
+    val pattern = "([^A-Za-z]+)".r
+    pId match {
+      case x if x.equals("#") => "id" ++ "_proc"
+      case pattern(_) => "id_" ++ pId
       case _ => pId
     }
+  }
+  private def parseToBpmn(rootNode: BpmnParsable, pId: String = "#"): Option[BpmnModelInstance] = {
+    val processId = cleanProcessId(pId)
 
     try {
       val model = parse(rootNode, processId)
