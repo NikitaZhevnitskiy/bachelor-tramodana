@@ -8,50 +8,14 @@ import org.camunda.bpm.model.xml.instance.ModelElementInstance
 
 object BpmnCreator {
 
-  def main(args: Array[String]): Unit = {
-    //var rootNode = Utils.createNode("0")
-    val rootNode: Node =
-      Utils.createNode("0", "Log in", "start_1",
-        List(
-          Utils.createNode("start_1", "Eat potatoes", "potatoes_1",Nil),
-          Utils.createNode("start_1", "Create Membership", "service_1",
-            List(
-              Utils.createNode("service_1", "Show Main Page", "end_1")
-            )
-          ),
-          Utils.createNode("start_1", "Find Membership", "service_2",
-            List(
-             Utils.createNode("service_2", "Get user updates", "service_3",
-              List( Utils.createNode("service_3", "Show main page with updates", "end_2_3"))
-            ),
-              Utils.createNode("service_2", "Error 404", "id404"),
-                Utils.createNode("service_2", "Error 405|", "id405")
-            )
-          )
-        )
-      )
-
-    //val testBpmn = parseToBpmn(rootNode, "example")
-    val creator = new BpmnCreator(rootNode)
-    //val testBpmn = parseToBpmn(rootNode, "example")
-    val testBpmn = creator.getBpmnTree
-    testBpmn match {
-      case None => println("Bpmn workflow building failed")
-      case Some(bpmn) =>
-        //val loopBasedBpmnStr = bpmnToString(bpmn).get
-        val loopBasedBpmnStr = creator.getBpmnXmlStr.get
-        println(loopBasedBpmnStr)
-        rootNode.printPretty()
-        Utils.writeToExampleDir(loopBasedBpmnStr, "loop-based")
-    }
-  }
+  def main(args: Array[String]): Unit = { }
 }
 
 class BpmnCreator(val parsableData: BpmnParsable) {
 
   var branchCount = 1
 
-  private def preprocess(parsableData: BpmnParsable): BpmnParsable = parsableData
+  private def preprocess(parsableData: BpmnParsable): BpmnParsable = throw new Exception("pending implementation!!!")
 
   private var preprocessedTree = preprocess(parsableData)
   var bpmnTree: Option[BpmnModelInstance] = parseToBpmn(preprocessedTree)

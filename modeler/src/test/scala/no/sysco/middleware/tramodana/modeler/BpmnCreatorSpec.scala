@@ -114,5 +114,44 @@ class BpmnCreatorSpec extends WordSpec with BeforeAndAfter {
     }
   }
 
+  "A verified BpmnParsable file" when {
+    "parsed" should {
+      "produce a visualisable BPMN file (check on bpmn.io)" in {
+
+        val rootNode: Node =
+          Utils.createNode("0", "Log in", "start_1",
+            List(
+              Utils.createNode("start_1", "Eat potatoes", "potatoes_1", Nil),
+              Utils.createNode("start_1", "Create Membership", "service_1",
+                List(
+                  Utils.createNode("service_1", "Show Main Page", "end_1")
+                )
+              ),
+              Utils.createNode("start_1", "Find Membership", "service_2",
+                List(
+                  Utils.createNode("service_2", "Get user updates", "service_3",
+                    List(Utils.createNode("service_3", "Show main page with updates", "end_2_3"))
+                  ),
+                  Utils.createNode("service_2", "Error 404", "id404"),
+                  Utils.createNode("service_2", "Error 405|", "id405")
+                )
+              )
+            )
+          )
+
+        val creator = new BpmnCreator(rootNode)
+        val testBpmn = creator.getBpmnTree
+        testBpmn match {
+          case None => println("Bpmn workflow building failed")
+          case Some(bpmn) =>
+            val loopBasedBpmnStr = creator.getBpmnXmlStr.get
+            println(loopBasedBpmnStr)
+            rootNode.printPretty()
+            Utils.writeToExampleDir(loopBasedBpmnStr, "loop-based")
+        }
+      }
+    }
+  }
+
 
 }
