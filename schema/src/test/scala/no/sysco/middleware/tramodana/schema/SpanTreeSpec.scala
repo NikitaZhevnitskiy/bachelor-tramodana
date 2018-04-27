@@ -176,6 +176,48 @@ class SpanTreeSpec extends WordSpec with Matchers with JsonSpanProtocol{
       // Act
       println(tree.toJson.toString)
     }
+
+    "convert List[Seq[Span]] to Set[Seq[Span]]" in {
+
+      // Arrange
+      val spans1: Seq[Span] = SpanTreeBuilder
+        .getSequence(SpanTreeBuilder.build(Utils.getSpanListWith4Nodes()))
+      val spans2: Seq[Span] = SpanTreeBuilder
+        .getSequence(SpanTreeBuilder.build(Utils.getSpanListWith7Nodes()))
+      val spansDuplication = spans1
+
+      val listOfSeq: List[Seq[Span]] = List(spans1, spans2, spansDuplication)
+
+      // Act
+      val setOfSeq: Set[Seq[Span]] = SpanTreeBuilder.getSetOfSeq(listOfSeq)
+
+      // Assert
+      assertEquals(3,listOfSeq.size)
+      assertEquals(2,setOfSeq.size)
+
+
+
+    }
+
+    "convert Set[Seq[Span]] to Set[SpanTree]" in {
+      // Arrange
+      val spans1: Seq[Span] = SpanTreeBuilder
+        .getSequence(SpanTreeBuilder.build(Utils.getSpanListWith4Nodes()))
+      val spans2: Seq[Span] = SpanTreeBuilder
+        .getSequence(SpanTreeBuilder.build(Utils.getSpanListWith7Nodes()))
+      val listOfSeq: List[Seq[Span]] = List(spans1, spans2)
+      val setOfSeq: Set[Seq[Span]] = SpanTreeBuilder.getSetOfSeq(listOfSeq)
+//      val jsonSpanSeq = setOfSeq.toJson.toString
+
+
+      // Act
+      val setOfTrees: Set[SpanTree] = setOfSeq.map((seq)=>SpanTreeBuilder.build(seq.toList))
+      println(setOfTrees.toJson.toString)
+
+      // Assert
+      assertEquals(2, setOfTrees.size)
+      assertEquals(2, setOfTrees.head.children.size)
+    }
   }
 
   "SpanTreeBuilder SEQ " should {
@@ -184,7 +226,7 @@ class SpanTreeSpec extends WordSpec with Matchers with JsonSpanProtocol{
       val spans: List[Span] = Utils.getSpanListWith7Nodes()
       val tree = SpanTreeBuilder.build(spans)
 
-      val expectedList = List("A","B","C","D","E","F","G")
+      val expectedList = Seq("A","B","C","D","E","F","G")
 
       // Act
       val actualList = SpanTreeBuilder.getSequence(tree).flatMap(span => span.operationName)

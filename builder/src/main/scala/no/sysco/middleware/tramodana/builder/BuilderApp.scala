@@ -3,6 +3,7 @@ package no.sysco.middleware.tramodana.builder
 import java.util.Properties
 import java.util.concurrent.CountDownLatch
 
+import no.sysco.middleware.tramodana.schema.Topic._
 import no.sysco.middleware.tramodana.schema._
 import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig, NewTopic}
 import org.apache.kafka.common.errors.TopicExistsException
@@ -15,18 +16,6 @@ import scala.concurrent.ExecutionException
 
 
 object BuilderApp extends App with JsonSpanProtocol {
-
-  // topic names
-  val SPANS_JSON_ORIGINAL = "spans-json-original"
-  val SPANS = "spans"
-  val TRACES = "traces"
-  val PROCESSED_TRACES = "processed-traces"
-  val TRACE_ID_ROOT_OPERATION = "trace-id-root-operation"
-  val TRACE_ID_SEQ_SPAN = "trace-id-seq-span"
-  val ROOT_SPAN_SEQ_SPAN = "root-span-seq-span"
-  val ROOT_OPERATION_LIST_SEQ_SPAN = "root-operation-list-seq-span"
-  // utils
-  val EMPTY_KEY: String = ""
 
 
   start()
@@ -82,7 +71,7 @@ object BuilderApp extends App with JsonSpanProtocol {
       * input: SPANS_JSON_ORIGINAL [trace_id, Span ]
       **/
     val originalSource: KStream[java.lang.String, String] =
-      builder.stream[String, String](SPANS_JSON_ORIGINAL)
+      builder.stream[String, String](Topic.SPANS_JSON_ORIGINAL)
 
     /**
       * 2 - Traces. Group spans by trace_id
@@ -95,7 +84,7 @@ object BuilderApp extends App with JsonSpanProtocol {
       .reduce((value1, value2) => value1 + "," + value2)
       .toStream
       .mapValues(v => s"[$v]")
-      .to(TRACES)
+      .to(Topic.TRACES)
 
 
     /**
@@ -109,7 +98,7 @@ object BuilderApp extends App with JsonSpanProtocol {
       val spanId = span.spanId
       KeyValue.pair(spanId, value)
     })
-      .to(SPANS)
+      .to(Topic.SPANS)
 
     /**
       * 4 - Processed-traces. SpanTree of specific trace
@@ -117,14 +106,14 @@ object BuilderApp extends App with JsonSpanProtocol {
       * output: PROCESSED_TRACES [trace_id, SpanTree ]
       **/
     val tracesSource: KStream[String, String] =
-      builder.stream[String, String](TRACES)
+      builder.stream[String, String](Topic.TRACES)
 
     tracesSource.mapValues(v => {
       val spans = JsonParser(v).convertTo[List[Span]]
       val tree = SpanTreeBuilder.build(spans)
       tree.toJson.toString()
     })
-      .to(PROCESSED_TRACES)
+      .to(Topic.PROCESSED_TRACES)
 
 //    builder.stream[String, String](TRACES)
 //      .map[String, String]((key, value) => {
@@ -151,13 +140,13 @@ object BuilderApp extends App with JsonSpanProtocol {
       * // NB! Topic should be manually created
       **/
     val processedTracesSource: KStream[String, String] =
-      builder.stream[String, String](PROCESSED_TRACES)
+      builder.stream[String, String](Topic.PROCESSED_TRACES)
     val traceIdRootOperationStream = processedTracesSource
       .mapValues(jsonTree => {
         val tree = JsonParser(jsonTree).convertTo[SpanTree]
         tree.value.operationName
       })
-      .to(TRACE_ID_ROOT_OPERATION)
+      .to(Topic.TRACE_ID_ROOT_OPERATION)
 
     /**
       * 6 tree to span seq
@@ -170,14 +159,14 @@ object BuilderApp extends App with JsonSpanProtocol {
         val seq = SpanTreeBuilder.getSequence(tree)
         seq.toJson.toString
       })
-      .to(TRACE_ID_SEQ_SPAN)
+      .to(Topic.TRACE_ID_SEQ_SPAN)
 
     /**
       * 7 remap
       * input: TRACE_ID_SEQ_SPAN   [trace_id, Seq[Span] ]
       * output: ROOT_SPAN_SEQ_SPAN [root-Span, Seq[Span] ]
       **/
-    val rootSpanSeqOperations = builder.stream[String, String](TRACE_ID_SEQ_SPAN)
+    val rootSpanSeqOperations = builder.stream[String, String](Topic.TRACE_ID_SEQ_SPAN)
       .map[String, String]((traceId, spanSeq) => {
       val spans = JsonParser(spanSeq).convertTo[List[Span]]
       val rootSpan: Span = spans.headOption.getOrElse(defaultSpan())
@@ -185,7 +174,7 @@ object BuilderApp extends App with JsonSpanProtocol {
     })
       // TODO: filter for empty values
       //        .filter((span, seq)=> JsonParser(span).convertTo[Span].spanId.trim.length>1)
-      .to(ROOT_SPAN_SEQ_SPAN)
+      .to(Topic.ROOT_SPAN_SEQ_SPAN)
 
 
     /**
@@ -193,7 +182,7 @@ object BuilderApp extends App with JsonSpanProtocol {
       * input: ROOT_SPAN_SEQ_SPAN [root-Span, Seq[Span] ]
       * output: ROOT_OPERATION_LIST_SEQ_SPAN [root-operation-name, List[ Seq[Span] ] ]
       **/
-    builder.stream[String, String](ROOT_SPAN_SEQ_SPAN)
+    builder.stream[String, String](Topic.ROOT_SPAN_SEQ_SPAN)
       .map[String, String]((rootSpanJson, spanSeqJson) => {
       KeyValue.pair(JsonParser(rootSpanJson).convertTo[Span].operationName, spanSeqJson)
     })
@@ -201,12 +190,42 @@ object BuilderApp extends App with JsonSpanProtocol {
       .reduce((value1, value2) => s"$value1 , $value2")
       .toStream()
       .mapValues(v => s"[$v]")
-      .to(ROOT_OPERATION_LIST_SEQ_SPAN)
+      .to(Topic.ROOT_OPERATION_LIST_SEQ_SPAN)
 
     // Todo: make Set instead of list
-    // 9
+    /**
+      * 9 all possible sequences SET
+      * input: ROOT_OPERATION_LIST_SEQ_SPAN [root-Span, Seq[Span] ]
+      * output: ROOT_OPERATION_LIST_SEQ_SPAN [root-operation-name, List[ Seq[Span] ] ]
+      **/
+    builder.stream[String, String](Topic.ROOT_OPERATION_LIST_SEQ_SPAN)
+        .map[String, String]((operationName, listOfSpanSeq)=>{
+      val listOfSeq = JsonParser(listOfSpanSeq).convertTo[ List[ Seq[Span] ] ]
+      val setOfSeq = SpanTreeBuilder.getSetOfSeq(listOfSeq)
+      KeyValue.pair[String, String](operationName,setOfSeq.toJson.toString)
+    })
+      .to(Topic.ROOT_OPERATION_SET_SEQ_SPANS)
 
-    // TODO: 10 alternatively build [root-operation-name, SpanTree] -> [root-operation-name, Set[SpanTree]]
+//    val tableSetSeqSpans : KTable[String, String] = builder
+//      .table(
+//        ROOT_OPERATION_SET_SEQ_SPANS,
+//        Materialized.as[String, String, KeyValueStore[Bytes, Array[Byte] ]](ROOT_OPERATION_SET_SEQ_SPANS_TABLE))
+
+
+
+    // 10 alternatively build [root-operation-name, SpanTree] -> [root-operation-name, Set[SpanTree]]
+    builder.stream[String, String](Topic.ROOT_OPERATION_SET_SEQ_SPANS)
+      .map[String, String]((k,v)=> {
+        val setSeqSpans = JsonParser(v).convertTo[Set[Seq[Span]]]
+        val setOfTrees: Set[SpanTree] = setSeqSpans.map((seq)=>SpanTreeBuilder.build(seq.toList))
+        KeyValue.pair[String, String](k,setOfTrees.toJson.toString)
+      })
+      .to(Topic.ROOT_OPERATION_SET_SPAN_TREES)
+
+//    val tableSetSpanTrees : KTable[String, String] = builder
+//      .table(ROOT_OPERATION_SET_SPAN_TREES,
+//        Materialized.as[String, String, KeyValueStore[Bytes, Array[Byte] ]](ROOT_OPERATION_SET_SPAN_TREES_TABLE))
+
 
     builder.build
 
@@ -241,14 +260,16 @@ object BuilderApp extends App with JsonSpanProtocol {
     val adminClient: AdminClient = AdminClient.create(properties)
     val newTopics =
       Seq(
-        new NewTopic(SPANS_JSON_ORIGINAL, 1, 1),
-        new NewTopic(SPANS, 1, 1),
-        new NewTopic(TRACES, 1, 1),
-        new NewTopic(PROCESSED_TRACES, 1, 1),
-        new NewTopic(TRACE_ID_ROOT_OPERATION, 1, 1),
-        new NewTopic(TRACE_ID_SEQ_SPAN, 1, 1),
-        new NewTopic(ROOT_SPAN_SEQ_SPAN, 1, 1),
-        new NewTopic(ROOT_OPERATION_LIST_SEQ_SPAN, 1, 1)
+        new NewTopic(Topic.SPANS_JSON_ORIGINAL, 1, 1),
+        new NewTopic(Topic.SPANS, 1, 1),
+        new NewTopic(Topic.TRACES, 1, 1),
+        new NewTopic(Topic.PROCESSED_TRACES, 1, 1),
+        new NewTopic(Topic.TRACE_ID_ROOT_OPERATION, 1, 1),
+        new NewTopic(Topic.TRACE_ID_SEQ_SPAN, 1, 1),
+        new NewTopic(Topic.ROOT_SPAN_SEQ_SPAN, 1, 1),
+        new NewTopic(Topic.ROOT_OPERATION_LIST_SEQ_SPAN, 1, 1),
+        new NewTopic(Topic.ROOT_OPERATION_SET_SEQ_SPANS, 1, 1),
+        new NewTopic(Topic.ROOT_OPERATION_SET_SPAN_TREES, 1, 1)
       )
     try {
       val result = adminClient.createTopics(newTopics.asJava)

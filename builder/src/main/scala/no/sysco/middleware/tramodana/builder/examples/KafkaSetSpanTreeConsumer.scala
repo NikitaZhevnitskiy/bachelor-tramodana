@@ -1,20 +1,20 @@
-package no.sysco.middleware.tramodana.builder
+package no.sysco.middleware.tramodana.builder.examples
 
 import java.util.concurrent.Executors
 import java.util.{Collections, Properties, UUID}
 
+import no.sysco.middleware.tramodana.schema.{JsonSpanProtocol, SpanTree, SpanTreeBuilder, Topic}
 import org.apache.kafka.clients.consumer._
 import org.apache.kafka.common.serialization.StringDeserializer
 
 
 // TODO: remove it
-class KafkaTraceConsumer(kafkaBootstrapServers: String) {
+object KafkaSetSpanTreeConsumer extends App with JsonSpanProtocol {
 
-//  final val TOPIC_TRACES = "traces"
-//  final val SPANS_ORIGINAL_TOPIC:  String = "spans-original"
-  final val SPANS_TOPIC:  String = "spans"
-  final val TEST_TOPIC:  String = "test-topic"
-  final val LOGS_BROKER:  String = "logs_broker"
+  import spray.json._
+
+  // create topics
+  KafkaAdminUtils.preStart()
 
   val kafkaConsumerConfigs: Properties = {
     val configs = new Properties()
@@ -29,15 +29,37 @@ class KafkaTraceConsumer(kafkaBootstrapServers: String) {
 
   val consumer = new KafkaConsumer[String, String](kafkaConsumerConfigs)
 
+
   def run() = {
-    consumer.subscribe(Collections.singletonList(TEST_TOPIC))
+    consumer.subscribe(Collections.singletonList(Topic.ROOT_OPERATION_SET_SPAN_TREES))
     Executors.newSingleThreadExecutor.execute(() => {
       while (true) {
+        // Your logic here
         val records: ConsumerRecords[String, String] = consumer.poll(1000)
-        records.forEach(r => println(r))
+
+//          records.forEach(r => println(s"KEY: ${r.key()} \nVALUE: ${r.value()}\n"))
+          val itter = records.iterator()
+          while(itter.hasNext){
+            try {
+
+              val record = itter.next()
+              val setSeqSpanTrees: Set[SpanTree] = JsonParser(record.value()).convertTo[Set[SpanTree]]
+
+
+              // ALL ur logic
+              println(setSeqSpanTrees.toJson.toString)
+
+            } catch {
+              case e: Exception => { println("lol")}
+            }
+          }
       }
     })
   }
+
+
+  // run consumer
+  run()
 
 }
 
