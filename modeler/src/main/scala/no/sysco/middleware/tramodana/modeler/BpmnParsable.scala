@@ -1,5 +1,13 @@
 package no.sysco.middleware.tramodana.modeler
 
+//TODO: turn generic to allow self-recursion
+//c.f.:
+// http://www.alessandrolacava.com/blog/scala-self-recursive-types/
+// example:
+/*    trait Doubler[T <: Doubler[T]] {
+          def double: T
+      }
+*/
 trait BpmnParsable{
   def getParentId: String
   def setParentId(id: String): BpmnParsable
