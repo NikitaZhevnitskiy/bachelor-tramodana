@@ -62,6 +62,7 @@ class BpmnCreatorSpec extends WordSpec with BeforeAndAfter {
   // edge cases
   val uniqueNodeSpanTree: Node = Utils.createNode()
   val wrongId_allInt: Node = Utils.createNode(procId = "1234")
+  val wrongId_hex: Node = Utils.createNode(procId = "0x01")
   val wrongId_startsWithHash: Node = Utils.createNode(procId = "#one")
   val wrongId_startsWithPeriod: Node = Utils.createNode(procId = ".one")
   val wrongId_containsSpace: Node = Utils.createNode(procId = "id one")
@@ -74,16 +75,19 @@ class BpmnCreatorSpec extends WordSpec with BeforeAndAfter {
       }
     }
     "containing a processId of the wrong format" should {
-      "parse to None: all int id - e.g: \"1234\"" in {
+      "parse correctly: all int id - e.g: \"1234\"" in {
         assert(new BpmnCreator(wrongId_allInt).getBpmnTree.nonEmpty)
       }
-      "parse to None: starts with '#' - e.g: \"#id\"" in {
+      "parse correctly: hex id - e.g: \"0x01\"" in {
+        assert(new BpmnCreator(wrongId_hex).getBpmnTree.nonEmpty)
+      }
+      "parse correctly: starts with '#' - e.g: \"#id\"" in {
         assert(new BpmnCreator(wrongId_startsWithHash).getBpmnTree.nonEmpty)
       }
-      "parse to None: starts with '.' - e.g: \".id\"" in {
+      "parse correctly: starts with '.' - e.g: \".id\"" in {
         assert(new BpmnCreator(wrongId_startsWithPeriod).getBpmnTree.nonEmpty)
       }
-      "parse to None: contains space - e.g: \"id one\"" in {
+      "parse correctly: contains space - e.g: \"id one\"" in {
         assert(new BpmnCreator(wrongId_containsSpace).getBpmnTree.nonEmpty)
       }
 
@@ -104,7 +108,7 @@ class BpmnCreatorSpec extends WordSpec with BeforeAndAfter {
         val root = Utils.createNode("0", "Log in", "start_1")
         val orphanNode = Utils.createNode("wrong_parent_id", "lone child", "end_1")
         val parentNode = root.addChild(orphanNode)
-        parentNode.printPretty
+        parentNode.printPretty()
         assert(new BpmnCreator(parentNode).getBpmnTree.nonEmpty)
       }
     }
