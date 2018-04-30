@@ -23,7 +23,7 @@ object ModelerApp extends App {
 
     override def getOperationName: String = st.value.operationName
 
-    override def getChildren: List[BpmnParsable] = st.children
+    override def getChildren: List[BpmnParsable] = st.children.asInstanceOf[List[BpmnParsable]]
   }
 
   val INPUT_FILES_DIRECTORY = "examples/input_for_modeler"

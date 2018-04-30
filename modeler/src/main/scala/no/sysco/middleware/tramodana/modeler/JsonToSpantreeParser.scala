@@ -3,10 +3,10 @@ package no.sysco.middleware.tramodana.modeler
 import no.sysco.middleware.tramodana.schema.{SpanTree, JsonSpanProtocol}
 import spray.json._
 
-class JsonToSpantreeParser(val jsonSrc: String) {
+class JsonToSpantreeParser(val jsonSrc: String)  extends JsonSpanProtocol{
 
-  def rebuildGenealogy[T <: BpmnParsable](tree: T): Option[T] = None
-  def mergeTrees[T <: BpmnParsable](treeList: List[T]): Option[T] = None
+  def rebuildGenealogy(tree: SpanTree): Option[SpanTree] = None
+  def mergeTrees(treeList: List[SpanTree]): Option[SpanTree] = None
 
   def getSpantreeList: List[SpanTree] = JsonParser(jsonSrc).convertTo[List[SpanTree]]
 
