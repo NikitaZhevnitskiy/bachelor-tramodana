@@ -15,10 +15,7 @@ class BpmnCreator(val parsableData: BpmnParsable) {
 
   var branchCount = 1
 
-  private def preprocess(parsableData: BpmnParsable): BpmnParsable = throw new Exception("pending implementation!!!")
-
-  private var preprocessedTree = preprocess(parsableData)
-  var bpmnTree: Option[BpmnModelInstance] = parseToBpmn(preprocessedTree)
+  var bpmnTree: Option[BpmnModelInstance] = parseToBpmn(parsableData)
   def getBpmnXmlStr: Option[String] = bpmnToString(bpmnTree.get)
 
   def getBpmnTree: Option[BpmnModelInstance] = bpmnTree
@@ -63,19 +60,10 @@ class BpmnCreator(val parsableData: BpmnParsable) {
     forkedChildren
   }
 
-  private def cleanProcessId(pId: String): String = {
-    val pattern = "([^A-Za-z]+)".r
-    pId match {
-      case x if x.equals("#") => "id" ++ "_proc"
-      case pattern(_) => "id_" ++ pId
-      case _ => pId
-    }
-  }
   private def parseToBpmn(rootNode: BpmnParsable, pId: String = "#"): Option[BpmnModelInstance] = {
-    val processId = cleanProcessId(pId)
 
     try {
-      val model = parse(rootNode, processId)
+      val model = parse(rootNode, pId)
       Bpmn.validateModel(model)
       Some(model)
     } catch {

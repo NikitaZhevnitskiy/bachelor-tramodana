@@ -5,33 +5,24 @@ import spray.json._
 
 class JsonToSpantreeParser(val jsonSrc: String)  extends JsonSpanProtocol{
 
+  private def cleanProcessId(pId: String): String = {
+    val pattern = "([^A-Za-z]+)".r
+    pId match {
+      case x if x.equals("#") => "id" ++ "_proc"
+      case pattern(_) => "id_" ++ pId
+      case _ => pId
+    }
+  }
+
+  private def preprocess(parsableData: BpmnParsable): BpmnParsable = {
+    val formattedId = cleanProcessId(parsableData.getProcessId)
+    val cleanedRoot = parsableData.setProcessId( formattedId)
+    cleanedRoot
+  }
+
   def rebuildGenealogy(tree: SpanTree): Option[SpanTree] = None
   def mergeTrees(treeList: List[SpanTree]): Option[SpanTree] = None
-
   def getSpantreeList: List[SpanTree] = JsonParser(jsonSrc).convertTo[List[SpanTree]]
 
 }
 
-case class Jsonable(rootNode: Int, traceModels: List[List[Int]])
-
-object JsonableJsonProtocol extends DefaultJsonProtocol
-{
-  implicit val whatever: RootJsonFormat[Jsonable] = jsonFormat2(Jsonable)
-}
-
-import JsonableJsonProtocol._
-
-object JsonToSpantreeParser{
-
-  def testGenerateJsonWithArray(): Unit = {
-    def trace(to: Int): List[Int] = for (i <- List.range(0, to)) yield i
-    val trace1 = trace(5)
-    val trace2 = trace(4)
-
-    val traces = List(trace1, trace2)
-    val root = Jsonable( 0 ,  traces ).toJson
-
-    println(root.prettyPrint)
-  }
-
-}
