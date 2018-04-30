@@ -7,23 +7,27 @@ import scala.io.Source
 object ModelerApp extends App {
 
   implicit class SpanTreeToBpmnParsable(st: SpanTree) extends BpmnParsable {
+    type T = SpanTree
     override def getParentId: String = st.value.parentId
-
-    override def setParentId(id: String): BpmnParsable = {
+    override def setParentId(id: String): T = {
       val span = st.value.copy(parentId = id)
       st.copy( value = span)
     }
 
     override def getProcessId: String = st.value.spanId
 
-    override def setProcessId(id: String): BpmnParsable = {
+    override def setProcessId(id: String): T = {
       val span: Span = st.value.copy(parentId = id)
       st.copy( value = span)
     }
 
     override def getOperationName: String = st.value.operationName
 
-    override def getChildren: List[BpmnParsable] = st.children.asInstanceOf[List[BpmnParsable]]
+    override def getChildren: List[T] = st.children
+
+    override def addChild(node: T): T =  st.copy( children = node :: st.children)
+
+    override def addChildren(nodes: List[T]): T = st.copy( children = nodes ::: st.children)
   }
 
   val INPUT_FILES_DIRECTORY = "examples/input_for_modeler"

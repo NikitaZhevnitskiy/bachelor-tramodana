@@ -29,28 +29,28 @@ object Utils {
 case class Node(operationName: String,
                 processId: String,
                 children: List[Node],
-                parentId: String) extends BpmnParsable with NodeUtils {
+                parentId: String) extends BpmnParsable {
 
-  override def getChildren: List[BpmnParsable] = children
+  type T = Node
+  override def getChildren: List[T] = children
 
   override def getParentId: String = parentId
 
-  override def setParentId(id: String): BpmnParsable = copy(parentId = id)
+  override def setParentId(id: String): T = copy(parentId = id)
 
   override def getProcessId: String = processId
 
-  override def setProcessId(id: String): BpmnParsable = copy(processId = id)
+  override def setProcessId(id: String): T = copy(processId = id)
 
   override def getOperationName: String = operationName
 
-  override def addChild(node: Node): Node = this.copy(children = node :: children)
+  override def addChild(node: T ): T = this.copy(children = node :: children)
 
-  override def addChildren(nodes: List[Node]): Node = this.copy(children = nodes ::: children)
+  override def addChildren(nodes: List[T]): T = this.copy(children = nodes ::: children)
 
 }
 
-trait NodeUtils {
-  def addChild(node: Node): Node
-
-  def addChildren(nodes: List[Node]): Node
+trait TreeNodeUtils[T] {
+  def addChild(node: T): T
+  def addChildren(nodes: List[T]): T
 }

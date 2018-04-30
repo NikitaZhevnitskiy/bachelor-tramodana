@@ -9,12 +9,15 @@ package no.sysco.middleware.tramodana.modeler
       }
 */
 trait BpmnParsable{
+  type T <: BpmnParsable
   def getParentId: String
-  def setParentId(id: String): BpmnParsable
+  def setParentId(id: String): T
   def getProcessId: String
-  def setProcessId(id:String): BpmnParsable
+  def setProcessId(id:String): T
   def getOperationName: String
-  def getChildren: List[BpmnParsable]
+  def getChildren: List[T]
+  def addChild(node: T): T
+  def addChildren(nodes: List[T]): T
   def printPretty(): Unit = printPrettyIter("",last = true)
   private def printPrettyIter(ind: String, last: Boolean): Unit = {
     var indent = ind
