@@ -1,8 +1,7 @@
-apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'scala'
 group = 'no.sysco.middleware.tramodana'
-mainClassName = 'no.sysco.middleware.tramodana.modeler.Main'
+mainClassName = 'no.sysco.middleware.tramodana.modeler.ModelerApp'
 
 dependencies{
     compile project(":schema")
