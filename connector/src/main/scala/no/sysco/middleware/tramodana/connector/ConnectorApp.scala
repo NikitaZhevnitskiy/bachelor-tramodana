@@ -9,6 +9,7 @@ import akka.stream.scaladsl.{Flow, GraphDSL, RunnableGraph, Source}
 import akka.stream.{ActorMaterializer, ClosedShape}
 import com.datastax.driver.core.{Cluster, SimpleStatement}
 import org.apache.kafka.clients.producer.ProducerRecord
+import no.sysco.middleware.tramodana.schema.Topic
 import org.apache.kafka.common.serialization.StringSerializer
 import spray.json.JsonParser
 
@@ -16,7 +17,6 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 object ConnectorApp extends App with JsonSpanProtocol {
-  final val SPANS_ORIGINAL_TOPIC: String = "spans-json-original"
 
   //#init-mat
   implicit val system = ActorSystem()
@@ -50,7 +50,7 @@ object ConnectorApp extends App with JsonSpanProtocol {
       json => {
         val span = JsonParser(json).convertTo[Span]
         val id = span.traceId
-        val record = new ProducerRecord[java.lang.String, String](SPANS_ORIGINAL_TOPIC, id.toString, getJsonStringifyIds(span))
+        val record = new ProducerRecord[java.lang.String, String](Topic.SPANS_ORIGINAL_TOPIC, id.toString, getJsonStringifyIds(span))
         println(record)
         record
       }
