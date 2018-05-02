@@ -8,12 +8,17 @@ Trace, Model, Analyse - bachelor project developed in Ubuntu 16.04
 - Gradle: [install Gradle](https://gradle.org/install/)
 
 ## running the application
+### UP jaeger environment
 1. `docker-compose -f jaeger.yml up -d`  
 2. Check containers status with `docker-compose -f jaeger.yml ps` that tracing-jaeger-query and tracing-jaeger-collector are UP. 
 If NOT, exec `docker-compose -f jaeger.yml up -d`  one more time
+
+### UP kafka environment
 3. Up Kafka with `docker-compose -f kafka.yml up -d`, takes around 2-3 mins
+### UP generator app
 4. Generate traces with examples/[TraceGenApp1](https://github.com/NikitaZhevnitskiy/TraceGenApp1) 
 or examples/[TraceGenApp2](https://github.com/NikitaZhevnitskiy/TraceGenApp2)
+### UP application TRAMODANA
 5. Run ConnectorApp
 6. Check [localhost:3030](http://localhost:3030)
 

@@ -15,7 +15,7 @@ import spray.json.JsonParser
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-object ConnectorAppSt extends App with JsonSpanProtocol {
+object ConnectorApp extends App with JsonSpanProtocol {
   final val SPANS_ORIGINAL_TOPIC: String = "spans-json-original"
 
   //#init-mat
