@@ -56,7 +56,7 @@ class BpmnCreator(val parsableData: BpmnParsable) {
     val branchId = n.getProcessId + "_fork_" + branchCount
     branchCount += 1
     appendGateway(mi, n.getProcessId, branchId)
-    val forkedChildren = n.getChildren.mapConserve(child => child.setParentId(branchId))
+    val forkedChildren: List[BpmnParsable] = n.getChildren.map(child => child.setParentId(branchId))
     forkedChildren
   }
 
@@ -144,11 +144,6 @@ class BpmnCreator(val parsableData: BpmnParsable) {
     parentelem.builder.parallelGateway().id(nodeId).done()
   }
 
-  private def appendElement(mi: BpmnModelInstance, node: BpmnParsable): Unit = {
-    appendElement(mi, node.getParentId, node.getProcessId, node.getOperationName
-      //,classOf[EndEvent]
-    )
-  }
 
   private def appendElement[T <: BpmnModelElementInstance](mi: BpmnModelInstance,
                                                    parent_id: String,

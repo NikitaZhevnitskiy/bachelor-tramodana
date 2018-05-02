@@ -21,11 +21,10 @@ class JsonToSpantreeParserSpec extends WordSpec with JsonSpanProtocol{
           .getLines
           .mkString
         val parser = new JsonToSpantreeParser(jsonSource)
-        val parsedSpans = parser.getSpantreeList
+        val parsedSpans = parser.getSpanNodeList
         assert(parsedSpans.size == 2)
         val firstTree = parsedSpans.head
         assert(firstTree.children.size == 1)
-        firstTree.
 
       }
     }

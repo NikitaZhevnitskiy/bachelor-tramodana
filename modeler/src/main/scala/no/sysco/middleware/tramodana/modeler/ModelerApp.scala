@@ -4,44 +4,27 @@ import no.sysco.middleware.tramodana.schema.{Span, SpanTree}
 
 import scala.io.Source
 
+
+
 object ModelerApp extends App {
-
-  implicit class SpanTreeToBpmnParsable(st: SpanTree) extends BpmnParsable {
-    type T = SpanTree
-    override def getParentId: String = st.value.parentId
-    override def setParentId(id: String): T = {
-      val span = st.value.copy(parentId = id)
-      st.copy( value = span)
-    }
-
-    override def getProcessId: String = st.value.spanId
-
-    override def setProcessId(id: String): T = {
-      val span: Span = st.value.copy(parentId = id)
-      st.copy( value = span)
-    }
-
-    override def getOperationName: String = st.value.operationName
-
-    override def getChildren: List[T] = st.children
-
-    override def addChild(node: T): T =  st.copy( children = node :: st.children)
-
-    override def addChildren(nodes: List[T]): T = st.copy( children = nodes ::: st.children)
-  }
 
   val INPUT_FILES_DIRECTORY = "examples/input_for_modeler"
 
-  def main(test: String): Unit = {
-    println(test)
+  def run: Unit = {
 
     val jsonSource: String = Source
-      .fromFile(s"$INPUT_FILES_DIRECTORY/workflow_v03.json")
+      .fromFile(s"$INPUT_FILES_DIRECTORY/ROOT_OPERATION_SET_SPAN_TREES.json")
       .getLines
       .mkString
     val parser = new JsonToSpantreeParser(jsonSource)
-    val dtoList: List[SpanTree] =  parser.getSpantreeList
-    val spanTree: Option[SpanTree] = parser.mergeTrees(dtoList)
+    val dtoList: List[SpanNode] =  parser.getSpanNodeList
+    val pre_clean = dtoList.head
+    println("Before cleaning IDs: ")
+    pre_clean.printPretty()
+    val post_clean = parser.preprocessSpanNode(pre_clean)
+    println("After cleaning IDs: ")
+    post_clean.printPretty()
+    val spanTree: Option[SpanNode] = parser.mergeTrees(dtoList)
 
     val bpmnCreator = spanTree match {
       case Some(parsable) => new BpmnCreator(parsable)
@@ -52,5 +35,6 @@ object ModelerApp extends App {
     println(bpmnXmlString)
   }
 
+  run
 
 }
