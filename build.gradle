@@ -60,7 +60,11 @@ allprojects {
                 [group: "org.scalatest", name: "scalatest_$scalaMajor", version: "3.0.4"],
                 [group: "junit", name: "junit", version: "4.12"],
                 //json validator
-                [group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.7.0"]
+                [group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.7.0"],
+
+                // kafka test suite for streams
+                // https://mvnrepository.com/artifact/org.apache.kafka/kafka-streams-test-utils
+                [group: "org.apache.kafka", name: "kafka-streams-test-utils", version: "$kafkaV"]
         )
         // Need scala-xml at test runtime
         testRuntime "org.scala-lang.modules:scala-xml_$scalaMajor:1.0.6"
