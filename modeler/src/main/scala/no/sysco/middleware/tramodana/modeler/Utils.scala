@@ -2,6 +2,8 @@ package no.sysco.middleware.tramodana.modeler
 
 import java.io.{BufferedWriter, File, FileWriter}
 
+import no.sysco.middleware.tramodana.schema.Span
+
 object Utils {
   var counter: Int = 1
 
@@ -26,12 +28,61 @@ object Utils {
   }
 }
 
+case class SpanNode(value: Span, children: List[SpanNode]) extends BpmnParsable {
+  override type T = SpanNode
+
+  override def getParentId: String = value.parentId
+
+  override def setParentId(id: String): SpanNode = {
+    val span = value.copy(parentId = id)
+    new SpanNode(span, children)
+  }
+
+  override def getProcessId: String = value.spanId
+
+  override def setProcessId(id: String): SpanNode = {
+    val span = value.copy(spanId = id)
+    new SpanNode(span, children)
+  }
+
+  override def getOperationName: String = value.operationName
+
+  override def getChildren: List[SpanNode] = children
+
+  override def addChild(node: SpanNode): SpanNode =
+    new SpanNode(value, node :: children)
+
+  override def addChildren(nodes: List[SpanNode]): SpanNode =
+    new SpanNode(value, nodes ::: children)
+
+  def printPretty(): Unit = printPrettyIter("", last = true)
+
+  private def printPrettyIter(ind: String, last: Boolean): Unit = {
+    var indent = ind
+    print(indent)
+
+    if (last) {
+      print("\\-")
+      indent ++= "  "
+    } else {
+      print("|-")
+      indent ++= "| "
+    }
+    println(getProcessId)
+    for (i <- getChildren.indices) {
+      getChildren(i).printPrettyIter(indent, i == (getChildren.size - 1))
+    }
+  }
+}
+
 case class Node(operationName: String,
                 processId: String,
                 children: List[Node],
                 parentId: String) extends BpmnParsable {
 
+  self: Node =>
   type T = Node
+
   override def getChildren: List[T] = children
 
   override def getParentId: String = parentId
@@ -44,13 +95,32 @@ case class Node(operationName: String,
 
   override def getOperationName: String = operationName
 
-  override def addChild(node: T ): T = this.copy(children = node :: children)
+  override def addChild(node: T): T = this.copy(children = node :: children)
 
   override def addChildren(nodes: List[T]): T = this.copy(children = nodes ::: children)
 
+  def printPretty(): Unit = printPrettyIter("", last = true)
+
+  private def printPrettyIter(ind: String, last: Boolean): Unit = {
+    var indent = ind
+    print(indent)
+
+    if (last) {
+      print("\\-")
+      indent ++= "  "
+    } else {
+      print("|-")
+      indent ++= "| "
+    }
+    println(getProcessId)
+    for (i <- getChildren.indices) {
+      getChildren(i).printPrettyIter(indent, i == (getChildren.size - 1))
+    }
+  }
 }
 
 trait TreeNodeUtils[T] {
   def addChild(node: T): T
+
   def addChildren(nodes: List[T]): T
 }
