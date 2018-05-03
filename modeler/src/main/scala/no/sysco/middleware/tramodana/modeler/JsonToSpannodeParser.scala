@@ -13,7 +13,7 @@ trait JsonSpanNodeProtocol extends JsonSpanProtocol with SprayJsonSupport with D
 class JsonToSpannodeParser(val jsonSrc: String) extends JsonSpanNodeProtocol {
 
   private val rawSpanNodeList = getSpanNodeList
-  val preprocessedSpanNodeList = preprocess(rawSpanNodeList)
+  val preprocessedSpanNodeList: List[SpanNode] = preprocess(rawSpanNodeList)
 
   private def preprocessNode(n: SpanNode): SpanNode = {
     //val cleanedSpan = preprocessSpan(n.value)
@@ -66,8 +66,7 @@ class JsonToSpannodeParser(val jsonSrc: String) extends JsonSpanNodeProtocol {
   private def mergeTraces(traceList: List[SpanNode]): Option[SpanNode] = {
     var tree: SpanNodeTree = new SpanNodeTree
     var edges: List[Edge] = traceList.flatMap( sn => splitTraceIntoEdges(Some(sn), List.empty))
-
-
+    //def mergeIter(ls: List[Edge], sn: SpanNode): SpanNode = { }
   }
 
   @tailrec
@@ -84,9 +83,30 @@ class JsonToSpannodeParser(val jsonSrc: String) extends JsonSpanNodeProtocol {
     JsonParser(jsonSrc).convertTo[List[SpanNode]]
   }
 
-  class Edge(val from: Span, val to: Option[Span])
+  class Edge(val from: Span, val to: Option[Span]) {
+    override def equals(obj: scala.Any): Boolean =
+      obj match {
+        case  e : Edge => e.hashCode == this.hashCode
+        case _ => false
+      }
+
+    override def hashCode(): Int =
+      (from.process.get.serviceName.hashCode * 13) ^
+        (from.operationName.hashCode * 17) ^
+        ( to match {
+      case Some(span) =>
+        span.process.get.serviceName.hashCode * 21 ^
+        span.operationName.hashCode * 23
+      case None =>
+        0
+    })
+  }
 
   class SpanNodeTree {
+    def insert(e: Edge): Unit = {
+
+    }
+
     var value = Nil
     var children: List[SpanNodeTree] = List.empty
   }

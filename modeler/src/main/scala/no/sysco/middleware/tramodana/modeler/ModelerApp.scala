@@ -1,7 +1,5 @@
 package no.sysco.middleware.tramodana.modeler
 
-import no.sysco.middleware.tramodana.schema.{Span, SpanTree}
-
 import scala.io.Source
 
 
