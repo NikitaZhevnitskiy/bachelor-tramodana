@@ -13,7 +13,9 @@ object Utils {
     new TestNode( op, procId, children, parentId )
   }
 
-  def applyXmlIdFormat(pId: String): String = {
+  def applyXmlIdFormat(inputId: String): String = {
+    val badChars = " #$()={}[]@".toSet
+    val pId = inputId.map( c => if(badChars.contains(c)) '_' else c)
     val pattern = "([^A-Za-z]+).*".r
     pId match {
       case x if x.equals("#") => "id" ++ "_proc"
@@ -21,6 +23,15 @@ object Utils {
       case _ => pId
     }
   }
+
+  def formatParsableForXml(n: BpmnParsable): BpmnParsable = {
+    val validProcessId = applyXmlIdFormat(n.getProcessId)
+    val validParentId = applyXmlIdFormat(n.getParentId)
+    val nodeWithValidProcId = n.setProcessId(validProcessId)
+    val validNode = nodeWithValidProcId.setParentId(validParentId)
+    validNode
+  }
+
   def writeToExampleDir(content: String, fileNameWithoutExt: String): Unit = {
     val file = new File(s"examples/output_for_modeler/$fileNameWithoutExt.bpmn")
     val bufferedWriter = new BufferedWriter(new FileWriter(file))

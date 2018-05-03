@@ -17,17 +17,11 @@ object ModelerApp extends App {
       .getLines
       .mkString
     val parser = new JsonToSpantreeParser(jsonSource)
-    val dtoList: List[SpanNode] =  parser.getSpanNodeList
-    val pre_clean = dtoList.head
-    println("Before cleaning IDs: ")
-    pre_clean.printPretty()
-    val post_clean = parser.preprocessSpanNode(pre_clean)
-    println("After cleaning IDs: ")
-    post_clean.printPretty()
-    val spanTree: Option[SpanNode] = parser.mergeTrees(dtoList)
+    val processedTraces: List[SpanNode] =  parser.preprocessedSpanNodeList
+    val firstTrace = processedTraces.headOption
 
-    val bpmnCreator = spanTree match {
-      case Some(parsable) => new BpmnCreator(parsable)
+    val bpmnCreator = firstTrace match {
+      case Some(parsable) => new BpmnCreator(parsable, "00 test")
       case None => throw new Exception("No parsable created")
     }
 

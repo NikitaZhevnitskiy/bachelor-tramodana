@@ -11,11 +11,12 @@ object BpmnCreator {
   def main(args: Array[String]): Unit = { }
 }
 
-class BpmnCreator(val parsableData: BpmnParsable) {
+class BpmnCreator(val parsableData: BpmnParsable, val rootProcessName: String) {
 
   var branchCount = 1
+  val validRootProcessName = Utils.applyXmlIdFormat(rootProcessName)
 
-  var bpmnTree: Option[BpmnModelInstance] = parseToBpmn(parsableData)
+  var bpmnTree: Option[BpmnModelInstance] = parseToBpmn(parsableData, validRootProcessName)
   def getBpmnXmlStr: Option[String] = bpmnToString(bpmnTree.get)
 
   def getBpmnTree: Option[BpmnModelInstance] = bpmnTree
@@ -60,7 +61,7 @@ class BpmnCreator(val parsableData: BpmnParsable) {
     forkedChildren
   }
 
-  private def parseToBpmn(rootNode: BpmnParsable, pId: String = "#"): Option[BpmnModelInstance] = {
+  private def parseToBpmn(rootNode: BpmnParsable, pId: String): Option[BpmnModelInstance] = {
 
     try {
       val model = parse(rootNode, pId)
@@ -84,7 +85,7 @@ class BpmnCreator(val parsableData: BpmnParsable) {
     val nodeStack: Stack[BpmnParsable] = new Stack()
     var rootChildren = rootNode.getChildren match {
       case Nil => return modelInstance
-      case _ :: Nil => rootNode.getChildren
+      case head :: Nil => head :: Nil
       case _ :: _ => getForkedChildren(modelInstance, rootNode)
     }
 
@@ -97,10 +98,10 @@ class BpmnCreator(val parsableData: BpmnParsable) {
       children match {
         // no children -> node is a leaf, i.e. an end event
         case Nil =>
-          appendEndEvent(modelInstance, currentNode.getParentId, currentNode.getProcessId, currentNode.getOperationName)
+          appendEndEvent(modelInstance, currentNode)
         //appendElement(modelInstance, currentNode)
         case x =>
-          appendServiceTask(modelInstance, currentNode.getParentId, currentNode.getProcessId, currentNode.getOperationName)
+          appendServiceTask(modelInstance, currentNode)
           x match {
             case head :: Nil =>
               // one child -> node is a task leading to next node
@@ -118,23 +119,19 @@ class BpmnCreator(val parsableData: BpmnParsable) {
   }
 
   private def appendServiceTask[T <: FlowNode](mi: BpmnModelInstance,
-                                       parent_id: String,
-                                       nodeId: String,
-                                       nodeName: String): BpmnModelInstance = {
-    val parentelem: T = mi.getModelElementById(parent_id)
+                                               node: BpmnParsable): BpmnModelInstance = {
+    val parentelem: T = mi.getModelElementById(node.getParentId )
     parentelem.builder
-      .serviceTask(nodeId)
-      .name(nodeName).done()
+      .serviceTask(node.getProcessId)
+      .name(node.getOperationName).done()
   }
 
   private def appendEndEvent[T <: FlowNode](mi: BpmnModelInstance,
-                                    parent_id: String,
-                                    nodeId: String,
-                                    nodeName: String): BpmnModelInstance = {
-    val parentelem: T = mi.getModelElementById(parent_id)
+                                            node: BpmnParsable): BpmnModelInstance = {
+    val parentelem: T = mi.getModelElementById(node.getParentId)
     parentelem.builder
-      .endEvent(nodeId)
-      .name(nodeName).done()
+      .endEvent(node.getProcessId)
+      .name(node.getOperationName).done()
   }
 
   private def appendGateway[T <: FlowNode](mi: BpmnModelInstance,

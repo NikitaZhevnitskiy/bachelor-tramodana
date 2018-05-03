@@ -12,17 +12,15 @@ trait JsonSpanNodeProtocol extends JsonSpanProtocol with SprayJsonSupport with D
 
 class JsonToSpantreeParser(val jsonSrc: String) extends JsonSpanNodeProtocol {
 
+  private val rawSpanNodeList = getSpanNodeList
+  val preprocessedSpanNodeList = preprocess(rawSpanNodeList)
 
-  def preprocessSpan(s: Span): Span =
-    s.copy(spanId = Utils.applyXmlIdFormat(s.spanId),
-      parentId = Utils.applyXmlIdFormat(s.parentId))
-
-  def preprocessNode(n: SpanNode): SpanNode = {
-    val cleanedSpan = preprocessSpan(n.value)
-    n.copy(value = cleanedSpan)
+  private def preprocessNode(n: SpanNode): SpanNode = {
+    //val cleanedSpan = preprocessSpan(n.value)
+    Utils.formatParsableForXml(n).asInstanceOf[SpanNode]
   }
 
-  def flattenSpanNode(n: SpanNode): List[SpanNode] = {
+  private def flattenSpanNode(n: SpanNode): List[SpanNode] = {
     var nodes: List[SpanNode] = Nil
 
     @tailrec
@@ -40,9 +38,9 @@ class JsonToSpantreeParser(val jsonSrc: String) extends JsonSpanNodeProtocol {
     nodes
   }
 
-  def preprocessSpanNode(n: SpanNode): SpanNode = {
+  private def preprocessSpanNode(n: SpanNode): SpanNode = {
     var nodes: List[SpanNode] = flattenSpanNode(n)
-    nodes = nodes.map(node => node.copy(value = preprocessSpan(node.value)))
+    nodes = nodes.map(node => preprocessNode(node))
 
     var resNode = nodes.head
     nodes = nodes.tail
@@ -53,26 +51,21 @@ class JsonToSpantreeParser(val jsonSrc: String) extends JsonSpanNodeProtocol {
           nodes = xs
         }
       }
-      //val currentNode = nodes.head
-      //(resNode, nodes) = (
-      //  currentNode.copy( children = resNode :: currentNode.children ),
-      //  nodes.tail
-      // )
     }
     resNode
   }
 
-  def preprocess(list: List[SpanNode]): List[SpanNode] = {
+  private def preprocess(list: List[SpanNode]): List[SpanNode] = {
     list.map(node => preprocessSpanNode(node))
   }
 
   //TODO: link nodes by logical dependency (parent-child), not by reference (parentId-spanId)
-  def rebuildGenealogy(tree: SpanNode): Option[SpanNode] = None
+  private def rebuildGenealogy(tree: SpanNode): Option[SpanNode] = None
 
   //TODO: implement trace merging
-  def mergeTraces(traceList: List[SpanNode]): Option[SpanNode] = traceList.headOption
+  private def mergeTraces(traceList: List[SpanNode]): Option[SpanNode] = traceList.headOption
 
-  def getSpanNodeList: List[SpanNode] = {
+  private def getSpanNodeList: List[SpanNode] = {
     JsonParser(jsonSrc).convertTo[List[SpanNode]]
   }
 

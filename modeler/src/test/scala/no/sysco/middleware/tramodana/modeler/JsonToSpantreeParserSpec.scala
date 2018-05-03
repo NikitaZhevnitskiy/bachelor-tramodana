@@ -10,22 +10,34 @@ import scala.io.Source
 @RunWith(classOf[JUnitRunner])
 class JsonToSpantreeParserSpec extends WordSpec with JsonSpanProtocol{
 
+  val INPUT_FILES_DIRECTORY = "examples/input_for_modeler"
 
-  "A json string storing Spantree data" when {
-    "storing several Spantrees" should{
-      "parse to a list of Spantrees with the same count of Spantrees" in{
+  val jsonSource: String = Source
+    .fromFile(s"$INPUT_FILES_DIRECTORY/ROOT_OPERATION_SET_SPAN_TREES.json")
+    .getLines
+    .mkString
 
-        val INPUT_FILES_DIRECTORY = "examples/input_for_modeler"
-        val jsonSource: String = Source
-          .fromFile(s"$INPUT_FILES_DIRECTORY/ROOT_OPERATION_SET_SPAN_TREES.json")
-          .getLines
-          .mkString
+  "A json string storing Jaeger trace models" when {
+    "storing several trace models" should{
+      "parse to a list of SpanNodes with a size equal to the number of parsed trace models" in{
         val parser = new JsonToSpantreeParser(jsonSource)
-        val parsedSpans = parser.getSpanNodeList
-        assert(parsedSpans.size == 2)
-        val firstTree = parsedSpans.head
-        assert(firstTree.children.size == 1)
-
+        val spanNodes = parser.preprocessedSpanNodeList
+        assert(spanNodes.size == 2)
+      }
+      "parse each trace to a valid BPMN diagram" in {
+        val parser = new JsonToSpantreeParser(jsonSource)
+        val spanNodes = parser.preprocessedSpanNodeList
+        val xmls = spanNodes.map(sn => {
+          sn.printPretty()
+          new BpmnCreator(sn, sn.getOperationName).getBpmnXmlStr.get
+        })
+        var traceCount = 1
+        xmls.foreach(
+          x => {
+            Utils.writeToExampleDir(x,"separate_trace_model_" + traceCount)
+            traceCount += 1
+          }
+        )
       }
     }
   }
