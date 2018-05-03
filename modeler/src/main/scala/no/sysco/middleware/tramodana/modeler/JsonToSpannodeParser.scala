@@ -60,13 +60,35 @@ class JsonToSpannodeParser(val jsonSrc: String) extends JsonSpanNodeProtocol {
   }
 
   //TODO: link nodes by logical dependency (parent-child), not by reference (parentId-spanId)
-  private def rebuildGenealogy(tree: SpanNode): Option[SpanNode] = None
+  private def rebuildGenealogy(tree: SpanNode): SpanNode = tree
 
   //TODO: implement trace merging
-  private def mergeTraces(traceList: List[SpanNode]): Option[SpanNode] = traceList.headOption
+  private def mergeTraces(traceList: List[SpanNode]): Option[SpanNode] = {
+    var tree: SpanNodeTree = new SpanNodeTree
+    var edges: List[Edge] = traceList.flatMap( sn => splitTraceIntoEdges(Some(sn), List.empty))
+
+
+  }
+
+  @tailrec
+  private def splitTraceIntoEdges(trace: Option[SpanNode], edges: List[Edge]): List[Edge] = {
+    trace match {
+      case Some(SpanNode(s, x :: _)) => splitTraceIntoEdges(Some(x), edges :+ new Edge(s, Some(x.value)))
+      case Some(SpanNode(s, Nil)) => splitTraceIntoEdges(None, edges :+ new Edge(s, None))
+      case None => edges
+    }
+  }
+
 
   private def getSpanNodeList: List[SpanNode] = {
     JsonParser(jsonSrc).convertTo[List[SpanNode]]
+  }
+
+  class Edge(val from: Span, val to: Option[Span])
+
+  class SpanNodeTree {
+    var value = Nil
+    var children: List[SpanNodeTree] = List.empty
   }
 
 }
