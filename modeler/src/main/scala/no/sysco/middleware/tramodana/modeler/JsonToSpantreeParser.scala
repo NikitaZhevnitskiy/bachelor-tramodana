@@ -12,18 +12,10 @@ trait JsonSpanNodeProtocol extends JsonSpanProtocol with SprayJsonSupport with D
 
 class JsonToSpantreeParser(val jsonSrc: String) extends JsonSpanNodeProtocol {
 
-  def applyXmlIdFormat(pId: String): String = {
-    val pattern = "([^A-Za-z]+)".r
-    pId match {
-      case x if x.equals("#") => "id" ++ "_proc"
-      case pattern(_) => "id_" ++ pId
-      case _ => pId
-    }
-  }
 
   def preprocessSpan(s: Span): Span =
-    s.copy(spanId = applyXmlIdFormat(s.spanId),
-      parentId = applyXmlIdFormat(s.parentId))
+    s.copy(spanId = Utils.applyXmlIdFormat(s.spanId),
+      parentId = Utils.applyXmlIdFormat(s.parentId))
 
   def preprocessNode(n: SpanNode): SpanNode = {
     val cleanedSpan = preprocessSpan(n.value)
@@ -44,7 +36,7 @@ class JsonToSpantreeParser(val jsonSrc: String) extends JsonSpanNodeProtocol {
       }
     }
 
-    pp_iter(n.children.headOption)
+    pp_iter(Some(n))
     nodes
   }
 
@@ -74,9 +66,11 @@ class JsonToSpantreeParser(val jsonSrc: String) extends JsonSpanNodeProtocol {
     list.map(node => preprocessSpanNode(node))
   }
 
+  //TODO: link nodes by logical dependency (parent-child), not by reference (parentId-spanId)
   def rebuildGenealogy(tree: SpanNode): Option[SpanNode] = None
 
-  def mergeTrees(treeList: List[SpanNode]): Option[SpanNode] = treeList.headOption
+  //TODO: implement trace merging
+  def mergeTraces(traceList: List[SpanNode]): Option[SpanNode] = traceList.headOption
 
   def getSpanNodeList: List[SpanNode] = {
     JsonParser(jsonSrc).convertTo[List[SpanNode]]
