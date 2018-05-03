@@ -7,19 +7,20 @@ import no.sysco.middleware.tramodana.schema.Span
 object Utils {
   var counter: Int = 1
 
-  def createNode(parentId: String = "0", op: String = "op", procId: String = "proc", children: List[Node] = List.empty): Node = {
+  def createTestNode(parentId: String = "0", op: String = "op", procId: String = "proc", children: List[TestNode] = List.empty): TestNode = {
     val id = counter.toString
     counter += 1
-    new Node(
-      //op match { case "op" => op ++ id case _ => op},
-      op,
-      //procId match {case "proc" => procId ++ id case _ => procId },
-      procId,
-      children,
-      parentId
-    )
+    new TestNode( op, procId, children, parentId )
   }
 
+  def applyXmlIdFormat(pId: String): String = {
+    val pattern = "([^A-Za-z]+).*".r
+    pId match {
+      case x if x.equals("#") => "id" ++ "_proc"
+      case pattern(_) => "id_" ++ pId
+      case _ => pId
+    }
+  }
   def writeToExampleDir(content: String, fileNameWithoutExt: String): Unit = {
     val file = new File(s"examples/output_for_modeler/$fileNameWithoutExt.bpmn")
     val bufferedWriter = new BufferedWriter(new FileWriter(file))
@@ -75,13 +76,13 @@ case class SpanNode(value: Span, children: List[SpanNode]) extends BpmnParsable 
   }
 }
 
-case class Node(operationName: String,
-                processId: String,
-                children: List[Node],
-                parentId: String) extends BpmnParsable {
+case class TestNode(operationName: String,
+                    processId: String,
+                    children: List[TestNode],
+                    parentId: String) extends BpmnParsable {
 
-  self: Node =>
-  type T = Node
+  self: TestNode =>
+  type T = TestNode
 
   override def getChildren: List[T] = children
 
