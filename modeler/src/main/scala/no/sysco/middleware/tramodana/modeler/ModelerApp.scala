@@ -16,7 +16,7 @@ object ModelerApp extends App {
       .fromFile(s"$INPUT_FILES_DIRECTORY/ROOT_OPERATION_SET_SPAN_TREES.json")
       .getLines
       .mkString
-    val parser = new JsonToSpantreeParser(jsonSource)
+    val parser = new JsonToSpannodeParser(jsonSource)
     val processedTraces: List[SpanNode] =  parser.preprocessedSpanNodeList
     val firstTrace = processedTraces.headOption
 

@@ -8,7 +8,7 @@ import org.scalatest.junit.JUnitRunner
 import scala.io.Source
 
 @RunWith(classOf[JUnitRunner])
-class JsonToSpantreeParserSpec extends WordSpec with JsonSpanProtocol{
+class JsonToSpannodeParserSpec extends WordSpec with JsonSpanProtocol{
 
   val INPUT_FILES_DIRECTORY = "examples/input_for_modeler"
 
@@ -20,12 +20,12 @@ class JsonToSpantreeParserSpec extends WordSpec with JsonSpanProtocol{
   "A json string storing Jaeger trace models" when {
     "storing several trace models" should{
       "parse to a list of SpanNodes with a size equal to the number of parsed trace models" in{
-        val parser = new JsonToSpantreeParser(jsonSource)
+        val parser = new JsonToSpannodeParser(jsonSource)
         val spanNodes = parser.preprocessedSpanNodeList
         assert(spanNodes.size == 2)
       }
       "parse each trace to a valid BPMN diagram" in {
-        val parser = new JsonToSpantreeParser(jsonSource)
+        val parser = new JsonToSpannodeParser(jsonSource)
         val spanNodes = parser.preprocessedSpanNodeList
         val xmls = spanNodes.map(sn => {
           sn.printPretty()

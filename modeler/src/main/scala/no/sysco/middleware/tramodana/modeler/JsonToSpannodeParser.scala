@@ -10,7 +10,7 @@ trait JsonSpanNodeProtocol extends JsonSpanProtocol with SprayJsonSupport with D
   implicit def spanNodeFormat: JsonFormat[SpanNode] = lazyFormat(jsonFormat2(SpanNode))
 }
 
-class JsonToSpantreeParser(val jsonSrc: String) extends JsonSpanNodeProtocol {
+class JsonToSpannodeParser(val jsonSrc: String) extends JsonSpanNodeProtocol {
 
   private val rawSpanNodeList = getSpanNodeList
   val preprocessedSpanNodeList = preprocess(rawSpanNodeList)
