@@ -29,7 +29,7 @@ object SpanTreeBuilder extends JsonSpanProtocol {
         val rootSpanTree = SpanTree(root, List.empty)
         val sortedRootChildren = findSortedChildrenSpanTrees(root, spans)
         buildIter(rootSpanTree, sortedRootChildren, sortedRootChildren.size, spans)
-      case None => throw new IllegalArgumentException(s"Can not create SpanTree with given list: ${spans.toString}")
+      case None => throw new IllegalArgumentException(s"No Span with parent $parentId in list: ${spans.toString}")
     }
   }
 
