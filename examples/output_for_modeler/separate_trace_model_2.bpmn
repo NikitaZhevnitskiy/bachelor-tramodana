@@ -1,25 +1,37 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<definitions xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="definitions_78ae5892-81e3-47cd-8c64-a224b2048ae8" targetNamespace="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
+<definitions xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="definitions_3fd5158f-75d5-4cdc-b1d2-90210352f7a8" targetNamespace="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
   <process id="buyBookMethod" isExecutable="true">
     <startEvent id="id_-2609353140979866598" name="buyBookMethod">
-      <outgoing>sequenceFlow_f70f4630-ffdb-405c-a2b7-a9a288485f64</outgoing>
+      <outgoing>sequenceFlow_afe801ca-92d2-49e8-8b9e-cdd44405901c</outgoing>
     </startEvent>
+    <serviceTask id="id_-7676767676767676767" name="GET">
+      <incoming>sequenceFlow_afe801ca-92d2-49e8-8b9e-cdd44405901c</incoming>
+      <outgoing>sequenceFlow_cef75f6b-dfe7-4306-bf85-3491602ace1a</outgoing>
+    </serviceTask>
+    <sequenceFlow id="sequenceFlow_afe801ca-92d2-49e8-8b9e-cdd44405901c" sourceRef="id_-2609353140979866598" targetRef="id_-7676767676767676767"/>
     <endEvent id="id_2323232323232323232" name="getPriceMethod">
-      <incoming>sequenceFlow_f70f4630-ffdb-405c-a2b7-a9a288485f64</incoming>
+      <incoming>sequenceFlow_cef75f6b-dfe7-4306-bf85-3491602ace1a</incoming>
     </endEvent>
-    <sequenceFlow id="sequenceFlow_f70f4630-ffdb-405c-a2b7-a9a288485f64" sourceRef="id_-2609353140979866598" targetRef="id_2323232323232323232"/>
+    <sequenceFlow id="sequenceFlow_cef75f6b-dfe7-4306-bf85-3491602ace1a" sourceRef="id_-7676767676767676767" targetRef="id_2323232323232323232"/>
   </process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_9f0f4d93-5c5d-42d8-b308-cccb7a9748b4">
-    <bpmndi:BPMNPlane bpmnElement="buyBookMethod" id="BPMNPlane_48fc534d-712a-4a35-9c38-b0bcc1be5baa">
-      <bpmndi:BPMNShape bpmnElement="id_-2609353140979866598" id="BPMNShape_61a080f4-8113-4d93-98b2-c789dc818713">
+  <bpmndi:BPMNDiagram id="BPMNDiagram_506441a3-fa1c-4e1e-834d-9a5b4c584b97">
+    <bpmndi:BPMNPlane bpmnElement="buyBookMethod" id="BPMNPlane_2d3ffd37-c753-436f-b5ef-d05cfb43e812">
+      <bpmndi:BPMNShape bpmnElement="id_-2609353140979866598" id="BPMNShape_0269edb9-55e8-4131-9e5e-cc10ba65778b">
         <dc:Bounds height="36.0" width="36.0" x="100.0" y="100.0"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="id_2323232323232323232" id="BPMNShape_fc539b75-dbd8-49f4-9c1f-09e4a0e8db91">
-        <dc:Bounds height="36.0" width="36.0" x="186.0" y="100.0"/>
+      <bpmndi:BPMNShape bpmnElement="id_-7676767676767676767" id="BPMNShape_8a0f002e-7945-43d9-8f8b-0dbfff4cf939">
+        <dc:Bounds height="80.0" width="100.0" x="186.0" y="78.0"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge bpmnElement="sequenceFlow_f70f4630-ffdb-405c-a2b7-a9a288485f64" id="BPMNEdge_6cfb8fcc-7cc7-4f46-9e09-0a29931ae71c">
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow_afe801ca-92d2-49e8-8b9e-cdd44405901c" id="BPMNEdge_7057f074-0436-4a78-becb-d195ec9a5d8b">
         <di:waypoint x="136.0" y="118.0"/>
         <di:waypoint x="186.0" y="118.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape bpmnElement="id_2323232323232323232" id="BPMNShape_09e0f9e4-0728-4aa2-b5b5-99140ab01a6d">
+        <dc:Bounds height="36.0" width="36.0" x="336.0" y="100.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow_cef75f6b-dfe7-4306-bf85-3491602ace1a" id="BPMNEdge_9fd4af5a-604a-4752-a59e-f4df1dae0454">
+        <di:waypoint x="286.0" y="118.0"/>
+        <di:waypoint x="336.0" y="118.0"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

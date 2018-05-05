@@ -61,9 +61,17 @@ case class SpanNode(value: Span, children: List[SpanNode]) extends BpmnParsable 
 
   override def getChildren: List[SpanNode] = children
 
+  /**
+    * returns the argument SpanNode with updated children
+    * (SpanNode is immutable)
+    */
   override def addChild(node: SpanNode): SpanNode =
     new SpanNode(value, node :: children)
 
+  /**
+    * returns the argument SpanNode with updated children
+    * (SpanNode is immutable)
+    */
   override def addChildren(nodes: List[SpanNode]): SpanNode =
     new SpanNode(value, nodes ::: children)
 
