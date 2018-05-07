@@ -23,34 +23,56 @@ def getTopRootParentId(spanNodeList: List[SpanNode]):String =
 
 
   private def preprocessSpanNode(n: SpanNode): SpanNode = {
-    var nodes: List[SpanNode] = flattenSpanNode(n)
-    nodes = nodes.map(node => preprocessNode(node))
+    var nodes: List[SpanNode] = flattenSpanNode(n).map(node => preprocessNode(node))
 
-    var resNode = nodes.head
-    nodes = nodes.tail
-    while (nodes.nonEmpty) {
-      nodes match {
-        case x :: xs =>
-          resNode = x.copy(children = resNode :: x.children)
-          nodes = xs
+    @tailrec
+    def rebuildTrace(list: List[SpanNode], acc: SpanNode): SpanNode =
+      list match {
+        case x :: xs => rebuildTrace(xs, x.copy(children = acc :: x.children))
+        case Nil => acc
+      }
+
+    rebuildTrace(nodes.tail, nodes.head)
+  }
+
+  /**
+    * Format a node's parentId and spanId (processId)
+    * to be ready for BPMN xml
+    *
+    * @param n the node to format
+    * @return the formatted node
+    */
+  private def preprocessNode(n: SpanNode): SpanNode = {
+    Utils.formatParsableForXml(n).asInstanceOf[SpanNode]
+  }
+
+  /**
+    * Return a list of all nodes contained in a tree,
+    * each without its children
+    *
+    * @param n : the tree
+    * @return the list of nodes contained by the tree
+    */
+  private def flattenSpanNode(n: SpanNode): List[SpanNode] = {
+    @tailrec
+    def pp_iter(in: Option[SpanNode], acc: List[SpanNode]): List[SpanNode] = {
+      in match {
+        case Some(node) =>
+          pp_iter(node.children.headOption, node.copy(node.value, Nil) :: acc)
+        case None => acc
       }
     }
-    resNode
+
+    pp_iter(Some(n), List.empty)
   }
 
-  private def preprocess(list: List[SpanNode]): List[SpanNode] = {
-    list.map(node => preprocessSpanNode(node))
-  }
-
-  //TODO: implement trace merging
-  private def mergeTracesIntoTree(traceList: List[SpanNode], rootId: String): Option[SpanNode]= {
+  def mergeTracesIntoTree(traceList: List[SpanNode], rootId: String): Option[SpanNode] = {
     var edges: Set[SpanEdge] = traceList.flatMap(sn => splitTraceIntoEdges(Some(sn), Set.empty)).toSet
 
-    try
-      {
-        val tree = build(edges, rootId)
-        Some(tree)
-      }
+    try {
+      val tree = build(edges, rootId)
+      Some(tree)
+    }
     catch {
       case e: SerializationException =>
         println(e.getMessage)
@@ -59,15 +81,14 @@ def getTopRootParentId(spanNodeList: List[SpanNode]):String =
   }
 
 
-
-  private def build(edges: Set[SpanEdge], root: String): SpanNode = {
-    var rootEdge = edges.find(se => se.from.parentId.equals(root))
+  private def build(edges: Set[SpanEdge], rootId: String): SpanNode = {
+    var rootEdge = edges.find(se => se.from.parentId.equals(rootId))
     rootEdge match {
       case Some(r) =>
         val rootNode = SpanNode(r.from, Nil)
         val children = getChildrenSpanNodes(r.from, edges.toList)
         buildIter(rootNode, children, children.size, edges.toList)
-      case None => throw new IllegalArgumentException(s"Could not find node with parent '$root'")
+      case None => throw new IllegalArgumentException(s"Could not find node with parent '$rootId'")
     }
   }
 
@@ -103,13 +124,13 @@ def getTopRootParentId(spanNodeList: List[SpanNode]):String =
   }
 
 
-  private def getChildrenSpanNodes(root: Span, edges: List[SpanEdge]): List[SpanNode]={
+  private def getChildrenSpanNodes(root: Span, edges: List[SpanEdge]): List[SpanNode] = {
     edges.filter(e => spanEq(e.from, root)) // take all edges with 'root' as origin
-      .flatMap( e => e.to.toSet) // all None become empty sets and disappear. All Some aggregate into one list
-      .map( to => SpanNode(to.copy(parentId = root.spanId),Nil))  // adjust ancestry
+      .flatMap(e => e.to.toSet) // all None become empty sets and disappear. All Some aggregate into one list
+      .map(to => SpanNode(to.copy(parentId = root.spanId), Nil)) // adjust ancestry
   }
 
-  def spanEq(lhs: Span, rhs: Span): Boolean={
+  def spanEq(lhs: Span, rhs: Span): Boolean = {
     (
       lhs.process.get.serviceName.equals(rhs.process.get.serviceName)
         && lhs.operationName.equals(rhs.operationName)
@@ -125,7 +146,7 @@ def getTopRootParentId(spanNodeList: List[SpanNode]):String =
     }
   }
 
-  private def getSpanNodeList(js:String): List[SpanNode] = try {
+  def getSpanNodeList(js: String): List[SpanNode] = try {
     JsonParser(js).convertTo[List[SpanNode]]
   } catch {
     case e: DeserializationException =>
