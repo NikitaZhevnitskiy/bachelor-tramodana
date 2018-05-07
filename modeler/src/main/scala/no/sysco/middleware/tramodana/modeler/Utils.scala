@@ -10,20 +10,26 @@ object Utils {
   def createTestNode(parentId: String = "0", op: String = "op", procId: String = "proc", children: List[TestNode] = List.empty): TestNode = {
     val id = counter.toString
     counter += 1
-    new TestNode( op, procId, children, parentId )
+    new TestNode(op, procId, children, parentId)
   }
 
   def applyXmlIdFormat(inputId: String): String = {
-    val badChars = " #$()={}[]@".toSet
-    val pId = inputId.map( c => if(badChars.contains(c)) '_' else c)
-    val pattern = "([^A-Za-z]+).*".r
+    val goodChars = (('A' to 'Z') ++ ('a' to 'z') ++ ('0' to '9')).toSet
+    val pId = inputId.map(c => if (goodChars.contains(c)) c else '_')
+    val pattern = "([^A-Za-z]+).*".r // match against all that doesn't start with alpha char
     pId match {
-      case x if x.equals("#") => "id" ++ "_proc"
       case pattern(_) => "id_" ++ pId
       case _ => pId
     }
   }
 
+  /**
+    * Format the parentId and processId of a BpmnParsable node
+    * to be ready for use as XML parameter
+    *
+    * @param n the node
+    * @return the node with formatted parent- and processId
+    */
   def formatParsableForXml(n: BpmnParsable): BpmnParsable = {
     val validProcessId = applyXmlIdFormat(n.getProcessId)
     val validParentId = applyXmlIdFormat(n.getParentId)
@@ -88,7 +94,7 @@ case class SpanNode(value: Span, children: List[SpanNode]) extends BpmnParsable 
       print("|-")
       indent ++= "| "
     }
-    println(getProcessId)
+    println(getOperationName ++ " - (" ++ getProcessId ++ ")")
     for (i <- getChildren.indices) {
       getChildren(i).printPrettyIter(indent, i == (getChildren.size - 1))
     }
