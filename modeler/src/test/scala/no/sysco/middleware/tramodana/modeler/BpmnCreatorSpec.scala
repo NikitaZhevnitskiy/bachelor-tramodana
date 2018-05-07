@@ -117,16 +117,6 @@ class BpmnCreatorSpec extends WordSpec with BeforeAndAfter {
         assert(res.nonEmpty)
       }
     }
-
-    "containing a broken child-parent link (parentId != the parent's processId)" should {
-      "parse to BPMN" in {
-        val root = Utils.createTestNode("0", "Log in", "start_1")
-        val orphanNode = Utils.createTestNode("wrong_parent_id", "lone child", "end_1")
-        val parentNode = root.addChild(orphanNode)
-        parentNode.printPretty()
-        assert(new BpmnCreator(parentNode, parentNode.operationName).getBpmnTree.nonEmpty)
-      }
-    }
   }
 
   "A verified BpmnParsable file" when {
