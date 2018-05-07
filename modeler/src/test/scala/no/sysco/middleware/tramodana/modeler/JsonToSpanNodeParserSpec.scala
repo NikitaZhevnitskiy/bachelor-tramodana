@@ -17,10 +17,10 @@ class JsonToSpanNodeParserSpec extends WordSpec with BeforeAndAfter with JsonSpa
     .getLines
     .mkString
   var spanNodes: List[SpanNode] = List.empty
-  val parser = new JsonToSpanNodeParser(jsonSource)
+  val parser = new JsonToSpanNodeParser
 
   before {
-    spanNodes = parser.preprocessedSpanNodeList
+    spanNodes = parser.getPreprocessedSpanNodeList(jsonSource)
   }
 
   "A json string storing Jaeger trace models" when {
@@ -29,9 +29,9 @@ class JsonToSpanNodeParserSpec extends WordSpec with BeforeAndAfter with JsonSpa
         assert(spanNodes.size == 2)
       }
       "merge to a single BPMN tree" in {
-        val tree = parser.mergedSpanNodeWorkflow
-        tree.get.printPretty()
-        val bpmn = new BpmnCreator(tree.get, tree.get.getOperationName)
+        val tree = parser.parse(jsonSource).get.asInstanceOf[SpanNode]
+        tree.printPretty()
+        val bpmn = new BpmnCreator(tree, tree.getOperationName)
         val xml = bpmn.getBpmnXmlStr.get
         Utils.writeToExampleDir(xml, "aggregated_workflow")
       }

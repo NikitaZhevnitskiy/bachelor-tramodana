@@ -9,36 +9,18 @@ trait JsonSpanNodeProtocol extends JsonSpanProtocol with DefaultJsonProtocol {
   implicit def spanNodeFormat: JsonFormat[SpanNode] = lazyFormat(jsonFormat2(SpanNode))
 }
 
-class JsonToSpanNodeParser(val jsonSrc: String) extends JsonSpanNodeProtocol {
-
-  private val rawSpanNodeList = getSpanNodeList(jsonSrc)
-  val preprocessedSpanNodeList: List[SpanNode] = preprocess(rawSpanNodeList)
-  private val topRootParentId = preprocessedSpanNodeList.head.getParentId
-  val mergedSpanNodeWorkflow: Option[SpanNode] = mergeTracesIntoTree(preprocessedSpanNodeList, topRootParentId)
-
-  private def preprocessNode(n: SpanNode): SpanNode = {
-    Utils.formatParsableForXml(n).asInstanceOf[SpanNode]
+class JsonToSpanNodeParser extends JsonSpanNodeProtocol {
+  def parse(jsonSource: String): Option[BpmnParsable] = {
+    val preprocessed = getSpanNodeList(jsonSource).map(sn => preprocessSpanNode(sn))
+    val rootParentId = preprocessed.head.getParentId
+    mergeTracesIntoTree(preprocessed, rootParentId)
   }
 
-  /**
-    * Transform a tree into a list of all its nodes
-    * @param n : the tree
-    * @return the list of nodes contained by the tree
-    */
-  private def flattenSpanNode(n: SpanNode): List[SpanNode] = {
-    var nodes: List[SpanNode] = Nil
-    @tailrec
-    def pp_iter(in: Option[SpanNode]): Unit = {
-      in match {
-        case Some(node) =>
-          nodes = node.copy(node.value, Nil) :: nodes
-          pp_iter(node.children.headOption)
-        case None => ()
-      }
-    }
-    pp_iter(Some(n))
-    nodes
-  }
+def getTopRootParentId(spanNodeList: List[SpanNode]):String =
+    spanNodeList.head.getParentId
+  def getPreprocessedSpanNodeList(jsonSrc: String): List[SpanNode] =
+    getSpanNodeList(jsonSrc).map(sn => preprocessSpanNode(sn))
+
 
   private def preprocessSpanNode(n: SpanNode): SpanNode = {
     var nodes: List[SpanNode] = flattenSpanNode(n)

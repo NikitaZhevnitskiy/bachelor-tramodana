@@ -17,8 +17,8 @@ object ModelerApp extends App {
       .getLines
       .mkString
 
-    val parser: JsonToSpanNodeParser = new JsonToSpanNodeParser(jsonSource)
-    val tree:  Option[BpmnParsable] = parser.mergedSpanNodeWorkflow
+    val parser: JsonToSpanNodeParser = new JsonToSpanNodeParser()
+    val tree:  Option[BpmnParsable] = parser.parse(jsonSource)
 
     val bpmnCreator = tree match {
       case Some(parsable) => new BpmnCreator(parsable, "00 test")
