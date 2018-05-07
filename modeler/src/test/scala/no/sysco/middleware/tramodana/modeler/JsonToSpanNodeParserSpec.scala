@@ -38,8 +38,14 @@ class JsonToSpanNodeParserSpec extends WordSpec with BeforeAndAfter with JsonSpa
       "parse each trace to a valid BPMN diagram" in {
         val xmls = spanNodes.map(sn => {
           sn.printPretty()
-          new BpmnCreator(sn, sn.getOperationName).getBpmnXmlStr.get
+          parser.mergeTracesIntoTree(sn :: Nil, "id_0")
         })
+          .flatMap(sn => sn.toSet)
+          .map(sn => {
+            sn.printPretty()
+            new BpmnCreator(sn, sn.getOperationName).getBpmnXmlStr.get
+          })
+
         var traceCount = 1
         xmls.foreach(
           x => {
@@ -62,14 +68,14 @@ class JsonToSpanNodeParserSpec extends WordSpec with BeforeAndAfter with JsonSpa
         println
         println("All duplicates eliminated: ")
         resultSet.foreach(e => println(e))
-        assert(resultSet.size == 5)
+        assert(resultSet.size == 6)
       }
       "eliminates all duplicate Edges" in {
         println(" flatmap + toSet == reduce ")
         val resultSet: Set[SpanEdge] = spanNodes.flatMap(sn => parser.splitTraceIntoEdges(Some(sn), Set.empty))
           .toSet
         resultSet.foreach(se => println(se))
-        assert(resultSet.size == 5)
+        assert(resultSet.size == 6)
       }
     }
   }
