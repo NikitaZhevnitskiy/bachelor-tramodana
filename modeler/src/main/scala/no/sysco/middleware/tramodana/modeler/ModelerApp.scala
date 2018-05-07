@@ -10,7 +10,7 @@ object ModelerApp extends App {
 
   val INPUT_FILES_DIRECTORY = "examples/input_for_modeler"
 
-  def run: Unit = {
+  def run(): Unit = {
 
     val jsonSource: String = Source
       .fromFile(s"$INPUT_FILES_DIRECTORY/ROOT_OPERATION_SET_SPAN_TREES.json")
@@ -29,6 +29,6 @@ object ModelerApp extends App {
     println(bpmnXmlString)
   }
 
-  run
+  run()
 
 }

@@ -7,12 +7,27 @@ import no.sysco.middleware.tramodana.schema.Span
 object Utils {
   var counter: Int = 1
 
+  /**
+    * Helper constructor method with defaults for TestNode
+    * @param parentId
+    * @param op
+    * @param procId
+    * @param children
+    * @return
+    */
   def createTestNode(parentId: String = "0", op: String = "op", procId: String = "proc", children: List[TestNode] = List.empty): TestNode = {
     val id = counter.toString
     counter += 1
     new TestNode(op, procId, children, parentId)
   }
 
+  /**
+    * Replace all non-alphanum characters by '_' and
+    * enforce beginning of string by "id_" if not starting
+    * by letter character
+    * @param inputId
+    * @return
+    */
   def applyXmlIdFormat(inputId: String): String = {
     val goodChars = (('A' to 'Z') ++ ('a' to 'z') ++ ('0' to '9')).toSet
     val pId = inputId.map(c => if (goodChars.contains(c)) c else '_')
@@ -38,14 +53,26 @@ object Utils {
     validNode
   }
 
-  def writeToExampleDir(content: String, fileNameWithoutExt: String): Unit = {
-    val file = new File(s"examples/output_for_modeler/$fileNameWithoutExt.bpmn")
+  /**
+    * Helper method to write string content to a file
+    * @param content the content of the file
+    * @param fileNameWithoutExt the name of the output file without extension
+    * @param ext the file extension - defaults to 'bpmn'
+    */
+  def writeToExampleDir(content: String, fileNameWithoutExt: String, ext: String = "bpmn"): Unit = {
+    val file = new File(s"examples/output_for_modeler/$fileNameWithoutExt.$ext")
     val bufferedWriter = new BufferedWriter(new FileWriter(file))
     bufferedWriter.write(content)
     bufferedWriter.close()
   }
 }
 
+/**
+  * This class is basically the SpanTree model from the Schema module
+  * implementing the BpmnParsable trait
+  * @param value
+  * @param children
+  */
 case class SpanNode(value: Span, children: List[SpanNode]) extends BpmnParsable {
   override type T = SpanNode
 
@@ -53,14 +80,14 @@ case class SpanNode(value: Span, children: List[SpanNode]) extends BpmnParsable 
 
   override def setParentId(id: String): SpanNode = {
     val span = value.copy(parentId = id)
-    new SpanNode(span, children)
+    SpanNode(span, children)
   }
 
   override def getProcessId: String = value.spanId
 
   override def setProcessId(id: String): SpanNode = {
     val span = value.copy(spanId = id)
-    new SpanNode(span, children)
+    SpanNode(span, children)
   }
 
   override def getOperationName: String = value.operationName
@@ -71,15 +98,13 @@ case class SpanNode(value: Span, children: List[SpanNode]) extends BpmnParsable 
     * returns the argument SpanNode with updated children
     * (SpanNode is immutable)
     */
-  override def addChild(node: SpanNode): SpanNode =
-    new SpanNode(value, node :: children)
+  override def addChild(node: SpanNode): SpanNode = SpanNode(value, node :: children)
 
   /**
     * returns the argument SpanNode with updated children
     * (SpanNode is immutable)
     */
-  override def addChildren(nodes: List[SpanNode]): SpanNode =
-    new SpanNode(value, nodes ::: children)
+  override def addChildren(nodes: List[SpanNode]): SpanNode = SpanNode(value, nodes ::: children)
 
   def printPretty(): Unit = printPrettyIter("", last = true)
 
@@ -101,6 +126,15 @@ case class SpanNode(value: Span, children: List[SpanNode]) extends BpmnParsable 
   }
 }
 
+/**
+  * Test class for SpanTree, requiring only BpmnParsable-essential
+  * arguments (instead of having to deal with generating all other DTOs
+  * from Schema module)
+  * @param operationName
+  * @param processId
+  * @param children
+  * @param parentId
+  */
 case class TestNode(operationName: String,
                     processId: String,
                     children: List[TestNode],
