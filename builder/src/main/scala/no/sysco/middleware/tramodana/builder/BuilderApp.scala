@@ -9,7 +9,7 @@ import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig, NewTopic}
 import org.apache.kafka.common.errors.TopicExistsException
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams._
-import org.apache.kafka.streams.kstream.KStream
+import org.apache.kafka.streams.kstream.{KStream, Predicate}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionException
@@ -110,9 +110,20 @@ object BuilderApp extends App with JsonSpanProtocol {
 
     tracesSource.mapValues(v => {
       val spans = JsonParser(v).convertTo[List[Span]]
-      val tree = SpanTreeBuilder.build(spans)
-      tree.toJson.toString()
+      var suggestedTree = EMPTY_KEY
+      try {
+        val tree = SpanTreeBuilder.build(spans)
+        suggestedTree = tree.toJson.toString()
+      }
+      catch{
+        case iae: IllegalArgumentException => println("Illegal argument exception : \n"+spans.toJson + "\n")
+        case e : Exception => println(s"Exception :\n $spans \n")
+      }
+      val tree1 = suggestedTree
+      tree1
     })
+      .filterNot((k,v) => v.toString.equalsIgnoreCase(EMPTY_KEY))
+      .peek((k,v)=>println(k))
       .to(Topic.PROCESSED_TRACES)
 
 //    builder.stream[String, String](TRACES)
