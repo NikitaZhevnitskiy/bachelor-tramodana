@@ -16,6 +16,7 @@ object Topic {
   final val ROOT_OPERATION_SET_SEQ_SPANS_TABLE = "root-operation-set-seq-spans-table"
   final val ROOT_OPERATION_SET_SPAN_TREES = "root-operation-set-spantree"
   final val ROOT_OPERATION_SET_SPAN_TREES_TABLE = "root-operation-set-spantree-table"
+  final val ROOT_OPERATION_BPMN_XML = "root-operation-bpmn-xml"
 
 
   // utils

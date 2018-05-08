@@ -17,10 +17,10 @@ class JsonToSpanNodeParserSpec extends WordSpec with BeforeAndAfter with JsonSpa
     .getLines
     .mkString
   var spanNodes: List[SpanNode] = List.empty
-  val parser = new JsonToSpanNodeParser
+//  val parser = new JsonToSpanNodeParser
 
   before {
-    spanNodes = parser.getPreprocessedSpanNodeList(jsonSource)
+    spanNodes = JsonToSpanNodeParser.getPreprocessedSpanNodeList(jsonSource)
   }
 
   "A json string storing Jaeger trace models" when {
@@ -29,7 +29,7 @@ class JsonToSpanNodeParserSpec extends WordSpec with BeforeAndAfter with JsonSpa
         assert(spanNodes.size == 2)
       }
       "merge to a single BPMN tree" in {
-        val tree = parser.parse(jsonSource).get.asInstanceOf[SpanNode]
+        val tree = JsonToSpanNodeParser.parse(jsonSource).get.asInstanceOf[SpanNode]
         tree.printPretty()
         val bpmn = new BpmnCreator(tree, tree.getOperationName)
         val xml = bpmn.getBpmnXmlStr.get
@@ -38,7 +38,7 @@ class JsonToSpanNodeParserSpec extends WordSpec with BeforeAndAfter with JsonSpa
       "parse each trace to a valid BPMN diagram" in {
         val xmls = spanNodes.map(sn => {
           sn.printPretty()
-          parser.mergeTracesIntoTree(sn :: Nil, "id_0")
+          JsonToSpanNodeParser.mergeTracesIntoTree(sn :: Nil, "id_0")
         })
           .flatMap(sn => sn.toSet)
           .map(sn => {
@@ -57,7 +57,7 @@ class JsonToSpanNodeParserSpec extends WordSpec with BeforeAndAfter with JsonSpa
       "convert to a list of Edge objects" in {
         println
         println("Parsing SpanNode tree to list of edges: ")
-        val resultSet = spanNodes.map(n => parser.splitTraceIntoEdges(Some(n), Set.empty))
+        val resultSet = spanNodes.map(n => JsonToSpanNodeParser.splitTraceIntoEdges(Some(n), Set.empty))
           .map(es => {
             println("---- Node count: " + es.size ++ "------")
             es.foreach(e => println(e))
@@ -72,7 +72,7 @@ class JsonToSpanNodeParserSpec extends WordSpec with BeforeAndAfter with JsonSpa
       }
       "eliminates all duplicate Edges" in {
         println(" flatmap + toSet == reduce ")
-        val resultSet: Set[SpanEdge] = spanNodes.flatMap(sn => parser.splitTraceIntoEdges(Some(sn), Set.empty))
+        val resultSet: Set[SpanEdge] = spanNodes.flatMap(sn => JsonToSpanNodeParser.splitTraceIntoEdges(Some(sn), Set.empty))
           .toSet
         resultSet.foreach(se => println(se))
         assert(resultSet.size == 6)
@@ -85,12 +85,12 @@ class JsonToSpanNodeParserSpec extends WordSpec with BeforeAndAfter with JsonSpa
       "return true if they share the same operationName and Service" in {
         val span1 = spanNodes.head.value
         val equal_to_span_1 = spanNodes.last.value
-        assert(parser.spanEq(span1, equal_to_span_1))
+        assert(JsonToSpanNodeParser.spanEq(span1, equal_to_span_1))
       }
       "return false if operationName and/or Service are not the same" in {
         val span1 = spanNodes.head.value
         val not_equal_to_span1 = spanNodes.head.children.head.value
-        assert(!parser.spanEq(span1, not_equal_to_span1))
+        assert(!JsonToSpanNodeParser.spanEq(span1, not_equal_to_span1))
       }
     }
   }
