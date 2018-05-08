@@ -40,6 +40,9 @@ allprojects {
                 [group: "com.datastax.cassandra", name: "cassandra-driver-extras", version: "3.4.0"],
                 [group: "com.datastax.cassandra", name: "cassandra-driver-mapping", version: "3.4.0"],
 
+                // logger
+                [ group: "org.slf4j", name: "slf4j-api", version: "1.7.25"],
+                [group: "org.slf4j", name: "slf4j-log4j12", version: "1.7.25"],
 
                 // alpakka
                     // Kafka [sink, source]
