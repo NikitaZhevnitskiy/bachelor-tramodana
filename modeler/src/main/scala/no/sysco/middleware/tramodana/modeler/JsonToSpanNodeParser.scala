@@ -9,7 +9,7 @@ trait JsonSpanNodeProtocol extends JsonSpanProtocol with DefaultJsonProtocol {
   implicit def spanNodeFormat: JsonFormat[SpanNode] = lazyFormat(jsonFormat2(SpanNode))
 }
 
-class JsonToSpanNodeParser extends JsonSpanNodeProtocol {
+object JsonToSpanNodeParser extends JsonSpanNodeProtocol {
   def parse(jsonSource: String): Option[BpmnParsable] = {
     val preprocessed = getSpanNodeList(jsonSource).map(sn => preprocessSpanNode(sn))
     val rootParentId = preprocessed.head.getParentId
