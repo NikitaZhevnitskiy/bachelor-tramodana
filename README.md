@@ -21,13 +21,16 @@ or examples/[TraceGenApp2](https://github.com/NikitaZhevnitskiy/TraceGenApp2)
 ### UP application TRAMODANA
 5. Run ConnectorApp
 6. Check [localhost:3030](http://localhost:3030)
+7. Run Builder
+8. Run Modeler
 
-## Mock backend
+
+## Mock backend (todo: remove)
 Install [json-server](https://github.com/typicode/json-server)
 1. Exec `json-server models.json --port 3004`
 2. Check [https://localhost:3004](https://localhost:3004)
-## Cassandra data samples
 
+## Cassandra data samples
 [Cassanra docker images docs](https://hub.docker.com/_/cassandra/).
 Samples contains snapshot of cassandra db, with 3 traces from [Jorge's project](https://github.com/jeqo/poc-opentrancing-jvm)
 Make sure that docker user has permissions r/w/e to folder ./cassandra/data-sample: `chmod -R 777 /cassandra`
