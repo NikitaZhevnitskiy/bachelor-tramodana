@@ -31,7 +31,7 @@ allprojects {
                 // Kafka
                 [group: 'org.apache.kafka', name: 'kafka-streams', version: "$kafkaV"],
 
-                // alpakka Cassandra connector
+                // Cassandra driver
                 [group: "com.datastax.cassandra", name: "cassandra-driver-core", version: "3.4.0"],
 
                 // remove later
@@ -49,6 +49,10 @@ allprojects {
                 [group: "com.typesafe.akka", name: "akka-stream-kafka_$scalaMajor", version: "0.20"],
                     // Cassandra [sink, source]
                 [group: "com.lightbend.akka", name: "akka-stream-alpakka-cassandra_$scalaMajor", version: "0.18"],
+
+                // akka http
+                [group: "com.typesafe.akka", name: "akka-http_$scalaMajor",   version: "10.1.1"],
+                [group: "com.typesafe.akka", name: "akka-stream_$scalaMajor", version: "2.5.11"],
 
                 // json parser
                 [group: 'com.typesafe.akka', name: "akka-http-spray-json_$scalaMajor", version: "$akkaHttpV"],

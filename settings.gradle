@@ -8,4 +8,4 @@
  */
 
 rootProject.name = 'bachelor-tramodana'
-include 'builder', 'connector', 'modeler' , 'schema'
+include 'builder', 'connector', 'modeler' , 'schema', 'query'
