@@ -1,0 +1,7 @@
+---
+version: '3.6'
+services:
+  connector:
+    build: ./connector
+    image: tramodana/connector
+    network_mode: host
