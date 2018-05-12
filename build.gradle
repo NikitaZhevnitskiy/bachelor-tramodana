@@ -40,10 +40,10 @@ allprojects {
 
                 // json parser
                 [group: 'com.typesafe.akka', name: "akka-http-spray-json_$scalaMajor", version: "$akkaHttpV"],
-
-                // Camunda
-                [group: 'org.camunda.bpm', name: 'camunda-engine', version: '7.8.0'],
-                [group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.7.0"]
+//
+//                // Camunda
+//                [group: 'org.camunda.bpm', name: 'camunda-engine', version: '7.8.0'],
+//                [group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.7.0"]
         )
         testCompile(
                 [group: "org.scalatest", name: "scalatest_$scalaMajor", version: "3.0.4"],
