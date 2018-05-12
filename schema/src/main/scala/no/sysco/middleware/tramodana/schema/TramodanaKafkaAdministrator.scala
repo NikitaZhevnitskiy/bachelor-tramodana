@@ -43,9 +43,9 @@ object TramodanaKafkaAdministrator {
     }
   }
 
-  def addShutdownHook(streams: KafkaStreams, latch: CountDownLatch): Unit = {
+  def addShutdownHook(streams: KafkaStreams, latch: CountDownLatch, appName: String): Unit = {
     // attach shutdown handler to catch control-c
-    Runtime.getRuntime.addShutdownHook(new Thread("streams-experiments-shutdown-hook") {
+    Runtime.getRuntime.addShutdownHook(new Thread(s"$appName-shutdown-hook") {
       override def run(): Unit = {
         streams.close()
         latch.countDown()

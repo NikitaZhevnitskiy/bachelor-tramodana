@@ -26,5 +26,5 @@ object QueryApp extends App {
   // run http server
   val bindingFuture = Http().bindAndHandle(routes.route, config.http.host, config.http.port)
   // run streams
-  TramodanaKafkaAdministrator.addShutdownHook(streamsService.streams, new CountDownLatch(1))
+  TramodanaKafkaAdministrator.addShutdownHook(streamsService.streams, new CountDownLatch(1), config.name)
 }
