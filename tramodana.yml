@@ -1,0 +1,24 @@
+---
+version: '3.6'
+services:
+
+  builder:
+    build: ./builder
+    image: tramodana/builder
+    network_mode: host
+
+  modeler:
+    build: ./modeler
+    image: tramodana/modeler
+    network_mode: host
+    depends_on:
+      - builder
+
+  query:
+    build: ./query
+    image: tramodana/query
+    ports:
+      - "8888:8888"
+    network_mode: host
+#    depends_on:
+#      - modeler
