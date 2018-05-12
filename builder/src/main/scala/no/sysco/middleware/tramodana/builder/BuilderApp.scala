@@ -24,33 +24,34 @@ object BuilderApp extends App with JsonSpanProtocol {
   def start(): Unit = {
     val builderConfig: AppConfig.BuilderServerConfig = AppConfig.buildServerConfig()
     val props = getProps(builderConfig.name, builderConfig.kafkaConfig.bootstrapServers)
-    preStart(props)
+
+    TramodanaKafkaAdministrator.preStart(props)
 
     val builder = new StreamsBuilder
     val topology = buildTopology(builder)
     val streams = new KafkaStreams(topology, props)
 
-    addShutdownHook(streams, new CountDownLatch(1))
+    TramodanaKafkaAdministrator.addShutdownHook(streams, new CountDownLatch(1), builderConfig.name)
   }
 
-  def addShutdownHook(streams: KafkaStreams, latch: CountDownLatch): Unit = {
-    // attach shutdown handler to catch control-c
-    Runtime.getRuntime.addShutdownHook(new Thread("streams-experiments-shutdown-hook") {
-      override def run(): Unit = {
-        streams.close()
-        latch.countDown()
-      }
-    })
-
-    try {
-      streams.start()
-      latch.await()
-    } catch {
-      case e: Throwable =>
-        System.exit(1)
-    }
-    System.exit(0)
-  }
+//  def addShutdownHook(streams: KafkaStreams, latch: CountDownLatch): Unit = {
+//    // attach shutdown handler to catch control-c
+//    Runtime.getRuntime.addShutdownHook(new Thread("streams-experiments-shutdown-hook") {
+//      override def run(): Unit = {
+//        streams.close()
+//        latch.countDown()
+//      }
+//    })
+//
+//    try {
+//      streams.start()
+//      latch.await()
+//    } catch {
+//      case e: Throwable =>
+//        System.exit(1)
+//    }
+//    System.exit(0)
+//  }
 
   def getProps(appName: String, kafkaBootstrapServer: String): Properties = {
     val props = new Properties
@@ -110,37 +111,12 @@ object BuilderApp extends App with JsonSpanProtocol {
 
     tracesSource.mapValues(v => {
       val spans = JsonParser(v).convertTo[List[Span]]
-      var suggestedTree = EMPTY_KEY
-      try {
-        val tree = SpanTreeBuilder.build(spans)
-        suggestedTree = tree.toJson.toString()
-      }
-      catch{
-        case iae: IllegalArgumentException => println("Illegal argument exception : \n"+spans.toJson + "\n")
-        case e : Exception => println(s"Exception :\n $spans \n")
-      }
-      val tree1 = suggestedTree
-      tree1
+      val tree = SpanTreeBuilder.build(spans)
+      tree.toJson.toString()
     })
-      .filterNot((k,v) => v.toString.equalsIgnoreCase(EMPTY_KEY))
-      .peek((k,v)=>println(k))
+//      .filterNot((k,v) => v.toString.equalsIgnoreCase(EMPTY_KEY))
+//      .peek((k,v)=>println(k))
       .to(Topic.PROCESSED_TRACES)
-
-//    builder.stream[String, String](TRACES)
-//      .map[String, String]((key, value) => {
-//      try {
-//        val spans = JsonParser(value).convertTo[List[Span]]
-//        val tree = SpanTreeBuilder.build(spans)
-//        val jsonTree : String = tree.toJson.toString()
-//        KeyValue.pair(key,jsonTree)
-//      }catch {
-//        case _: Exception => KeyValue.pair(EMPTY_KEY,EMPTY_KEY)
-//      }
-//    })
-//      .peek((k,v)=>println(s"HERE: $k \n $v"))
-//      .filterNot((k,v) => EMPTY_KEY.equalsIgnoreCase(k.trim))
-//      .peek((k,v)=>println(s"HERE: $k \n $v"))
-//      .to(PROCESSED_TRACES)
 
 
     /**
@@ -217,14 +193,12 @@ object BuilderApp extends App with JsonSpanProtocol {
     })
       .to(Topic.ROOT_OPERATION_SET_SEQ_SPANS)
 
-//    val tableSetSeqSpans : KTable[String, String] = builder
-//      .table(
-//        ROOT_OPERATION_SET_SEQ_SPANS,
-//        Materialized.as[String, String, KeyValueStore[Bytes, Array[Byte] ]](ROOT_OPERATION_SET_SEQ_SPANS_TABLE))
 
-
-
-    // 10 alternatively build [root-operation-name, SpanTree] -> [root-operation-name, Set[SpanTree]]
+    /**
+      * 10 build [root-operation-name, SpanTree] -> [root-operation-name, Set[SpanTree] ]
+      * input: ROOT_OPERATION_SET_SEQ_SPANS [root-operation-name, List[ Seq[Span] ]
+      * output: ROOT_OPERATION_SET_SPAN_TREES [root-operation-name, Set[ Seq[Span] ] ]
+      * */
     builder.stream[String, String](Topic.ROOT_OPERATION_SET_SEQ_SPANS)
       .map[String, String]((k,v)=> {
         val setSeqSpans = JsonParser(v).convertTo[Set[Seq[Span]]]
@@ -232,10 +206,6 @@ object BuilderApp extends App with JsonSpanProtocol {
         KeyValue.pair[String, String](k,setOfTrees.toJson.toString)
       })
       .to(Topic.ROOT_OPERATION_SET_SPAN_TREES)
-
-//    val tableSetSpanTrees : KTable[String, String] = builder
-//      .table(ROOT_OPERATION_SET_SPAN_TREES,
-//        Materialized.as[String, String, KeyValueStore[Bytes, Array[Byte] ]](ROOT_OPERATION_SET_SPAN_TREES_TABLE))
 
 
     builder.build
@@ -257,42 +227,6 @@ object BuilderApp extends App with JsonSpanProtocol {
       startTime = 0l,
       tags = Option.empty
     )
-  }
-
-  /**
-    * CREATE TOPICS in PRE_START stage
-    **/
-
-  //  // with existing props
-
-  //
-  def preStart(properties: Properties): Unit = {
-
-    val adminClient: AdminClient = AdminClient.create(properties)
-    val newTopics =
-      Seq(
-        new NewTopic(Topic.SPANS_JSON_ORIGINAL, 1, 1),
-        new NewTopic(Topic.SPANS, 1, 1),
-        new NewTopic(Topic.TRACES, 1, 1),
-        new NewTopic(Topic.PROCESSED_TRACES, 1, 1),
-        new NewTopic(Topic.TRACE_ID_ROOT_OPERATION, 1, 1),
-        new NewTopic(Topic.TRACE_ID_SEQ_SPAN, 1, 1),
-        new NewTopic(Topic.ROOT_SPAN_SEQ_SPAN, 1, 1),
-        new NewTopic(Topic.ROOT_OPERATION_LIST_SEQ_SPAN, 1, 1),
-        new NewTopic(Topic.ROOT_OPERATION_SET_SEQ_SPANS, 1, 1),
-        new NewTopic(Topic.ROOT_OPERATION_SET_SPAN_TREES, 1, 1)
-      )
-    try {
-      val result = adminClient.createTopics(newTopics.asJava)
-      result.all().get()
-    } catch {
-      case e: ExecutionException =>
-        e.getCause match {
-          case _: TopicExistsException =>
-            println(s"Topics ${newTopics.map(_.name())} already exist")
-        }
-      case e: Throwable => throw e
-    }
   }
 }
 
