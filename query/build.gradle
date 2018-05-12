@@ -14,3 +14,4 @@ dependencies {
             [group: "com.typesafe.akka", name: "akka-stream_$scalaMajor", version: "2.5.11"]
     )
 }
+mainClassName = 'no.sysco.middleware.tramodana.query.QueryApp'

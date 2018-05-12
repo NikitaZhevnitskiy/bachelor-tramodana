@@ -48,3 +48,4 @@ SELECT * FROM traces;
 ## Connector
 Check [connector documentation](./cassandra/connector.md) and [db entities](./cassandra/entities.md)
 
+`docker run --rm -it --net=host`

@@ -5,6 +5,15 @@
  * For more details take a look at the Scala plugin chapter in the Gradle
  * user guide available at https://docs.gradle.org/4.5/userguide/scala_plugin.html
  */
+plugins {
+    id 'nebula.info' version '3.6.0'
+    id 'nebula.release' version '6.0.0'
+    id 'nebula.maven-scm' version '5.1.0'
+}
+
+//apply plugin: 'nebula.info'
+//apply plugin: 'nebula.release'
+//apply plugin: 'nebula.maven-scm'
 
 // Scala and Akka versions
 def scalaMajor = "2.12"
@@ -16,6 +25,9 @@ def kafkaV = "1.1.0"
 // In this section you declare where to find the dependencies of your project
 allprojects {
     apply plugin: 'scala'
+    apply plugin: 'nebula.info'
+    apply plugin: 'nebula.release'
+    apply plugin: 'nebula.maven-scm'
     repositories {
         // Use jcenter for resolving your dependencies.
         jcenter()
