@@ -3,7 +3,6 @@ package no.sysco.middleware.tramodana.query
 import java.util.Properties
 
 import no.sysco.middleware.tramodana.query.AppConfig.QueryConfig
-import no.sysco.middleware.tramodana.query.QueryWebServer.{ config,streamsService }
 import no.sysco.middleware.tramodana.schema.Topic
 import org.apache.kafka.clients.admin.AdminClientConfig
 import org.apache.kafka.common.serialization.Serdes
@@ -13,11 +12,12 @@ import org.apache.kafka.streams.state.{KeyValueIterator, KeyValueStore, Queryabl
 import org.apache.kafka.streams.{KafkaStreams, StreamsBuilder, StreamsConfig, Topology}
 
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.{ExecutionContext, Future}
 
 
-class StreamsService(config: QueryConfig) {
+class StreamsService(config: QueryConfig)(implicit executionContext: ExecutionContext) {
 
-  val storageName : String = config.kafka.storageName
+  val storageName: String = config.kafka.storageName
   val props: Properties = getProps(
     config.name,
     config.kafka.bootstrapServers,
@@ -27,7 +27,7 @@ class StreamsService(config: QueryConfig) {
   val topology = buildTopology(builder)
   val streams: KafkaStreams = new KafkaStreams(topology, props)
 
-  def getProps(appName: String, kafkaBootstrapServer: String, queryHostPort:String): Properties = {
+  def getProps(appName: String, kafkaBootstrapServer: String, queryHostPort: String): Properties = {
     val props = new Properties
     props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServer)
     props.put(StreamsConfig.APPLICATION_ID_CONFIG, appName)
@@ -37,6 +37,7 @@ class StreamsService(config: QueryConfig) {
     props.put(StreamsConfig.APPLICATION_SERVER_CONFIG, queryHostPort)
     props
   }
+
   def buildTopology(builder: StreamsBuilder): Topology = {
     val oNameStorageXml =
       builder.table(
@@ -45,27 +46,32 @@ class StreamsService(config: QueryConfig) {
     builder.build()
   }
 
-  // todo:
-  def getValueByKey(key: String): Unit =  {
+  def getValueByKey(key: String): Future[Option[BpmnFlow]] = {
     val storeType = QueryableStoreTypes.keyValueStore[String, String]()
-    val keyValueStore: ReadOnlyKeyValueStore[String, String] = streams.store(storageName,storeType)
-    println(keyValueStore.get(key))
+    val keyValueStore: ReadOnlyKeyValueStore[String, String] = streams.store(storageName, storeType)
+    val value = keyValueStore.get(key)
+    println(value)
+
+    if (value == null) {
+      Future(Option.empty)
+    } else {
+      Future(Option(BpmnFlow(key, value)))
+    }
+
   }
 
-  // todo:
-  def getAllValues():Unit = {
+  def getAllValues(): Future[List[BpmnFlow]] = {
     val storeType = QueryableStoreTypes.keyValueStore[String, String]()
-    val keyValueStore: ReadOnlyKeyValueStore[String, String] = streams.store(storageName,storeType)
+    val keyValueStore: ReadOnlyKeyValueStore[String, String] = streams.store(storageName, storeType)
 
     val it: KeyValueIterator[String, String] = keyValueStore.all()
-    var list = new ListBuffer[String]()
+    var list = new ListBuffer[BpmnFlow]()
 
     while (it.hasNext) {
       val nextKV = it.next
-      println(s"${nextKV.key} : ${nextKV.value}")
-      list += nextKV.value
+      list += BpmnFlow(nextKV.key, nextKV.value)
     }
 
-    println(s"FINAL : ${list.toList}")
+    Future(list.toList)
   }
 }
