@@ -2,10 +2,8 @@ package no.sysco.middleware.tramodana.query
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives._
-import no.sysco.middleware.tramodana.query.QueryWebServer.{getAllValues, getValueByKey}
 
-
-object Routes {
+class Routes(streamsService: StreamsService) {
   import StatusCodes._
 
   val route =
@@ -17,13 +15,15 @@ object Routes {
       } ~
       pathPrefix("keys"){
         pathEnd {
-          getAllValues()
+          streamsService.getAllValues()
           complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Get all values</h1>"))
         } ~
         path(Segment) { segment =>
-          getValueByKey(segment)
+          streamsService.getValueByKey(segment)
           complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Get value by key</h1>"))
         }
       }
     }
+
+
 }
