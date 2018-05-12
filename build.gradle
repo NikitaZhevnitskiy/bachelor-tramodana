@@ -27,33 +27,20 @@ allprojects {
                 // Scala
                 [group: "org.scala-lang", name: "scala-compiler", version: "$scalaMajor.$scalaMinor"],
                 [group: "org.scala-lang", name: "scala-library", version: "$scalaMajor.$scalaMinor"],
-                // Kafka
+
+                // Config
+                [group: "com.typesafe", name: "config", version: "1.3.2"],
+
+                // Kafka streams
                 [group: 'org.apache.kafka', name: 'kafka-streams', version: "$kafkaV"],
-
-                // Cassandra driver
-                [group: "com.datastax.cassandra", name: "cassandra-driver-core", version: "3.4.0"],
-
-                // remove later
-                    // extras for mapping cassandra entity to scala pojo
-                    // https://docs.datastax.com/en/developer/java-driver/3.4/manual/custom_codecs/extras/
-                [group: "com.datastax.cassandra", name: "cassandra-driver-extras", version: "3.4.0"],
-                [group: "com.datastax.cassandra", name: "cassandra-driver-mapping", version: "3.4.0"],
 
                 // logger
                 [ group: "org.slf4j", name: "slf4j-api", version: "1.7.25"],
                 [group: "org.slf4j", name: "slf4j-log4j12", version: "1.7.25"],
 
-                // alpakka
-                    // Kafka [sink, source]
-                [group: "com.typesafe.akka", name: "akka-stream-kafka_$scalaMajor", version: "0.20"],
-                    // Cassandra [sink, source]
-                [group: "com.lightbend.akka", name: "akka-stream-alpakka-cassandra_$scalaMajor", version: "0.18"],
-
                 // json parser
                 [group: 'com.typesafe.akka', name: "akka-http-spray-json_$scalaMajor", version: "$akkaHttpV"],
 
-                // Config
-                [group: "com.typesafe", name: "config", version: "1.3.2"],
                 // Camunda
                 [group: 'org.camunda.bpm', name: 'camunda-engine', version: '7.8.0'],
                 [group: "com.fasterxml.jackson.core", name: "jackson-databind", version: "2.7.0"]

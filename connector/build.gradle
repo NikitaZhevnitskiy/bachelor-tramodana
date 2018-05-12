@@ -3,6 +3,21 @@ apply plugin: 'application'
 
 group = 'no.sysco.middleware.tramodana'
 mainClassName = 'no.sysco.middleware.tramodana.connector.ConnectorApp'
+def scalaMajor = "2.12"
+def scalaMinor = "4"
+
 dependencies{
     compile project(":schema")
+    compile(
+
+            // Cassandra driver
+            [group: "com.datastax.cassandra", name: "cassandra-driver-core", version: "3.4.0"],
+
+            // alpakka (https://developer.lightbend.com/docs/alpakka/current/cassandra.html)
+                // Kafka [sink, source]
+            [group: "com.typesafe.akka", name: "akka-stream-kafka_$scalaMajor", version: "0.20"],
+                // Cassandra [sink, source]
+            [group: "com.lightbend.akka", name: "akka-stream-alpakka-cassandra_$scalaMajor", version: "0.18"],
+
+    )
 }
