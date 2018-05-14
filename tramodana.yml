@@ -5,20 +5,29 @@ services:
   builder:
     build: ./builder
     image: tramodana/builder
-    network_mode: host
+#    networks:
+#      - default
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-cluster:9092
+#    network_mode: host
 
   modeler:
     build: ./modeler
     image: tramodana/modeler
-    network_mode: host
-    depends_on:
-      - builder
+#    networks:
+#      - default
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-cluster:9092
 
   query:
     build: ./query
     image: tramodana/query
     ports:
-      - "8888:8888"
-    network_mode: host
-#    depends_on:
-#      - modeler
+      - 5555:5555
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-cluster:9092
+
+networks:
+  default:
+    external:
+      name: bachelor-tramodana_default
