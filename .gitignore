@@ -141,5 +141,6 @@ project/plugins/project/
 /cassandra/cassandra
 /cassandra/cassandra-source-connector/
 .idea
+*.iml
 
 **/out/*
