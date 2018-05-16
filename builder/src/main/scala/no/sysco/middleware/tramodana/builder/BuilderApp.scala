@@ -8,8 +8,10 @@ import no.sysco.middleware.tramodana.schema._
 import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig, NewTopic}
 import org.apache.kafka.common.errors.TopicExistsException
 import org.apache.kafka.common.serialization.Serdes
+import org.apache.kafka.common.utils.Bytes
 import org.apache.kafka.streams._
-import org.apache.kafka.streams.kstream.{KStream, Predicate}
+import org.apache.kafka.streams.kstream.{KStream, Materialized, Predicate, Reducer}
+import org.apache.kafka.streams.state.KeyValueStore
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionException
@@ -67,6 +69,7 @@ object BuilderApp extends App with JsonSpanProtocol {
   def buildTopology(builder: StreamsBuilder): Topology = {
     import spray.json._
 
+
     /**
       * 1 - Original source
       * input: SPANS_JSON_ORIGINAL [trace_id, Span ]
@@ -78,11 +81,17 @@ object BuilderApp extends App with JsonSpanProtocol {
       * 2 - Traces. Group spans by trace_id
       * input: SPANS_JSON_ORIGINAL [trace_id, Span ]
       * output: TRACES [trace_id, List[Span] ]
+      *
+      * NB! To be testable needs to provide explicit KeyValue store
       **/
+
     originalSource
       .groupByKey()
       // concatenate
-      .reduce((value1, value2) => value1 + "," + value2)
+//      .reduce((value1, value2) => value1 + "," + value2)
+      .reduce(
+        new Reducer[String] {override def apply(value1: String, value2: String): String = s"$value1,$value2"},
+        Materialized.as[String, String, KeyValueStore[Bytes, Array[Byte]]](TRACES_STORAGE))
       .toStream
       .mapValues(v => s"[$v]")
       .to(Topic.TRACES)
