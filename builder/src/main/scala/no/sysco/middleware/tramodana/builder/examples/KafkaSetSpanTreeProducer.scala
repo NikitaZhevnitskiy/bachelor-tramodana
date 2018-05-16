@@ -27,7 +27,8 @@ object KafkaSetSpanTreeProducer extends App {
 
   val key = "buyBookMethod"
   val value = getValuerForRecord("builder/src/main/resources/example/ROOT_OPERATION_SET_SPAN_TREES.json")
-  val record = new ProducerRecord[String, String](Topic.ROOT_OPERATION_SET_SPAN_TREES, key, value)
+//  val record = new ProducerRecord[String, String](Topic.ROOT_OPERATION_SET_SPAN_TREES, key, value)
+  val record = new ProducerRecord[String, String](Topic.ROOT_OPERATION_BPMN_XML, "hello", "omg")
 
 
 

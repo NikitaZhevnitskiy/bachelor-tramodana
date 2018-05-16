@@ -17,6 +17,9 @@ object Topic {
   // tables
   final val ROOT_OPERATION_SET_SEQ_SPANS_TABLE = "root-operation-set-seq-spans-table"
   final val ROOT_OPERATION_SET_SPAN_TREES_TABLE = "root-operation-set-spantree-table"
+
+  // storages
+  final val TRACES_STORAGE = "traces-storage"
   // utils
   final val EMPTY_KEY: String = ""
 }
