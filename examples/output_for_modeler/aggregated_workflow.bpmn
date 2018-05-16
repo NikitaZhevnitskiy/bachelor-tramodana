@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <definitions xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="definitions_303a718f-c3b2-4c1e-a5e8-511209c63028" targetNamespace="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
-  <process id="buyBookMethod" isExecutable="true">
-    <startEvent id="whatever" name="buyBookMethod">
+  <process id="buyBookMethod1" isExecutable="true">
+    <startEvent id="whatever" name="buyBookMethod1">
       <outgoing>sequenceFlow_c0a6dae5-f8aa-47f4-99a3-67a4a857d847</outgoing>
     </startEvent>
     <serviceTask id="id__2943093284150778885" name="GET">
@@ -30,7 +30,7 @@
     <sequenceFlow id="sequenceFlow_2fe9fdc2-e41a-4035-a1c9-e0c25a65c5c0" sourceRef="id_2323232323232323232" targetRef="id_0000000000000000000"/>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_b60ecbb5-b1f6-4e87-9222-ce6f3b38161f">
-    <bpmndi:BPMNPlane bpmnElement="buyBookMethod" id="BPMNPlane_d3ed4ac7-b353-46cf-a3f5-0b8e2327dc4e">
+    <bpmndi:BPMNPlane bpmnElement="buyBookMethod1" id="BPMNPlane_d3ed4ac7-b353-46cf-a3f5-0b8e2327dc4e">
       <bpmndi:BPMNShape bpmnElement="whatever" id="BPMNShape_ffb61965-d13d-45a6-8f25-922b0032cd22">
         <dc:Bounds height="36.0" width="36.0" x="100.0" y="100.0"/>
       </bpmndi:BPMNShape>
