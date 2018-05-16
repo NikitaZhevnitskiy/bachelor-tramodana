@@ -9,7 +9,6 @@ import no.sysco.middleware.tramodana.schema.{JsonSpanProtocol, Span, SpanTree, T
 import org.apache.kafka.clients.admin.AdminClientConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.{Serdes, StringDeserializer, StringSerializer}
-import org.apache.kafka.connect.json.JsonConverter
 import org.apache.kafka.streams.state.{KeyValueStore, Stores}
 import org.apache.kafka.streams.test.{ConsumerRecordFactory, OutputVerifier}
 import org.apache.kafka.streams.{StreamsBuilder, StreamsConfig, Topology, TopologyTestDriver}
@@ -41,10 +40,11 @@ class StreamTopologySpec extends WordSpec with BeforeAndAfter with JsonSpanProto
 
 //    topology.addStateStore(
 //      Stores.keyValueStoreBuilder(
-//        Stores.inMemoryKeyValueStore(TRACES_STORAGE),
+//        Stores.inMemoryKeyValueStore("set-span-trees"),
 //        Serdes.String(),
 //        Serdes.String()).withLoggingDisabled(), // need to disable logging to allow store pre-populating
 //      "reducer")
+//    topology.addSink("sinkk", Topic.ROOT_OPERATION_SET_SPAN_TREES, "parent")
   }
 
   after {
@@ -102,6 +102,30 @@ class StreamTopologySpec extends WordSpec with BeforeAndAfter with JsonSpanProto
       assertEquals(0, resultTree.children.head.children.head.children.size)
     }
 
+    "correct Topic.ROOT_OPERATION_SET_SPAN_TREES" in {
+
+      // Arrange
+      val spanListSuccessfullSimultation = Utils.getTraceWith3Spans()
+      val spanListFailedSimultaion = Utils.getTraceWith1Span()
+      writeToKafka(Topic.SPANS_JSON_ORIGINAL, spanListFailedSimultaion)
+      writeToKafka(Topic.SPANS_JSON_ORIGINAL, spanListSuccessfullSimultation)
+
+      //Act
+//      val value = testDriver.readOutput(Topic.ROOT_OPERATION_SET_SPAN_TREES, new StringDeserializer, new StringDeserializer)
+
+      val lastRec = getLastRecord(Topic.ROOT_OPERATION_SET_SPAN_TREES)
+      println(lastRec.value)
+//      val spanTrees = getRecords(Topic.ROOT_OPERATION_SET_SPAN_TREES)
+//      spanTrees.foreach(tree => println(tree.key+" : "+tree.value + "\n"))
+
+//      val resultSet = JsonParser(spanTrees.reverse.head.value).convertTo[Set[SpanTree]]
+
+//      // Assert
+//      println(resultSet.size)
+//      resultSet.foreach(spanT => println(s"${spanT.toJson}"))
+
+    }
+
 
   }
 
@@ -118,15 +142,29 @@ class StreamTopologySpec extends WordSpec with BeforeAndAfter with JsonSpanProto
   }
 
   def getRecords(topic: String): List[ProducerRecord[String, String]] = {
+    val stringDeserializer = new StringDeserializer
     var record: ProducerRecord[String, String] = null
 
     var list = new ListBuffer[ProducerRecord[String, String]]()
     do {
-      record = testDriver.readOutput(topic, new StringDeserializer, new StringDeserializer)
+      record = testDriver.readOutput(topic, stringDeserializer, stringDeserializer)
       if (record != null) list += record
     } while (record != null)
 
     list.toList
+  }
+
+  def getLastRecord(topic: String): ProducerRecord[String, String] = {
+    val stringDeserializer = new StringDeserializer
+    var record: ProducerRecord[String, String] = null
+    var tmp: ProducerRecord[String, String] = null
+
+    do {
+      tmp = testDriver.readOutput(topic, stringDeserializer, stringDeserializer)
+      if (tmp != null) record=tmp
+    } while (tmp != null)
+
+    record
   }
 
   def printRecords(list: List[ProducerRecord[String, String]]): Unit = {
