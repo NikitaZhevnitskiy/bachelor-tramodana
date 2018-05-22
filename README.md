@@ -5,13 +5,11 @@ Trace, Model, Analyse - bachelor project developed in Ubuntu 16.04
 ## Requirements
 
 - Java 8 JDK: `sudo apt-get update && sudo apt-get install openjdk-8-jdk`
-- Gradle: [install Gradle](https://gradle.org/install/)
 
 ## running the application
 ### UP jaeger environment
 1. `docker-compose -f jaeger.yml up -d`  
-2. Check containers status with `docker-compose -f jaeger.yml ps` that tracing-jaeger-query and tracing-jaeger-collector are UP. 
-If NOT, exec `docker-compose -f jaeger.yml up -d`  one more time
+2. Check containers status with `docker-compose -f jaeger.yml ps` that both **tracing-jaeger-query** and **tracing-jaeger-collector** have the `Up` state. 
 
 ### UP kafka environment
 3. Up Kafka with `docker-compose -f kafka.yml up -d`, takes around 2-3 mins

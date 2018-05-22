@@ -2,6 +2,21 @@
 # APM Tracing Service
 version: '3'
 services:
+  tracing-jaeger-cassandra:
+    image: cassandra:3.9
+    ports:
+      - 9042:9042
+   #healthcheck:
+       #test: ["CMD", "curl", "-f", "http://localhost:9042"] 
+       #timeout: 10s
+
+  tracing-jaeger-cassandra-schema:
+    image: jaegertracing/jaeger-cassandra-schema:1.1.0
+    environment:
+      - CQLSH_HOST=tracing-jaeger-cassandra
+    depends_on:
+      - tracing-jaeger-cassandra
+
   tracing-jaeger-collector:
     image: jaegertracing/jaeger-collector:1.1.0
     command: [
@@ -9,6 +24,7 @@ services:
       "--span-storage.type=cassandra",
       "--cassandra.keyspace=jaeger_v1_dc1",
       "--cassandra.servers=tracing-jaeger-cassandra"]
+    restart: on-failure
     depends_on:
       - tracing-jaeger-cassandra
       - tracing-jaeger-cassandra-schema
@@ -24,6 +40,7 @@ services:
     ports:
       - 16686:16686
       - 16687
+    restart: on-failure
     depends_on:
       - tracing-jaeger-cassandra
       - tracing-jaeger-cassandra-schema
@@ -38,17 +55,7 @@ services:
     depends_on:
       - tracing-jaeger-collector
 
-  tracing-jaeger-cassandra:
-    image: cassandra:3.9
-    ports:
-      - 9042:9042
 
-  tracing-jaeger-cassandra-schema:
-    image: jaegertracing/jaeger-cassandra-schema:1.1.0
-    environment:
-      - CQLSH_HOST=tracing-jaeger-cassandra
-    depends_on:
-      - tracing-jaeger-cassandra
 
 #  tracing-jaeger-dependencies:
 #    image: jaegertracing/spark-dependencies:latest
