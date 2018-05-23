@@ -53,14 +53,14 @@ case class SpanNode(value: Span, children: List[SpanNode]) extends BpmnParsable 
 
   override def setParentId(id: String): SpanNode = {
     val span = value.copy(parentId = id)
-    new SpanNode(span, children)
+    SpanNode(span, children)
   }
 
   override def getProcessId: String = value.spanId
 
   override def setProcessId(id: String): SpanNode = {
     val span = value.copy(spanId = id)
-    new SpanNode(span, children)
+    SpanNode(span, children)
   }
 
   override def getOperationName: String = value.operationName
@@ -72,14 +72,14 @@ case class SpanNode(value: Span, children: List[SpanNode]) extends BpmnParsable 
     * (SpanNode is immutable)
     */
   override def addChild(node: SpanNode): SpanNode =
-    new SpanNode(value, node :: children)
+    SpanNode(value, node :: children)
 
   /**
     * returns the argument SpanNode with updated children
     * (SpanNode is immutable)
     */
   override def addChildren(nodes: List[SpanNode]): SpanNode =
-    new SpanNode(value, nodes ::: children)
+    SpanNode(value, nodes ::: children)
 
   def printPretty(): Unit = printPrettyIter("", last = true)
 
