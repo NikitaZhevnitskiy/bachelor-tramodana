@@ -30,7 +30,24 @@ REQUIREMENTS:
 1. `docker-compose -f jaeger.yml up -d`
 2. Check status `docker-compose -f jaeger.yml ps`  
 Query, Agent and Collector containers should be UP
-3. 
+3. `TODO` UP TraceGenApp2
+4. `TODO` Dockerize. Build example project `./mvnw clean package` 
+5. `TODO` Run one `java -jar one/target/one.jar`
+6. `TODO` Run two `java -jar two/target/two.jar`
+7. Several times `curl http://localhost:10081/buybook`
+8. Check [localhost:16686](http://localhost:16686/)
+
+#### 2. Run Tramodana
+1. Build project `./gradlew clean installDist`
+2. Up kafka-cluster, Builder and Modeler `docker-compose up -d`
+3. Run connector to import traces `docker-compose -f connector_tramodana.yml up`
+4. Open [localhost:3030](http://localhost:3030)
+5. Find topic `spans-json-original` (all imported data in json format)
+6. Find topic `root-operation-bpmn-xml` (camunda diagram)
+7. `TODO` Query module
+
+
+
 
 
 
