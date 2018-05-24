@@ -1,10 +1,48 @@
-# bachelor-tramodana
+# Tramodana
 
-Trace, Model, Analyse - bachelor project developed in Ubuntu 16.04
+Trace Modeling and Analysis - 
+eliminate common maintenance issues by providing the ability to visualize and troubleshoot a distributed system.
 
-## Requirements
 
-- Java 8 JDK: `sudo apt-get update && sudo apt-get install openjdk-8-jdk`
+## Description
+Proof of concept to demonstrate visualization of a backend system out of trace data.
+## Architecture
+![tramodana-architecture](./architecture.png)
+#### Connector 
+Import data from a target system to Kafka and serves as the layer between Cassandra and Kafka.
+Based on [Alpakka](https://github.com/akka/alpakka) and reactive streams.
+#### Builder
+Build sets of suggested models from traces. 
+Based on [Kafka-streams API](https://kafka.apache.org/documentation/streams/).
+#### Modeler
+Convert SpanTrees into a BPMN 2.0 flowchart diagram in Bpmn format.
+Based on Kafka-streams API and [Camunda](https://camunda.com/).
+#### Query
+Provide opportunity to query specific topics in Kafka via HTTP. 
+Based on Kafka-streams API and [akka-http](https://github.com/akka/akka-http)
+
+## How to use it?
+REQUIREMENTS: 
+* [Docker](https://docs.docker.com/install/)  
+* [docker-compose](https://docs.docker.com/compose/install/)
+
+#### 1. Generate example trace data
+1. `docker-compose -f jaeger.yml up -d`
+2. Check status `docker-compose -f jaeger.yml ps`  
+Query, Agent and Collector containers should be UP
+3. 
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## running the application
 ### UP jaeger environment
