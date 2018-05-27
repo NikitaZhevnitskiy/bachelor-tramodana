@@ -10,18 +10,9 @@ object Utils {
   def createTestNode(parentId: String = "0", op: String = "op", procId: String = "proc", children: List[TestNode] = List.empty): TestNode = {
     val id = counter.toString
     counter += 1
-    new TestNode(op, procId, children, parentId)
+    TestNode(op, procId, children, parentId)
   }
 
-  def applyXmlIdFormat(inputId: String): String = {
-    val goodChars = (('A' to 'Z') ++ ('a' to 'z') ++ ('0' to '9')).toSet
-    val pId = inputId.map(c => if (goodChars.contains(c)) c else '_')
-    val pattern = "([^A-Za-z]+).*".r // match against all that doesn't start with alpha char
-    pId match {
-      case pattern(_) => "id_" ++ pId
-      case _ => pId
-    }
-  }
 
   /**
     * Format the parentId and processId of a BpmnParsable node
@@ -36,6 +27,16 @@ object Utils {
     val nodeWithValidProcId = n.setProcessId(validProcessId)
     val validNode = nodeWithValidProcId.setParentId(validParentId)
     validNode
+  }
+
+  def applyXmlIdFormat(inputId: String): String = {
+    val goodChars = (('A' to 'Z') ++ ('a' to 'z') ++ ('0' to '9')).toSet
+    val pId = inputId.map(c => if (goodChars.contains(c)) c else '_')
+    val pattern = "([^A-Za-z]+).*".r // match against all that doesn't start with alpha char
+    pId match {
+      case pattern(_) => "id_" ++ pId
+      case _ => pId
+    }
   }
 
   def writeToExampleDir(content: String, fileNameWithoutExt: String): Unit = {

@@ -13,9 +13,9 @@ import org.apache.kafka.streams._
 
 object ModelerApp extends App {
 
-  run
+  run()
 
-  def run: Unit = {
+  def run(): Unit = {
 
     val modelerConfig: AppConfig.ModelerConfig = AppConfig.load()
     val props = getProps(modelerConfig.name, modelerConfig.kafka.bootstrapServers)
@@ -41,19 +41,20 @@ object ModelerApp extends App {
 
   def buildTopology(builder: StreamsBuilder): Topology = {
 
-    val spanTreesSource: KStream[String, String] =
-      builder.stream[String, String](Topic.ROOT_OPERATION_SET_SPAN_TREES)
+    val mergedTreeSource: KStream[String, String] =
+      builder.stream[String, String](Topic.ROOT_OPERATION_MERGED_SPAN_TREE)
 
-    spanTreesSource.map[String, String]((processName, setTrees) => {
-      val tree: Option[BpmnParsable] = JsonToSpanNodeParser.parse(setTrees)
+    mergedTreeSource.map[String, String]((processName, mergedTree) => {
+      val tree: Option[BpmnParsable] = JsonToSpanNodeParser.parse(mergedTree)
       val xml = tree match {
-        case Some(parsable) => {
-          new BpmnCreator(parsable, "00 test").getBpmnXmlStr.getOrElse(Topic.EMPTY_KEY)
-        }
-        case None => {
-          println(s"Could not parse value $setTrees")
+          // TODO: make a real process name
+        case Some(parsable) => new BpmnCreator(parsable, "00 test")
+          .getBpmnXmlStr
+          .getOrElse(Topic.EMPTY_KEY)
+
+        case None =>
+          println(s"Could not parse value $mergedTree")
           Topic.EMPTY_KEY
-        }
       }
       KeyValue.pair(processName, xml)
     })

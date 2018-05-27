@@ -13,6 +13,7 @@ object Topic {
   final val ROOT_OPERATION_LIST_SEQ_SPAN = "root-operation-list-seq-span"
   final val ROOT_OPERATION_SET_SEQ_SPANS = "root-operation-set-seq-spans"
   final val ROOT_OPERATION_SET_SPAN_TREES = "root-operation-set-spantree"
+  final val ROOT_OPERATION_MERGED_SPAN_TREE = "root-operation-merged-spantree"
   final val ROOT_OPERATION_BPMN_XML = "root-operation-bpmn-xml"
   // tables
   final val ROOT_OPERATION_SET_SEQ_SPANS_TABLE = "root-operation-set-seq-spans-table"

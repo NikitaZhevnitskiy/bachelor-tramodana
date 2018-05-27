@@ -28,6 +28,7 @@ object TramodanaKafkaAdministrator {
         new NewTopic(Topic.ROOT_OPERATION_LIST_SEQ_SPAN, 1, 1),
         new NewTopic(Topic.ROOT_OPERATION_SET_SEQ_SPANS, 1, 1),
         new NewTopic(Topic.ROOT_OPERATION_SET_SPAN_TREES, 1, 1),
+        new NewTopic(Topic.ROOT_OPERATION_MERGED_SPAN_TREE, 1, 1),
         new NewTopic(Topic.ROOT_OPERATION_BPMN_XML, 1, 1)
       )
     try {

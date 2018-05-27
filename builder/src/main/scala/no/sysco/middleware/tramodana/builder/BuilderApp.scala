@@ -137,7 +137,7 @@ object BuilderApp extends App with JsonSpanProtocol {
       **/
     val processedTracesSource: KStream[String, String] =
       builder.stream[String, String](Topic.PROCESSED_TRACES)
-    val traceIdRootOperationStream = processedTracesSource
+    val traceIdRootOperationStream: Unit = processedTracesSource
       .mapValues(jsonTree => {
         val tree = JsonParser(jsonTree).convertTo[SpanTree]
         tree.value.operationName
@@ -149,7 +149,7 @@ object BuilderApp extends App with JsonSpanProtocol {
       * input: PROCESSED_TRACES [trace_id, SpanTree]
       * output: TRACE_ID_SEQ_SPAN [root_span, Seq[Span] ]
       **/
-    val traceIdSeqOperation = processedTracesSource
+     processedTracesSource
       .mapValues(jsonTree => {
         val tree = JsonParser(jsonTree).convertTo[SpanTree]
         val seq = SpanTreeBuilder.getSequence(tree)
@@ -162,7 +162,7 @@ object BuilderApp extends App with JsonSpanProtocol {
       * input: TRACE_ID_SEQ_SPAN   [trace_id, Seq[Span] ]
       * output: ROOT_SPAN_SEQ_SPAN [root-Span, Seq[Span] ]
       **/
-    val rootSpanSeqOperations = builder.stream[String, String](Topic.TRACE_ID_SEQ_SPAN)
+     builder.stream[String, String](Topic.TRACE_ID_SEQ_SPAN)
       .map[String, String]((traceId, spanSeq) => {
       val spans = JsonParser(spanSeq).convertTo[List[Span]]
       val rootSpan: Span = spans.headOption.getOrElse(defaultSpan())
@@ -211,10 +211,23 @@ object BuilderApp extends App with JsonSpanProtocol {
     builder.stream[String, String](Topic.ROOT_OPERATION_SET_SEQ_SPANS)
       .map[String, String]((k,v)=> {
         val setSeqSpans = JsonParser(v).convertTo[Set[Seq[Span]]]
-        val setOfTrees: Set[SpanTree] = setSeqSpans.map((seq)=>SpanTreeBuilder.build(seq.toList))
+        val setOfTrees: Set[SpanTree] = setSeqSpans.map(seq=>SpanTreeBuilder.build(seq.toList))
         KeyValue.pair[String, String](k,setOfTrees.toJson.toString)
       })
       .to(Topic.ROOT_OPERATION_SET_SPAN_TREES)
+
+    /**
+      * 11 build [root-operation-name, Set[SpanTree] ] -> [root-operation-name, SpanTree (merged) ]
+      */
+    builder.stream[String, String](Topic.ROOT_OPERATION_SET_SPAN_TREES)
+      .map((k,v)=> {
+        val setSpanTrees: List[SpanTree] = JsonParser(v).convertTo[List[SpanTree]]
+        // TODO: remove magic number for root id
+        val tree: Option[SpanTree] = SpanTreeBuilder.mergeIntoTree(setSpanTrees, "0")
+
+      KeyValue.pair[String, String](k,tree.get.toJson.toString)
+    })
+      .to(Topic.ROOT_OPERATION_MERGED_SPAN_TREE)
 
 
     builder.build
