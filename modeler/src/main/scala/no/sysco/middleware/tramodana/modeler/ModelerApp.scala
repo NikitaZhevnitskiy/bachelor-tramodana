@@ -10,6 +10,8 @@ import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.kstream.KStream
 import org.apache.kafka.streams._
 
+import scala.io.Source
+
 
 object ModelerApp extends App {
 
@@ -63,5 +65,21 @@ object ModelerApp extends App {
 
     builder.build()
   }
+  override def main(args: Array[String]): Unit = {
+    val INPUT_FILES_DIRECTORY = "examples/input_for_modeler"
 
+    val setTrees: String = Source
+      .fromFile(s"$INPUT_FILES_DIRECTORY/ROOT_OPERATION_SET_SPAN_TREES.json")
+      .getLines
+      .mkString
+
+    val tree: Option[BpmnParsable] = JsonToSpanNodeParser.parse(setTrees)
+    val xml = tree match {
+      case Some(parsable) =>
+        new BpmnCreator(parsable, "00 test").getBpmnXmlStr.getOrElse(Topic.EMPTY_KEY)
+      case None => throw new Exception("SpanTrees could not be merged")
+    }
+    println(xml)
+    Utils.writeToExampleDir(xml, "query_workflow")
+  }
 }
