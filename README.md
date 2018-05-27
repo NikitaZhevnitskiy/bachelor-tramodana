@@ -30,7 +30,7 @@ REQUIREMENTS:
 1. `docker-compose -f jaeger.yml up -d`
 2. Check status `docker-compose -f jaeger.yml ps`  
 Query, Agent and Collector containers should be UP
-3. `TODO` UP TraceGenApp2
+3. `TODO` UP [TraceGenApp2](https://github.com/NikitaZhevnitskiy/TraceGenApp2)
 4. `TODO` Dockerize. Build example project `./mvnw clean package` 
 5. `TODO` Run one `java -jar one/target/one.jar`
 6. `TODO` Run two `java -jar two/target/two.jar`
