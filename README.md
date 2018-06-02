@@ -7,7 +7,7 @@ eliminate common maintenance issues by providing the ability to visualize and tr
 ## Description
 Proof of concept to demonstrate visualization of a backend system out of trace data.
 ## Architecture
-![tramodana-architecture](./architecture.png)
+![tramodana-architecture](docs/img/architecture.png)
 #### Connector 
 Import data from a target system to Kafka and serves as the layer between Cassandra and Kafka.
 Based on [Alpakka](https://github.com/akka/alpakka) and reactive streams.
@@ -30,10 +30,9 @@ REQUIREMENTS:
 1. `docker-compose -f jaeger.yml up -d`
 2. Check status `docker-compose -f jaeger.yml ps`  
 Query, Agent and Collector containers should be UP
-3. `TODO` UP TraceGenApp2
-4. `TODO` Dockerize. Build example project `./mvnw clean package` 
-5. `TODO` Run one `java -jar one/target/one.jar`
-6. `TODO` Run two `java -jar two/target/two.jar`
+3. Build project TraceGenApp2 `./mvnw clean package` 
+5. Run one `java -jar one/target/one.jar`
+6. Run two `java -jar two/target/two.jar`
 7. Several times `curl http://localhost:10081/buybook`
 8. Check [localhost:16686](http://localhost:16686/)
 
