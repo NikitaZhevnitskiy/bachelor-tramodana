@@ -30,7 +30,7 @@ REQUIREMENTS:
 1. `docker-compose -f jaeger.yml up -d`
 2. Check status `docker-compose -f jaeger.yml ps`  
 Query, Agent and Collector containers should be UP
-3. Build project TraceGenApp2 `./mvnw clean package` 
+3. Build project [TraceGenApp2](https://github.com/NikitaZhevnitskiy/TraceGenApp2) `./mvnw clean package` 
 5. Run one `java -jar one/target/one.jar`
 6. Run two `java -jar two/target/two.jar`
 7. Several times `curl http://localhost:10081/buybook`
@@ -38,12 +38,12 @@ Query, Agent and Collector containers should be UP
 
 #### 2. Run Tramodana
 1. Build project `./gradlew clean installDist`
-2. Up kafka-cluster, Builder and Modeler `docker-compose up -d`
+2. Run kafka-cluster, Builder and Modeler `docker-compose up -d`
 3. Run connector to import traces `docker-compose -f connector_tramodana.yml up`
 4. Open [localhost:3030](http://localhost:3030)
 5. Find topic `spans-json-original` (all imported data in json format)
 6. Find topic `root-operation-bpmn-xml` (camunda diagram)
-7. `TODO` Query module
+7. Run Query module
 
 
 ## Cassandra data samples
